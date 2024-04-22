@@ -1,82 +1,114 @@
-import React, { useState } from 'react'
-import axios from 'axios'
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import config from "../config";
+
 import {
   CCard,
   CCardBody,
   CCardHeader,
   CCol,
   CForm,
-  CFormCheck,
   CFormFeedback,
   CFormInput,
   CFormLabel,
   CRow,
   CButton,
   CFormSelect,
-} from '@coreui/react'
+} from "@coreui/react";
 
 const Appointment = () => {
-  const [validated, setValidated] = useState(false)
-  const [submitted, setSubmitted] = useState(false) // State variable to track form submission
-
+  const [validated, setValidated] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [doctors, setDoctors] = useState([]);
   const [appointment, setAppointment] = useState({
-    id: '',
+    id: "",
     doctor: {
-      id: '',
-      fullName: '',
-      email: '',
-      contactNo: '',
-      gender: '',
-      specialization: '',
-      experience: '',
-      address: '',
-      country: '',
-      city: '',
-      postalCode: '',
-      qualification: '',
+      id: "",
+      fullName: "",
+      email: "",
+      contactNo: "",
+      gender: "",
+      specialization: "",
+      experience: "",
+      address: "",
+      country: "",
+      city: "",
+      postalCode: "",
+      qualification: "",
     },
-    patientName: '',
-    patientMobile: '',
-    appointmentDate: '',
-    appointmentTime: '',
-    appointmentCreated: '',
-    appointmentUpdated: '',
-    status: '',
-  })
+    patientName: "",
+    patientMobile: "",
+    appointmentDate: "",
+    appointmentTime: "",
+    appointmentCreated: "",
+    appointmentUpdated: "",
+    status: "Scheduled", // Default status
+  });
+
+  useEffect(() => {
+    // Fetch doctors list when the component mounts
+    fetchDoctors();
+  }, []);
+
+  const fetchDoctors = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/v1/doctor");
+      if (response.status === 200) {
+        setDoctors(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+    }
+  };
 
   const handleInputChange = (event) => {
-    const { name, value } = event.target
-    setAppointment({ ...appointment, [name]: value })
-  }
+    const { name, value } = event.target;
+    setAppointment({ ...appointment, [name]: value });
+  };
+
+  const handleDoctorSelect = (event) => {
+    const selectedDoctorId = event.target.value;
+    setAppointment({ ...appointment, doctor: { id: selectedDoctorId } });
+  };
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
-    const form = event.currentTarget
+    event.preventDefault();
+    const form = event.currentTarget;
 
     if (form.checkValidity() === false) {
-      event.stopPropagation()
-      setValidated(true)
-      return
+      event.stopPropagation();
+      setValidated(true);
+      return;
     }
 
     if (!submitted) {
       try {
-        const res = await axios.post('http://192.168.216.40:8080/api/v1/appointments', appointment)
+        const res = await axios.post(`${config.apiUrl}appointment`, {
+          patientName: appointment.patientName,
+          patientMobile: appointment.patientMobile,
+          doctorId: appointment.doctor.id,
+          appointmentDate: appointment.appointmentDate,
+          appointmentTime: appointment.appointmentTime,
+          status: "Scheduled", // Automatically setting status to Scheduled
+        });
 
         if (res.status === 200) {
-          window.alert('Appointment data submitted successfully!')
-          form.reset()
+          window.alert("Appointment data submitted successfully!");
+          form.reset();
+          setSubmitted(true);
         } else {
-          throw new Error('Failed to submit appointment data')
+          throw new Error("Failed to submit appointment data");
         }
       } catch (error) {
-        console.error('Error:', error)
-        window.alert('Failed to submit appointment data. Please try again later.')
+        console.error("Error:", error);
+        window.alert(
+          "Failed to submit appointment data. Please try again later.",
+        );
       }
 
-      setValidated(true)
+      setValidated(true);
     }
-  }
+  };
 
   return (
     <CCard className="mb-5">
@@ -98,8 +130,9 @@ const Appointment = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please enter the patients name.</CFormFeedback>
-            <CFormFeedback valid>Looks good!</CFormFeedback>
+            <CFormFeedback invalid>
+              Please enter the patient's name.
+            </CFormFeedback>
           </CCol>
           <CCol md={4}>
             <CFormLabel htmlFor="patientMobile">Patient Mobile</CFormLabel>
@@ -111,10 +144,26 @@ const Appointment = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please enter the patients mobile number.</CFormFeedback>
-            <CFormFeedback valid>Looks good!</CFormFeedback>
+            <CFormFeedback invalid>
+              Please enter the patient's mobile number.
+            </CFormFeedback>
           </CCol>
-
+          <CCol md={4}>
+            <CFormLabel htmlFor="doctorSelect">Search for Doctor</CFormLabel>
+            <CFormSelect
+              id="doctorSelect"
+              name="doctorSelect"
+              value={appointment.doctor.id}
+              onChange={handleDoctorSelect}
+            >
+              <option value="">Select Doctor</option>
+              {doctors.map((doctor) => (
+                <option key={doctor.id} value={doctor.id}>
+                  {doctor.fullName}
+                </option>
+              ))}
+            </CFormSelect>
+          </CCol>
           <CCol md={4}>
             <CFormLabel htmlFor="appointmentDate">Appointment Date</CFormLabel>
             <CFormInput
@@ -125,10 +174,10 @@ const Appointment = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please select the appointment date.</CFormFeedback>
-            <CFormFeedback valid>Looks good!</CFormFeedback>
+            <CFormFeedback invalid>
+              Please select the appointment date.
+            </CFormFeedback>
           </CCol>
-
           <CCol md={4}>
             <CFormLabel htmlFor="appointmentTime">Appointment Time</CFormLabel>
             <CFormInput
@@ -139,23 +188,21 @@ const Appointment = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please select the appointment time.</CFormFeedback>
-            <CFormFeedback valid>Looks good!</CFormFeedback>
+            <CFormFeedback invalid>
+              Please select the appointment time.
+            </CFormFeedback>
           </CCol>
-
-          {/* Add more fields for appointment details here as needed */}
           <CCol xs={4} />
-
           <CCol xs={4} />
           <CCol xs={4}>
             <CButton color="primary" type="submit" disabled={submitted}>
-              Submit Appointment
+              {submitted ? "Appointment Submitted" : "Submit Appointment"}
             </CButton>
           </CCol>
         </CForm>
       </CCardBody>
     </CCard>
-  )
-}
+  );
+};
 
-export default Appointment
+export default Appointment;

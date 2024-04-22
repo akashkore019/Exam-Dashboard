@@ -45,12 +45,7 @@ const _nav = [
     to: '/appointmentDetails',
     icon: <FaCalendarAlt className="nav-icon" />,
   },
-  {
-    component: CNavItem,
-    name: 'Add Patient',
-    to: '/addpatient',
-    icon: <FaUser className="nav-icon" />,
-  },
+  
   {
     component: CNavItem,
     name: 'Patient Details',

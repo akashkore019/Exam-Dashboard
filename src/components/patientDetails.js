@@ -185,6 +185,7 @@ const Patient = () => {
                 <th>Weight</th>
                 <th>Blood Group</th>
                 <th>Edit</th>
+                <th>Delete</th>
               </tr>
             </thead>
             <tbody>
