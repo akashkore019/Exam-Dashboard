@@ -81,7 +81,7 @@ const Patient = () => {
 
   return (
     <CCard className="mb-5">
-      <CCardHeader style={{ display: 'flex', justifyContent: 'space-between', padding: '5px' }}>
+        <CCardHeader style={{ display: 'flex', justifyContent: 'space-between', padding: '5px' }}>
           <span style={{ lineHeight: '44px' }}>Patient Details</span>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             
