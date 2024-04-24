@@ -45,32 +45,34 @@ const Doctor = () => {
   return (
     <CCard className="mb-5">
       <CCardBody>
-        <CTable>
-          <CTableHead>
-            <tr>
-              {columns.map((column) => (
-                <CTableHeaderCell {...column._props} key={column.key}>
-                  {column.label}
-                </CTableHeaderCell>
-              ))}
-            </tr>
-          </CTableHead>
-          <tbody>
-            {doctors.map((doctor) => (
-              <tr key={doctor.id}>
+        <div className="table-responsive">
+          <CTable>
+            <CTableHead>
+              <tr>
                 {columns.map((column) => (
-                  <CTableDataCell key={column.key}>
-                    {column.key === 'gender'
-                      ? doctor[column.key] === 'Male'
-                        ? 'M'
-                        : 'F'
-                      : doctor[column.key]}
-                  </CTableDataCell>
+                  <CTableHeaderCell {...column._props} key={column.key}>
+                    {column.label}
+                  </CTableHeaderCell>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </CTable>
+            </CTableHead>
+            <tbody>
+              {doctors.map((doctor) => (
+                <tr key={doctor.id}>
+                  {columns.map((column) => (
+                    <CTableDataCell key={column.key}>
+                      {column.key === 'gender'
+                        ? doctor[column.key] === 'Male'
+                          ? 'M'
+                          : 'F'
+                        : doctor[column.key]}
+                    </CTableDataCell>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </CTable>
+        </div>
       </CCardBody>
     </CCard>
   )

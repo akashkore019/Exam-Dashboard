@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 import {
   CCard,
@@ -68,13 +69,30 @@ const Appointment = () => {
       }
     } catch (error) {
       console.error("Error:", error);
-      window.alert("Failed to submit appointment data. Please try again later.");
+      window.alert(
+        "Failed to submit appointment data. Please try again later.",
+      );
     }
   };
 
   return (
     <CCard className="mb-5">
-      <CCardHeader>Appointment Details</CCardHeader>
+      <CCardHeader
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          padding: "5px",
+        }}
+      >
+        <span style={{ lineHeight: "44px" }}>Add Appointment</span>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div className="input-group-append">
+            <Link to="/appointmentDetails" className="btn btn-primary">
+              Back
+            </Link>
+          </div>
+        </div>
+      </CCardHeader>{" "}
       <CCardBody>
         <CForm
           className="row g-3 ml needs-validation"
@@ -92,7 +110,9 @@ const Appointment = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please enter the patient's name.</CFormFeedback>
+            <CFormFeedback invalid>
+              Please enter the patient's name.
+            </CFormFeedback>
           </CCol>
           <CCol md={4}>
             <CFormLabel htmlFor="patientMobile">Patient Mobile</CFormLabel>
@@ -104,7 +124,9 @@ const Appointment = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please enter the patient's mobile number.</CFormFeedback>
+            <CFormFeedback invalid>
+              Please enter the patient's mobile number.
+            </CFormFeedback>
           </CCol>
           <CCol md={4}>
             <CFormLabel htmlFor="doctorId">Select Doctor</CFormLabel>
@@ -135,7 +157,9 @@ const Appointment = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please select the appointment date.</CFormFeedback>
+            <CFormFeedback invalid>
+              Please select the appointment date.
+            </CFormFeedback>
           </CCol>
           <CCol md={4}>
             <CFormLabel htmlFor="appointmentTime">Appointment Time</CFormLabel>
@@ -147,7 +171,9 @@ const Appointment = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please select the appointment time.</CFormFeedback>
+            <CFormFeedback invalid>
+              Please select the appointment time.
+            </CFormFeedback>
           </CCol>
           <CCol xs={4} />
           <CCol xs={4} />

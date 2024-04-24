@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import axios from 'axios'
+import React, { useState } from 'react';
+import axios from 'axios';
 import {
   CCard,
   CCardBody,
@@ -9,13 +9,13 @@ import {
   CFormFeedback,
   CFormInput,
   CFormLabel,
+  CFormSelect,
   CRow,
   CButton,
-  CFormCheck,
-} from '@coreui/react'
+} from '@coreui/react';
 
 const AddMedicine = () => {
-  const [validated, setValidated] = useState(false)
+  const [validated, setValidated] = useState(false);
   const [medicine, setMedicine] = useState({
     medicineId: '',
     medicineName: '',
@@ -24,25 +24,28 @@ const AddMedicine = () => {
     manufacturer: '',
     formType: '',
     dosage: '',
-  })
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false); // state to track form submission
 
   const handleInputChange = (event) => {
-    const { name, value } = event.target
-    setMedicine({ ...medicine, [name]: value })
-  }
+    const { name, value } = event.target;
+    setMedicine({ ...medicine, [name]: value });
+  };
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
-    const form = event.currentTarget
+    event.preventDefault();
+    const form = event.currentTarget;
 
-    if (form.checkValidity() === false) {
-      event.stopPropagation()
-      setValidated(true)
-      return
+    if (form.checkValidity() === false || isSubmitting) { // Check if already submitting
+      event.stopPropagation();
+      setValidated(true);
+      return;
     }
 
+    setIsSubmitting(true); // Set submitting to true
+
     try {
-      const res = await axios.post('http://192.168.80.40:8080/api/v1/medicine', {
+      const res = await axios.post("http://localhost:8080/api/v1/medicine", {
         medicineId: medicine.medicineId,
         medicineName: medicine.medicineName,
         medicineType: medicine.medicineType,
@@ -50,21 +53,22 @@ const AddMedicine = () => {
         manufacturer: medicine.manufacturer,
         formType: medicine.formType,
         dosage: medicine.dosage,
-      })
+      });
 
       if (res.status === 200) {
-        window.alert('Medicine added successfully')
-        form.reset()
+        window.alert('Medicine added successfully');
+        form.reset();
       } else {
-        throw new Error('Failed to add medicine')
+        throw new Error('Failed to add medicine');
       }
     } catch (error) {
-      console.error('Error:', error)
-      window.alert('Failed to add medicine. Please try again later.')
+      console.error('Error:', error);
+      window.alert('Failed to add medicine. Please try again later.');
     }
 
-    setValidated(true)
-  }
+    setIsSubmitting(false); // Reset submitting to false
+    setValidated(true);
+  };
 
   return (
     <CCard className="mb-5">
@@ -141,17 +145,22 @@ const AddMedicine = () => {
             <CFormFeedback invalid>Please enter manufacturer.</CFormFeedback>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
-          <CCol md={4}>
+         <CCol md={4}>
             <CFormLabel htmlFor="formType">Form Type</CFormLabel>
-            <CFormInput
-              type="text"
+            <CFormSelect
               id="formType"
               name="formType"
               value={medicine.formType}
               onChange={handleInputChange}
               required
-            />
-            <CFormFeedback invalid>Please enter form type.</CFormFeedback>
+            >
+              <option value="">Select Form Type</option>
+              <option value="TAB">TAB</option>
+              <option value="CAP">CAP</option>
+              <option value="SYP">SYP</option>
+              <option value="INF">INF</option>
+            </CFormSelect>
+            <CFormFeedback invalid>Please select a form type.</CFormFeedback>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
           <CCol md={4}>
@@ -167,17 +176,17 @@ const AddMedicine = () => {
             <CFormFeedback invalid>Please enter dosage.</CFormFeedback>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
-          <CCol xs={5} />
+          <CCol xs={8} />
 
           <CCol xs={8}>
-            <CButton color="primary" type="submit">
-              Add Medicine
+            <CButton color="primary" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Adding Medicine...' : 'Add Medicine'}
             </CButton>
           </CCol>
         </CForm>
       </CCardBody>
     </CCard>
-  )
-}
+  );
+};
 
-export default AddMedicine
+export default AddMedicine;

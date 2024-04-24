@@ -10,7 +10,7 @@ import {
   CTableHeaderCell,
   CTableDataCell,
 } from '@coreui/react'
-const Patient = () => {
+const Service = () => {
   const [services, setServices] = useState([])
 
   useEffect(() => {
@@ -67,4 +67,4 @@ const Patient = () => {
   )
 }
 
-export default Patient
+export default Service

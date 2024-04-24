@@ -1,194 +1,159 @@
-import React, { useState } from 'react'
-import axios from 'axios'
-import {
-  CCard,
-  CCardBody,
-  CCardHeader,
-  CCol,
-  CForm,
-  CFormFeedback,
-  CFormInput,
-  CFormLabel,
-  CRow,
-  CButton,
-  CFormSelect,
-} from '@coreui/react'
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import config from "../config";
+import { toast } from "react-toastify";
+import { CCard, CCardHeader, CCardBody } from "@coreui/react";
+import { CSVLink } from "react-csv";
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
-const NewMedicineForm = () => {
-  const [validated, setValidated] = useState(false)
-  const [medicine, setMedicine] = useState({
-    medicineId: '',
-    medicineName: '',
-    medicineType: '',
-    medicineContents: '',
-    manufacturer: '',
-    formType: '',
-    dosage: '',
-  })
+import CIcon from "@coreui/icons-react";
+import { cilList, cilPlus, cilSearch } from "@coreui/icons";
+import { cilCloudDownload } from "@coreui/icons";
+import { CDropdown, CDropdownItem, CDropdownToggle } from "@coreui/react";
 
-  const handleInputChange = (event) => {
-    const { name, value } = event.target
-    setMedicine({ ...medicine, [name]: value })
-  }
+const Medicine = () => {
+  const [medicines, setMedicines] = useState([]);
+  const [searchInput, setSearchInput] = useState("");
+  const [filteredMedicines, setFilteredMedicines] = useState([]);
+  const [csvData, setCSVData] = useState([]);
+  const [searchBarVisible, setSearchBarVisible] = useState(false);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    const form = event.currentTarget
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-    if (form.checkValidity() === false) {
-      event.stopPropagation()
-      setValidated(true)
-      return
-    }
+  useEffect(() => {
+    setFilteredMedicines(
+      medicines.filter((medicine) =>
+        Object.values(medicine).some((value) => {
+          if (
+            typeof value === "string" &&
+            value.toLowerCase().includes(searchInput.toLowerCase())
+          ) {
+            return true;
+          }
+          if (
+            typeof value === "number" &&
+            value.toString().includes(searchInput)
+          ) {
+            return true;
+          }
+          return false;
+        }),
+      ),
+    );
+  }, [searchInput, medicines]);
 
+  useEffect(() => {
+    // Update CSV data whenever filteredMedicines change
+    setCSVData(
+      filteredMedicines.map((medicine) => ({
+        ...medicine,
+      })),
+    );
+  }, [filteredMedicines]);
+
+  const fetchData = async () => {
     try {
-      const res = await axios.post('http://192.168.80.40:8080/api/v1/medicine', {
-        medicineId: medicine.medicineId,
-        medicineName: medicine.medicineName,
-        medicineType: medicine.medicineType,
-        medicineContents: medicine.medicineContents,
-        manufacturer: medicine.manufacturer,
-        formType: medicine.formType,
-        dosage: medicine.dosage,
-      })
-
-      if (res.status === 200) {
-        window.alert('Data is submitted Successfully')
-        form.reset()
-      } else {
-        throw new Error('Failed to submit data')
-      }
+      const response = await axios.get(`${config.apiUrl}medicine`);
+      setMedicines(response.data);
     } catch (error) {
-      console.error('Error:', error)
-      window.alert('Failed to submit data. Please try again later.')
+      console.error("Error fetching data:", error);
     }
+  };
 
-    setValidated(true)
-  }
+  // Function to format date of birth
+  const formatDateOfBirth = (dob) => {
+    const date = new Date(dob);
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  };
+
+  // Function to handle search input change
+  const handleSearchInputChange = (event) => {
+    setSearchInput(event.target.value);
+  };
+
+  // Function to toggle search bar visibility
+  const toggleSearchBar = () => {
+    setSearchBarVisible(!searchBarVisible);
+  };
 
   return (
-    <CCard className="mb-5">
-      <CCardHeader>Medicine Details</CCardHeader>
-      <CCardBody>
-        <CForm
-          className="row g-3 ml needs-validation"
-          noValidate
-          validated={validated}
-          onSubmit={handleSubmit}
+    <div>
+      <CCard className="mb-4">
+        <CCardHeader
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            padding: "5px",
+          }}
         >
-          <CCol md={4}>
-            <CFormLabel htmlFor="medicineId">Medicine ID</CFormLabel>
-            <CFormInput
-              type="text"
-              id="medicineId"
-              name="medicineId"
-              value={medicine.medicineId}
-              onChange={handleInputChange}
-              required
-            />
-            <CFormFeedback invalid>Please enter medicine ID.</CFormFeedback>
-            <CFormFeedback valid>Looks good!</CFormFeedback>
-          </CCol>
-          <CCol md={4}>
-            <CFormLabel htmlFor="medicineName">Medicine Name</CFormLabel>
-            <CFormInput
-              type="text"
-              id="medicineName"
-              name="medicineName"
-              value={medicine.medicineName}
-              onChange={handleInputChange}
-              required
-            />
-            <CFormFeedback invalid>Please enter medicine name.</CFormFeedback>
-            <CFormFeedback valid>Looks good!</CFormFeedback>
-          </CCol>
-
-          <CCol md={4}>
-            <CFormLabel htmlFor="medicineType">Medicine Type</CFormLabel>
-            <CFormInput
-              type="text"
-              id="medicineType"
-              name="medicineType"
-              value={medicine.medicineType}
-              onChange={handleInputChange}
-              required
-            />
-            <CFormFeedback invalid>Please enter medicine type.</CFormFeedback>
-            <CFormFeedback valid>Looks good!</CFormFeedback>
-          </CCol>
-
-          <CCol md={4}>
-            <CFormLabel htmlFor="medicineContents">Medicine Contents</CFormLabel>
-            <CFormInput
-              type="text"
-              id="medicineContents"
-              name="medicineContents"
-              value={medicine.medicineContents}
-              onChange={handleInputChange}
-              required
-            />
-            <CFormFeedback invalid>Please enter medicine contents.</CFormFeedback>
-            <CFormFeedback valid>Looks good!</CFormFeedback>
-          </CCol>
-
-          <CCol md={4}>
-            <CFormLabel htmlFor="manufacturer">Manufacturer</CFormLabel>
-            <CFormInput
-              type="text"
-              id="manufacturer"
-              name="manufacturer"
-              value={medicine.manufacturer}
-              onChange={handleInputChange}
-              required
-            />
-            <CFormFeedback invalid>Please enter manufacturer details.</CFormFeedback>
-            <CFormFeedback valid>Looks good!</CFormFeedback>
-          </CCol>
-
-          <CCol md={4}>
-            <CFormLabel htmlFor="formType">Form Type</CFormLabel>
-            <CFormSelect
-              id="formType"
-              name="formType"
-              value={medicine.formType}
-              onChange={handleInputChange}
-              required
+          <span style={{ lineHeight: "44px" }}>Medicine Details</span>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {/* Search button */}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={toggleSearchBar}
+              style={{ marginRight: "10px" }}
             >
-              <option value="">Select Form Type</option>
-              <option value="TAB">TAB</option>
-              <option value="CAP">CAP</option>
-              <option value="SYP">SYP</option>
-              <option value="INF">INF</option>
-            </CFormSelect>
-            <CFormFeedback invalid>Please select a form type.</CFormFeedback>
-            <CFormFeedback valid>Looks good!</CFormFeedback>
-          </CCol>
+              <CIcon icon={cilSearch} />
+            </button>
+            {/* Search bar */}
+            <div className={`input-group ${searchBarVisible ? "" : "d-none"}`}>
+              <input
+                type="text"
+                placeholder="Search medicine details"
+                value={searchInput}
+                onChange={handleSearchInputChange}
+                className="form-control"
+                style={{ height: "30px", marginRight: "10px" }}
+              />
+            </div>
+            <div className="input-group-append" style={{ marginRight: "10px" }}>
+              <Link to="/addMedicineMaster" className="btn btn-primary">
+                Add
+              </Link>
+            </div>
+            <div className="input-group-append" style={{ marginRight: "10px" }}>
+              <CSVLink data={csvData} filename={"medicine_data.csv"}>
+                <CIcon icon={cilCloudDownload} size="lg" />
+              </CSVLink>{" "}
+            </div>
+          </div>
+        </CCardHeader>
+        <CCardBody style={{ overflowY: "auto" }}>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Medicine ID</th>
+                <th>Medicine Name</th>
+                <th>Medicine Type</th>
+                <th>Medicine Contents</th>
+                <th>Manufacturer</th>
+                <th>Form Type</th>
 
-          <CCol md={4}>
-            <CFormLabel htmlFor="dosage">Dosage</CFormLabel>
-            <CFormInput
-              type="text"
-              id="dosage"
-              name="dosage"
-              value={medicine.dosage}
-              onChange={handleInputChange}
-              required
-            />
-            <CFormFeedback invalid>Please enter dosage details.</CFormFeedback>
-            <CFormFeedback valid>Looks good!</CFormFeedback>
-          </CCol>
-          <CCol xs={4} />
-          <CCol xs={4} />
+                <th>Dosage</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredMedicines.map((medicine) => (
+                <tr key={medicine.id}>
+                  <td>{medicine.medicineId}</td>
+                  <td>{medicine.medicineName}</td>
+                  <td>{medicine.medicineType}</td>
+                  <td>{medicine.medicineContents}</td>
+                  <td>{medicine.manufacturer}</td>
+                  <td>{medicine.formType}</td>
+                  <td>{medicine.dosage}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </CCardBody>
+      </CCard>
+    </div>
+  );
+};
 
-          <CCol xs={4}>
-            <CButton color="primary" type="submit">
-              Add Medicine
-            </CButton>
-          </CCol>
-        </CForm>
-      </CCardBody>
-    </CCard>
-  )
-}
-
-export default NewMedicineForm
+export default Medicine;

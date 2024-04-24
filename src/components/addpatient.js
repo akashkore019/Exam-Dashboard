@@ -88,8 +88,8 @@ const Patient = () => {
             <div className="input-group-append">
               <Link to="/PatientDetails" className="btn btn-primary">
               Back
-            </Link>
-              </div>               
+              </Link>
+            </div>               
           </div>
         </CCardHeader>
       <CCardBody>
