@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 import {
   CCard,
   CCardBody,
@@ -12,18 +12,18 @@ import {
   CFormSelect,
   CRow,
   CButton,
-} from '@coreui/react';
+} from "@coreui/react";
 
 const AddMedicine = () => {
   const [validated, setValidated] = useState(false);
   const [medicine, setMedicine] = useState({
-    medicineId: '',
-    medicineName: '',
-    medicineType: '',
-    medicineContents: '',
-    manufacturer: '',
-    formType: '',
-    dosage: '',
+    medicineId: "",
+    medicineName: "",
+    medicineType: "",
+    medicineContents: "",
+    manufacturer: "",
+    formType: "",
+    dosage: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false); // state to track form submission
 
@@ -36,7 +36,8 @@ const AddMedicine = () => {
     event.preventDefault();
     const form = event.currentTarget;
 
-    if (form.checkValidity() === false || isSubmitting) { // Check if already submitting
+    if (form.checkValidity() === false || isSubmitting) {
+      // Check if already submitting
       event.stopPropagation();
       setValidated(true);
       return;
@@ -56,14 +57,14 @@ const AddMedicine = () => {
       });
 
       if (res.status === 200) {
-        window.alert('Medicine added successfully');
+        window.alert("Medicine added successfully");
         form.reset();
       } else {
-        throw new Error('Failed to add medicine');
+        throw new Error("Failed to add medicine");
       }
     } catch (error) {
-      console.error('Error:', error);
-      window.alert('Failed to add medicine. Please try again later.');
+      console.error("Error:", error);
+      window.alert("Failed to add medicine. Please try again later.");
     }
 
     setIsSubmitting(false); // Reset submitting to false
@@ -120,7 +121,9 @@ const AddMedicine = () => {
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
           <CCol md={4}>
-            <CFormLabel htmlFor="medicineContents">Medicine Contents</CFormLabel>
+            <CFormLabel htmlFor="medicineContents">
+              Medicine Contents
+            </CFormLabel>
             <CFormInput
               type="text"
               id="medicineContents"
@@ -129,7 +132,9 @@ const AddMedicine = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please enter medicine contents.</CFormFeedback>
+            <CFormFeedback invalid>
+              Please enter medicine contents.
+            </CFormFeedback>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
           <CCol md={4}>
@@ -145,7 +150,7 @@ const AddMedicine = () => {
             <CFormFeedback invalid>Please enter manufacturer.</CFormFeedback>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
-         <CCol md={4}>
+          <CCol md={4}>
             <CFormLabel htmlFor="formType">Form Type</CFormLabel>
             <CFormSelect
               id="formType"
@@ -180,7 +185,7 @@ const AddMedicine = () => {
 
           <CCol xs={8}>
             <CButton color="primary" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Adding Medicine...' : 'Add Medicine'}
+              {isSubmitting ? "Adding Medicine..." : "Add Medicine"}
             </CButton>
           </CCol>
         </CForm>

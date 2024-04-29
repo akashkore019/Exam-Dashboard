@@ -53,6 +53,18 @@ const AppointmentDetails = () => {
     setSearchBarVisible(!searchBarVisible);
   };
 
+  const handleDelete = async (appointmentId) => {
+    if (window.confirm("Are you sure you want to delete this appointment?")) {
+      try {
+        await axios.delete(`${config.apiUrl}appointment/${appointmentId}`);
+        setAppointments(appointments.filter(appointment => appointment.appointmentId !== appointmentId));
+        toast.success("Appointment deleted successfully!", { autoClose: 3000 });
+      } catch (error) {
+        console.error("Error deleting appointment:", error);
+      }
+    }
+  };
+
   return (
     <CCard className="mb-5">
       <CCardHeader
@@ -106,6 +118,7 @@ const AppointmentDetails = () => {
               <CTableHeaderCell scope="col">Appointment Date</CTableHeaderCell>
               <CTableHeaderCell scope="col">Appointment Time</CTableHeaderCell>
               <CTableHeaderCell scope="col">Status</CTableHeaderCell>
+              <CTableHeaderCell scope="col">Actions</CTableHeaderCell> {/* Add Actions column */}
             </tr>
           </CTableHead>
           <tbody>
@@ -132,6 +145,21 @@ const AppointmentDetails = () => {
                   <CTableDataCell>{appointment.appointmentDate}</CTableDataCell>
                   <CTableDataCell>{appointment.appointmentTime}</CTableDataCell>
                   <CTableDataCell>{appointment.status}</CTableDataCell>
+                  <CTableDataCell>
+                    <Link
+                      to={`/editAppointment/${appointment.appointmentId}`} // Link to edit page
+                      className="btn btn-primary mr-2"
+                    >
+                      Edit
+                    </Link>
+                    <button
+                      type="button"
+                      className="btn btn-danger text-white"
+                      onClick={() => handleDelete(appointment.appointmentId)} // Handle Delete action
+                    >
+                      Delete
+                    </button>
+                  </CTableDataCell>
                 </tr>
               ))}
           </tbody>

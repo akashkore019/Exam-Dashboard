@@ -79,7 +79,7 @@ const Medicine = () => {
   };
 
   return (
-    <div>
+    <>
       <CCard className="mb-4">
         <CCardHeader
           style={{
@@ -152,7 +152,7 @@ const Medicine = () => {
           </table>
         </CCardBody>
       </CCard>
-    </div>
+    </>
   );
 };
 
