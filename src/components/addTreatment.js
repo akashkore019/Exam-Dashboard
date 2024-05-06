@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import Select from "react-select";
 
 import {
   CCard,
@@ -22,13 +23,16 @@ const TreatmentList = () => {
     patientId: "",
     doctorId: "",
     serviceId: "",
+    medicineId: "",
   });
   const [medicineForms, setMedicineForms] = useState([]);
+  const [medicineNames, setMedicineNames] = useState([]);
 
   useEffect(() => {
     fetchPatients();
     fetchDoctors();
     fetchServices();
+    fetchMedicineNames();
   }, []);
 
   const fetchPatients = async () => {
@@ -64,10 +68,50 @@ const TreatmentList = () => {
     }
   };
 
+  const fetchMedicineNames = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/v1/medicine");
+      if (response.status === 200) {
+        setMedicineNames(
+          response.data.map((medicine) => ({
+            value: medicine.id,
+            label: medicine.medicineName,
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching medicine names:", error);
+    }
+  };
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setTreatment({ ...treatment, [name]: value });
   };
+
+  const handleMedicineChange = (selectedOption, index) => {
+    if (selectedOption) {
+      const selectedMedicineId = selectedOption.value;
+      setMedicineForms((prevMedicineForms) => {
+        const updatedMedicineForms = [...prevMedicineForms];
+        updatedMedicineForms[index] = {
+          ...updatedMedicineForms[index],
+          medicineId: selectedMedicineId,
+        };
+        return updatedMedicineForms;
+      });
+    } else {
+      setMedicineForms((prevMedicineForms) => {
+        const updatedMedicineForms = [...prevMedicineForms];
+        updatedMedicineForms[index] = {
+          ...updatedMedicineForms[index],
+          medicineId: "",
+        };
+        return updatedMedicineForms;
+      });
+    }
+  };
+  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -92,12 +136,14 @@ const TreatmentList = () => {
       }
     } catch (error) {
       console.error("Error:", error);
-      window.alert("Failed to submit treatment data. Please try again later.");
+      window.alert(
+        "Failed to submit treatment data. Please try again later."
+      );
     }
   };
 
   const handleAddMedicine = () => {
-    setMedicineForms([...medicineForms, {}]);
+    setMedicineForms([...medicineForms, { medicineId: "" }]);
   };
 
   return (
@@ -194,7 +240,7 @@ const TreatmentList = () => {
 
       {/* Medicine Forms */}
       {medicineForms.map((medicineForm, index) => (
-        <CCard key={index} className="mt-3 mb-3">
+        <CCard key={index} className="mb-3">
           <CCardHeader className="flex justify-between items-center">
             <span className="text-lg">Add Medicine</span>
             <button
@@ -212,42 +258,38 @@ const TreatmentList = () => {
             </button>
           </CCardHeader>
           <CCardBody>
-            <div className="mb-3">
-              <label htmlFor="medicine" className="form-label">
-                Search for Medicine
-              </label>
-              <input
-                type="text"
-                id="medicine"
-                name="medicine"
-                className="form-control"
-                placeholder="Enter medicine name"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="dosage" className="form-label">
-                Dosage
-              </label>
-              <input
-                type="text"
-                id="dosage"
-                name="dosage"
-                className="form-control"
-                placeholder="Enter dosage"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="duration" className="form-label">
-                Duration
-              </label>
-              <input
-                type="text"
-                id="duration"
-                name="duration"
-                className="form-control"
-                placeholder="Enter duration"
-              />
-            </div>
+            <CForm
+              className="row g-3 ml needs-validation"
+              noValidate
+              validated={validated}
+              onSubmit={handleSubmit}
+            >
+              <CCol md={4}>
+                <CFormLabel htmlFor={`medicineId-${index}`}>
+                  Search for Medicine
+                </CFormLabel>
+                <Select
+                  id={`medicineId-${index}`}
+                  name={`medicineId-${index}`}
+                  options={medicineNames}
+                  value={
+                    medicineForm.medicineId
+                      ? medicineNames.find(
+                          (medicine) =>
+                            medicine.value === parseInt(medicineForm.medicineId)
+                        )
+                      : null
+                  }
+                  onChange={(selectedOption) =>
+                    handleMedicineChange(selectedOption, index)
+                  }
+                  isSearchable
+                  placeholder="Select Medicine"
+                />
+
+                <CFormFeedback invalid>Please select a medicine.</CFormFeedback>
+              </CCol>
+            </CForm>
           </CCardBody>
         </CCard>
       ))}

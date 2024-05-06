@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import config from "../config";
 import { toast } from "react-toastify";
-import { CCard, CCardHeader, CCardBody, CCol } from "@coreui/react";
+import { CCard, CCardHeader, CCardBody, CCol, CFormLabel } from "@coreui/react";
+import Draggable from "react-draggable"; // Import Draggable component
+import { Link } from "react-router-dom";
 
 const Patient = () => {
   const [patients, setPatients] = useState([]);
@@ -10,8 +12,6 @@ const Patient = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [filteredPatients, setFilteredPatients] = useState([]);
-  const [csvData, setCSVData] = useState([]);
-  const [csvFormat, setCSVFormat] = useState("default");
 
   useEffect(() => {
     fetchData();
@@ -41,20 +41,10 @@ const Patient = () => {
               .includes(searchInput.toLowerCase());
           }
           return false;
-        })
-      )
+        }),
+      ),
     );
   }, [searchInput, patients]);
-
-  useEffect(() => {
-    // Update CSV data whenever filteredPatients change
-    setCSVData(
-      filteredPatients.map((patient) => ({
-        ...patient,
-        dob: formatDateOfBirth(patient.dob),
-      }))
-    );
-  }, [filteredPatients]);
 
   const fetchData = async () => {
     try {
@@ -62,6 +52,7 @@ const Patient = () => {
       setPatients(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
+      // Handle error - show toast message or any other UI indication
     }
   };
 
@@ -73,20 +64,24 @@ const Patient = () => {
     return `${day}/${month}/${year}`;
   };
 
-  const handleEdit = (patient) => {
+  const handleEdit = (patientId) => {
+    const patient = patients.find((patient) => patient.id === patientId);
     setSelectedPatient(patient);
     setShowEditModal(true);
   };
 
   const handleSave = async () => {
     try {
-      await axios.put(`${config.apiUrl}patients/${selectedPatient.id}`, selectedPatient);
+      await axios.put(
+        `${config.apiUrl}patients/${selectedPatient.id}`,
+        selectedPatient,
+      );
       setShowEditModal(false);
-      setSelectedPatient(prevState => ({ ...prevState }));
       fetchData(); // Refresh the table
       toast.success("Updated Successfully!", { autoClose: 3000 });
     } catch (error) {
       console.error("Error updating patient:", error);
+      // Handle error - show toast message or any other UI indication
     }
   };
 
@@ -98,12 +93,9 @@ const Patient = () => {
         toast.success("Patient deleted successfully!", { autoClose: 3000 });
       } catch (error) {
         console.error("Error deleting patient:", error);
+        // Handle error - show toast message or any other UI indication
       }
     }
-  };
-
-  const handleCSVFormatChange = (event) => {
-    setCSVFormat(event.target.value);
   };
 
   return (
@@ -163,7 +155,7 @@ const Patient = () => {
                     <button
                       type="button"
                       className="btn btn-primary"
-                      onClick={() => handleEdit(patient)}
+                      onClick={() => handleEdit(patient.id)}
                     >
                       Edit
                     </button>
@@ -186,207 +178,198 @@ const Patient = () => {
 
       {/* Edit Modal */}
       {selectedPatient && (
-        <div
-          className="modal"
-          style={{ display: showEditModal ? "block" : "none" }}
-        >
+        <Draggable handle=".modal-header">
           <div
-            className="modal-dialog"
-            style={{ maxWidth: "70%", maxHeight: "90vh" }}
+            className="modal"
+            style={{ display: showEditModal ? "block" : "none" }}
           >
-            <div className="modal-content">
-              <div
+            <CCard className="mb-5" style={{ width: "70%", maxHeight: "90vh" }}>
+              <CCardHeader
                 className="modal-header"
                 style={{
-                  backgroundColor: "#f5f5f5",
                   display: "flex",
                   justifyContent: "space-between",
+                  alignItems: "center",
+                  cursor: "move",
                 }}
               >
-                <h5 className="modal-title">Update Patient Details:</h5>
-                <button
-                  type="button"
-                  className="close"
-                  data-dismiss="modal"
-                  aria-label="Close"
-                  onClick={() => setShowEditModal(false)}
-                >
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-
-              <div className="modal-body" style={{ display: "flex", flexWrap: "wrap" }}>
-                {/* Input fields for editing patient details */}
-                <CCol md={4}>
-                  <div className="form-group">
-                    <label>Full Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={selectedPatient.fullName}
-                      onChange={(e) =>
-                        setSelectedPatient({
-                          ...selectedPatient,
-                          fullName: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </CCol>
-                <CCol md={4}>
-                  <div className="form-group">
-                    <label>Mobile</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={selectedPatient.mobile}
-                      onChange={(e) =>
-                        setSelectedPatient({
-                          ...selectedPatient,
-                          mobile: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </CCol>
-                <CCol md={4}>
-                  <div className="form-group">
-                    <label>Email</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={selectedPatient.email}
-                      onChange={(e) =>
-                        setSelectedPatient({
-                          ...selectedPatient,
-                          email: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </CCol>
-                <CCol md={4}>
-                  <div className="form-group">
-                    <label>Address</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={selectedPatient.address}
-                      onChange={(e) =>
-                        setSelectedPatient({
-                          ...selectedPatient,
-                          address: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </CCol>
-                <CCol md={4}>
-                  <div className="form-group">
-                    <label>Gender</label>
-                    <select
-                      className="form-control"
-                      value={selectedPatient.gender}
-                      onChange={(e) =>
-                        setSelectedPatient({
-                          ...selectedPatient,
-                          gender: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                </CCol>
-                <CCol md={4}>
-                  <div className="form-group">
-                    <label>Date of Birth</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={selectedPatient.dob}
-                      onChange={(e) =>
-                        setSelectedPatient({
-                          ...selectedPatient,
-                          dob: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </CCol>
-                <CCol md={4}>
-                  <div className="form-group">
-                    <label>Age</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={selectedPatient.age}
-                      onChange={(e) =>
-                        setSelectedPatient({
-                          ...selectedPatient,
-                          age: parseInt(e.target.value),
-                        })
-                      }
-                    />
-                  </div>
-                </CCol>
-                <CCol md={4}>
-                  <div className="form-group">
-                    <label>Weight</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={selectedPatient.weight}
-                      onChange={(e) =>
-                        setSelectedPatient({
-                          ...selectedPatient,
-                          weight: parseFloat(e.target.value),
-                        })
-                      }
-                    />
-                  </div>
-                </CCol>
-                <CCol md={4}>
-                  <div className="form-group">
-                    <label>Blood Group</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={selectedPatient.bloodGroup}
-                      onChange={(e) =>
-                        setSelectedPatient({
-                          ...selectedPatient,
-                          bloodGroup: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </CCol>
-                {/* Add more input fields for other patient details */}
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => {
-                    handleSave();
-                  }}
-                >
-                  Save
-                </button>
+                <span style={{ lineHeight: "44px" }}>
+                  Update Patient Details
+                </span>
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setShowEditModal(false)}
                 >
-                  Cancel
+                  Close
                 </button>
-              </div>
-            </div>
+              </CCardHeader>
+              <CCardBody>
+                <div className="modal-body" style={{ padding: "10px" }}>
+                  <div
+                    style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}
+                  >
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="fullName">Full Name</CFormLabel>
+                      <input
+                        type="text"
+                        id="fullName"
+                        className="form-control"
+                        value={selectedPatient.fullName}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            fullName: e.target.value,
+                          })
+                        }
+                      />
+                    </CCol>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="mobile">Mobile</CFormLabel>
+                      <input
+                        type="text"
+                        id="mobile"
+                        className="form-control"
+                        value={selectedPatient.mobile}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            mobile: e.target.value,
+                          })
+                        }
+                      />
+                    </CCol>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="email">Email</CFormLabel>
+                      <input
+                        type="text"
+                        id="email"
+                        className="form-control"
+                        value={selectedPatient.email}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            email: e.target.value,
+                          })
+                        }
+                      />
+                    </CCol>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="address">Address</CFormLabel>
+                      <input
+                        type="text"
+                        id="address"
+                        className="form-control"
+                        value={selectedPatient.address}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            address: e.target.value,
+                          })
+                        }
+                      />
+                    </CCol>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="gender">Gender</CFormLabel>
+                      <select
+                        id="gender"
+                        className="form-control"
+                        value={selectedPatient.gender}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            gender: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </CCol>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="dob">Date of Birth</CFormLabel>
+                      <input
+                        type="date"
+                        id="dob"
+                        className="form-control"
+                        value={selectedPatient.dob}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            dob: e.target.value,
+                          })
+                        }
+                      />
+                    </CCol>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="age">Age</CFormLabel>
+                      <input
+                        type="number"
+                        id="age"
+                        className="form-control"
+                        value={selectedPatient.age}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            age: parseInt(e.target.value),
+                          })
+                        }
+                      />
+                    </CCol>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="weight">Weight</CFormLabel>
+                      <input
+                        type="number"
+                        id="weight"
+                        className="form-control"
+                        value={selectedPatient.weight}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            weight: parseFloat(e.target.value),
+                          })
+                        }
+                      />
+                    </CCol>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="bloodGroup">Blood Group</CFormLabel>
+                      <input
+                        type="text"
+                        id="bloodGroup"
+                        className="form-control"
+                        value={selectedPatient.bloodGroup}
+                        onChange={(e) =>
+                          setSelectedPatient({
+                            ...selectedPatient,
+                            bloodGroup: e.target.value,
+                          })
+                        }
+                      />
+                    </CCol>
+                    {/* Add other input fields for patient details */}
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => handleSave()}
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowEditModal(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </CCardBody>
+            </CCard>
           </div>
-        </div>
+        </Draggable>
       )}
     </div>
   );

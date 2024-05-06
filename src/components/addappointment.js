@@ -92,7 +92,7 @@ const Appointment = () => {
             </Link>
           </div>
         </div>
-      </CCardHeader>{" "}
+      </CCardHeader>
       <CCardBody>
         <CForm
           className="row g-3 ml needs-validation"
