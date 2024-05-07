@@ -4,7 +4,10 @@ import config from "../config";
 import { toast } from "react-toastify";
 import { CCard, CCardHeader, CCardBody, CCol, CFormLabel } from "@coreui/react";
 import Draggable from "react-draggable"; // Import Draggable component
+import { CSVLink } from "react-csv";
 import { Link } from "react-router-dom";
+import CIcon from "@coreui/icons-react";
+import { cilSearch, cilCloudDownload } from "@coreui/icons";
 
 const Patient = () => {
   const [patients, setPatients] = useState([]);
@@ -12,6 +15,8 @@ const Patient = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [filteredPatients, setFilteredPatients] = useState([]);
+  const [csvData, setCSVData] = useState([]);
+  const [searchBarVisible, setSearchBarVisible] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -45,6 +50,28 @@ const Patient = () => {
       ),
     );
   }, [searchInput, patients]);
+
+  useEffect(() => {
+    // Update CSV data whenever patients change
+    setCSVData(
+      patients.map((patient) => ({
+        Id: patient.id,
+        "Full Name": patient.fullName,
+        Mobile: patient.mobile,
+        Email: patient.email,
+        Address: patient.address,
+        Gender: patient.gender,
+        "Date of Birth": formatDateOfBirth(patient.dob),
+        Age: patient.age,
+        Weight: patient.weight,
+        "Blood Group": patient.bloodGroup,
+      })),
+    );
+  }, [patients]);
+
+  const toggleSearchBar = () => {
+    setSearchBarVisible(!searchBarVisible);
+  };
 
   const fetchData = async () => {
     try {
@@ -97,6 +124,7 @@ const Patient = () => {
       }
     }
   };
+  
 
   return (
     <div>
@@ -110,14 +138,36 @@ const Patient = () => {
         >
           <span style={{ lineHeight: "44px" }}>Patient Details</span>
           <div style={{ display: "flex", alignItems: "center" }}>
-            <input
-              type="text"
-              placeholder="Search patient details"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="form-control"
-              style={{ height: "30px", marginRight: "10px" }} // Adjust height here
-            />
+            {/* Search button */}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={toggleSearchBar}
+              style={{ marginRight: "10px" }}
+            >
+              <CIcon icon={cilSearch} />
+            </button>
+            {/* Search bar */}
+            <div className={`input-group ${searchBarVisible ? "" : "d-none"}`}>
+              <input
+                type="text"
+                placeholder="Search patient details"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="form-control"
+                style={{ height: "30px", marginRight: "10px" }}
+              />
+            </div>
+            <div className="input-group-append" style={{ marginRight: "10px" }}>
+              <Link to="/addPatient" className="btn btn-primary">
+                Add
+              </Link>
+            </div>
+            <div className="input-group-append" style={{ marginRight: "10px" }}>
+              <CSVLink data={csvData} filename={"patient_data.csv"}>
+                <CIcon icon={cilCloudDownload} size="lg" />
+              </CSVLink>{" "}
+            </div>
           </div>
         </CCardHeader>
         <CCardBody style={{ overflowY: "auto" }}>
@@ -181,9 +231,18 @@ const Patient = () => {
         <Draggable handle=".modal-header">
           <div
             className="modal"
-            style={{ display: showEditModal ? "block" : "none" }}
+            style={{
+              display: showEditModal ? "block" : "none",
+              position: "fixed",
+              top: "5%",
+              left: "20%",
+              transform: "translate(-50%, -50%)",
+            }}
           >
-            <CCard className="mb-5" style={{ width: "70%", maxHeight: "90vh" }}>
+            <CCard
+              className="mb-5 "
+              style={{ width: "70%", maxHeight: "90vh" }}
+            >
               <CCardHeader
                 className="modal-header"
                 style={{

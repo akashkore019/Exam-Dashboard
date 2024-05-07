@@ -9,19 +9,38 @@ import { Link } from "react-router-dom";
 import CIcon from "@coreui/icons-react";
 import { cilSearch, cilCloudDownload } from "@coreui/icons";
 
-
 const Appointment = () => {
   const [appointments, setAppointments] = useState([]);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [csvData, setCSVData] = useState([]);
   const [searchBarVisible, setSearchBarVisible] = useState(false);
+  const [doctors, setDoctors] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState({
+    patientName: "",
+    patientMobile: "",
+    doctorId: "",
+    appointmentDate: "",
+    appointmentTime: "",
+    status: "pending", // Initialize status with default value
+  });
 
   useEffect(() => {
     fetchData();
+    fetchDoctors();
   }, []);
+
+  const fetchDoctors = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/v1/doctor");
+      if (response.status === 200) {
+        setDoctors(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+    }
+  };
 
   useEffect(() => {
     setFilteredAppointments(
@@ -73,18 +92,28 @@ const Appointment = () => {
     setSearchBarVisible(!searchBarVisible);
   };
 
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setSelectedAppointment({ ...selectedAppointment, [name]: value });
+  };
+
   const handleEdit = (appointmentId) => {
     const appointment = appointments.find(
       (appointment) => appointment.appointmentId === appointmentId,
     );
-    setSelectedAppointment(appointment);
-    setShowEditModal(true);
+    if (appointment) {
+      setSelectedAppointment(appointment);
+      setShowEditModal(true);
+    } else {
+      console.error("Appointment not found");
+      // Handle error - show toast message or any other UI indication
+    }
   };
 
   const handleSave = async () => {
     try {
       await axios.put(
-        `${config.apiUrl}appointments/${selectedAppointment.appointmentId}`,
+        `${config.apiUrl}appointment/${selectedAppointment.appointmentId}`,
         selectedAppointment,
       );
       setShowEditModal(false);
@@ -99,7 +128,7 @@ const Appointment = () => {
   const handleDelete = async (appointmentId) => {
     if (window.confirm("Are you sure you want to delete this appointment?")) {
       try {
-        await axios.delete(`${config.apiUrl}appointments/${appointmentId}`);
+        await axios.delete(`${config.apiUrl}appointment/${appointmentId}`);
         fetchData(); // Refresh the table after deletion
         toast.success("Appointment deleted successfully!", { autoClose: 3000 });
       } catch (error) {
@@ -112,52 +141,53 @@ const Appointment = () => {
   return (
     <div>
       <CCard className="mb-4">
-      <CCardHeader
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          padding: "5px",
-        }}
-      >
-        <span style={{ lineHeight: "44px" }}>Appointment Details</span>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          {/* Search button */}
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={toggleSearchBar}
-            style={{ marginRight: "10px" }}
-          >
-            <CIcon icon={cilSearch} />
-          </button>
-          {/* Search bar */}
-          <div className={`input-group ${searchBarVisible ? "" : "d-none"}`}>
-            <input
-              type="text"
-              placeholder="Search appointment details"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="form-control"
-              style={{ height: "30px", marginRight: "10px" }}
-            />
+        <CCardHeader
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            padding: "5px",
+          }}
+        >
+          <span style={{ lineHeight: "44px" }}>Appointment Details</span>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {/* Search button */}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={toggleSearchBar}
+              style={{ marginRight: "10px" }}
+            >
+              <CIcon icon={cilSearch} />
+            </button>
+            {/* Search bar */}
+            <div className={`input-group ${searchBarVisible ? "" : "d-none"}`}>
+              <input
+                type="text"
+                placeholder="Search appointment details"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="form-control"
+                style={{ height: "30px", marginRight: "10px" }}
+              />
+            </div>
+            <div className="input-group-append" style={{ marginRight: "10px" }}>
+              <Link to="/addAppointment" className="btn btn-primary">
+                Add
+              </Link>
+            </div>
+            <div className="input-group-append" style={{ marginRight: "10px" }}>
+              <CSVLink data={csvData} filename={"appointment_data.csv"}>
+                <CIcon icon={cilCloudDownload} size="lg" />
+              </CSVLink>{" "}
+            </div>
           </div>
-          <div className="input-group-append" style={{ marginRight: "10px" }}>
-            <Link to="/addAppointment" className="btn btn-primary">
-              Add
-            </Link>
-          </div>
-          <div className="input-group-append" style={{ marginRight: "10px" }}>
-            <CSVLink data={csvData} filename={"appointment_data.csv"}>
-              <CIcon icon={cilCloudDownload} size="lg" />
-            </CSVLink>{" "}
-          </div>
-        </div>
-      </CCardHeader>
+        </CCardHeader>
         <CCardBody style={{ overflowY: "auto" }}>
           <table className="table">
             <thead>
               <tr>
                 <th>Appointment ID</th>
+                <th>Doctor Name</th>
                 <th>Patient Name</th>
                 <th>Patient Mobile</th>
                 <th>Appointment Date</th>
@@ -171,6 +201,7 @@ const Appointment = () => {
               {filteredAppointments.map((appointment) => (
                 <tr key={appointment.appointmentId}>
                   <td>{appointment.appointmentId}</td>
+                  <td>{appointment.doctor.fullName}</td>
                   <td>{appointment.patientName}</td>
                   <td>{appointment.patientMobile}</td>
                   <td>{appointment.appointmentDate}</td>
@@ -206,7 +237,13 @@ const Appointment = () => {
         <Draggable handle=".modal-header">
           <div
             className="modal"
-            style={{ display: showEditModal ? "block" : "none" }}
+            style={{
+              display: showEditModal ? "block" : "none",
+              position: "fixed",
+              top: "5%",
+              left: "20%",
+              transform: "translate(-50%, -50%)",
+            }}
           >
             <CCard className="mb-5" style={{ width: "70%", maxHeight: "90vh" }}>
               <CCardHeader
@@ -267,6 +304,24 @@ const Appointment = () => {
                           })
                         }
                       />
+                    </CCol>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="doctorId">Select Doctor</CFormLabel>
+                      <select
+                        id="doctorId"
+                        name="doctorId"
+                        className="form-select"
+                        value={selectedAppointment.doctorId}
+                        onChange={handleInputChange}
+                        required
+                      >
+                        <option value="">Select Doctor</option>
+                        {doctors.map((doctor) => (
+                          <option key={doctor.id} value={doctor.id}>
+                            {doctor.fullName}
+                          </option>
+                        ))}
+                      </select>
                     </CCol>
                     <CCol md={6}>
                       <CFormLabel htmlFor="appointmentDate">
