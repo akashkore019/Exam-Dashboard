@@ -52,37 +52,21 @@ const _nav = [
     to: "/treatment",
     icon: <FaCalendarAlt className="nav-icon" />,
   },
-  {
-    component: CNavItem,
-    name: "Add Doctor",
-    to: "/addDoctor",
-    icon: <FaUserMd className="nav-icon" />,
-  },
+
   {
     component: CNavItem,
     name: "Doctor",
     to: "/doctor",
     icon: <FaUserMd className="nav-icon" />,
   },
-  {
-    component: CNavItem,
-    name: "Add Services",
-    to: "/addServices",
-    icon: <FaUserMd className="nav-icon" />,
-  },
+
   {
     component: CNavItem,
     name: "Services",
     to: "/services",
     icon: <FaUserMd className="nav-icon" />,
   },
-  {
-    component: CNavItem,
-    name: "Add Medicine Master",
-    to: "/addmedicinemaster",
-    // eslint-disable-next-line react/jsx-no-undef
-    icon: <AiFillMedicineBox className="nav-icon" />,
-  },
+
   {
     component: CNavItem,
     name: "Medicine Master",

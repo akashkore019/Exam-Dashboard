@@ -186,12 +186,12 @@ const Appointment = () => {
           <table className="table">
             <thead>
               <tr>
-                <th>Appointment ID</th>
+                <th>ID</th>
                 <th>Doctor Name</th>
                 <th>Patient Name</th>
                 <th>Patient Mobile</th>
-                <th>Appointment Date</th>
-                <th>Appointment Time</th>
+                <th> Date</th>
+                <th> Time</th>
                 <th>Status</th>
                 <th>Edit</th>
                 <th>Delete</th>
