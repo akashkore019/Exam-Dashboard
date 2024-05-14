@@ -64,7 +64,7 @@ const _nav = [
     component: CNavItem,
     name: "Services",
     to: "/services",
-    icon: <FaUserMd className="nav-icon" />,
+    icon: <FaUserMd className="nav-icongr" />,
   },
 
   {
