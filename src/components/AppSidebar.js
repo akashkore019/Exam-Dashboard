@@ -1,6 +1,5 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-
 import {
   CCloseButton,
   CSidebar,
@@ -9,15 +8,9 @@ import {
   CSidebarHeader,
   CSidebarToggler,
 } from "@coreui/react";
-import CIcon from "@coreui/icons-react";
-
 import { AppSidebarNav } from "./AppSidebarNav";
-
-import { logo } from "src/assets/brand/logo";
-import { sygnet } from "src/assets/brand/sygnet";
-
-// sidebar nav config
 import navigation from "../_nav";
+import clinicLogo from "../assets/clinic_logo.png";
 
 const AppSidebar = () => {
   const dispatch = useDispatch();
@@ -39,11 +32,16 @@ const AppSidebar = () => {
         <CSidebarBrand
           to="/"
           className="sidebar-brand"
-          style={{ textDecoration: "none", textAlign: "center" }}
+          style={{
+            textDecoration: "none",
+            textAlign: "center",
+            display: "flex",
+            alignItems: "center",
+          }}
         >
           {/* Your logo JSX element */}
           <img
-            src="path_to_your_logo"
+            src={clinicLogo} // Use the imported logo
             alt="Logo"
             style={{ height: "32px", marginRight: "8px" }}
           />
@@ -51,12 +49,6 @@ const AppSidebar = () => {
           {/* Xform Clinic */}
           <h4 style={{ margin: 0 }}>Xform Clinic</h4>
         </CSidebarBrand>
-
-        <CCloseButton
-          className="d-lg-none"
-          dark
-          onClick={() => dispatch({ type: "set", sidebarShow: false })}
-        />
       </CSidebarHeader>
       <AppSidebarNav items={navigation} />
       <CSidebarFooter className="border-top d-none d-lg-flex">

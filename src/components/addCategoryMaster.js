@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import axios from 'axios'
+import { Link } from "react-router-dom";
 
 import {
   CCard,
@@ -78,8 +79,22 @@ const Doctor = () => {
 
   return (
     <CCard className="mb-5">
-      <CCardHeader>Doctor Details</CCardHeader>
-      <CCardBody>
+<CCardHeader
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          padding: "5px",
+        }}
+      >
+        <span style={{ lineHeight: "44px" }}>Add Medicine</span>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div className="input-group-append">
+            <Link to="/categoryMaster" className="btn btn-primary">
+              Back
+            </Link>
+          </div>
+        </div>
+      </CCardHeader>      <CCardBody>
         <CForm
           className="row g-3 ml needs-validation"
           noValidate

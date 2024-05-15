@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import config from "../config";
 import { toast } from "react-toastify";
+import { Link } from 'react-router-dom';
+
 import {
   CCard,
   CCardHeader,
@@ -15,7 +17,6 @@ import {
   CFormLabel,
 } from "@coreui/react";
 import { CSVLink } from "react-csv";
-import { Link } from "react-router-dom";
 import CIcon from "@coreui/icons-react";
 import { cilSearch, cilCloudDownload } from "@coreui/icons";
 import Draggable from "react-draggable"; // Import Draggable component
@@ -80,8 +81,8 @@ const Service = () => {
   const handleSave = async () => {
     try {
       await axios.put(
-        `${config.apiUrl}services/${selectedService.id}`,
-        selectedService,
+        `${config.apiUrl}service/${selectedService.id}`, // Correct endpoint URL
+        selectedService // Use selectedService instead of selectedPatient
       );
       setShowEditModal(false);
       fetchData(); // Refresh the table
@@ -91,6 +92,7 @@ const Service = () => {
       // Handle error - show toast message or any other UI indication
     }
   };
+  
 
   return (
     <div>
@@ -275,7 +277,7 @@ const Service = () => {
                   <button
                     type="button"
                     className="btn btn-primary"
-                    onClick={() => handleSave()}
+                    onClick={handleSave}
                   >
                     Save
                   </button>

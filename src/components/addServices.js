@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import config from "../config";
-
+import { Link } from "react-router-dom";
 import {
   CCard,
   CCardBody,
@@ -82,8 +82,21 @@ const AddService = () => {
 
   return (
     <CCard className="mb-5">
-      <CCardHeader>
-        <strong>Add Service</strong>
+      <CCardHeader
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          padding: "5px",
+        }}
+      >
+        <span style={{ lineHeight: "44px" }}>Add Appointment</span>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div className="input-group-append">
+            <Link to="/services" className="btn btn-primary">
+              Back
+            </Link>
+          </div>
+        </div>
       </CCardHeader>
       <CCardBody>
         <CForm

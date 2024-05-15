@@ -31,7 +31,7 @@ const Treatment = () => {
         "Doctor Name",
         "Description",
         "Treatment Date",
-        "Status"
+        "Status",
       ],
       ...treatments.map((treatment) => [
         treatment.patient.fullName,
@@ -39,11 +39,10 @@ const Treatment = () => {
         treatment.doctor.fullName,
         treatment.description,
         treatment.treatmentDate,
-        treatment.status
-      ])
+        treatment.status,
+      ]),
     ]);
   }, [treatments]);
-  
 
   useEffect(() => {
     // Filter treatments based on search input
@@ -154,13 +153,8 @@ const Treatment = () => {
               </Link>
             </div>
             <div className="input-group-append">
-              <CSVLink
-                data={csvData}
-                filename={"treatment_data.csv"}
-                className="btn btn-secondary"
-              >
+              <CSVLink data={csvData} filename={"treatment_data.csv"}>
                 <CIcon icon={cilCloudDownload} size="lg" />
-                Download CSV
               </CSVLink>
             </div>
           </div>
@@ -255,103 +249,105 @@ const Treatment = () => {
                     style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}
                   >
                     <CCol md={4}>
-  <CFormLabel htmlFor="fullName">Patient Name</CFormLabel>
-  <input
-    type="text"
-    id="fullName"
-    className="form-control"
-    value={selectedTreatment.patient.fullName}
-    onChange={(e) =>
-      setSelectedTreatment({
-        ...selectedTreatment,
-        patient: {
-          ...selectedTreatment.patient,
-          fullName: e.target.value,
-        },
-      })
-    }
-  />
-</CCol>
-<CCol md={4}>
-  <CFormLabel htmlFor="mobile">Patient Mobile</CFormLabel>
-  <input
-    type="text"
-    id="mobile"
-    className="form-control"
-    value={selectedTreatment.patient.mobile}
-    onChange={(e) =>
-      setSelectedTreatment({
-        ...selectedTreatment,
-        patient: {
-          ...selectedTreatment.patient,
-          mobile: e.target.value,
-        },
-      })
-    }
-  />
-</CCol>
-<CCol md={4}>
-  <CFormLabel htmlFor="doctorName">Doctor Name</CFormLabel>
-  <input
-    type="text"
-    id="doctorName"
-    className="form-control"
-    value={selectedTreatment.doctor.fullName}
-    onChange={(e) =>
-      setSelectedTreatment({
-        ...selectedTreatment,
-        doctor: {
-          ...selectedTreatment.doctor,
-          fullName: e.target.value,
-        },
-      })
-    }
-  />
-</CCol>
-<CCol md={12}>
-  <CFormLabel htmlFor="description">Description</CFormLabel>
-  <textarea
-    id="description"
-    className="form-control"
-    value={selectedTreatment.description}
-    onChange={(e) =>
-      setSelectedTreatment({
-        ...selectedTreatment,
-        description: e.target.value,
-      })
-    }
-  />
-</CCol>
-<CCol md={4}>
-  <CFormLabel htmlFor="treatmentDate">Treatment Date</CFormLabel>
-  <input
-    type="date"
-    id="treatmentDate"
-    className="form-control"
-    value={selectedTreatment.treatmentDate}
-    onChange={(e) =>
-      setSelectedTreatment({
-        ...selectedTreatment,
-        treatmentDate: e.target.value,
-      })
-    }
-  />
-</CCol>
-<CCol md={4}>
-  <CFormLabel htmlFor="status">Status</CFormLabel>
-  <input
-    type="text"
-    id="status"
-    className="form-control"
-    value={selectedTreatment.status}
-    onChange={(e) =>
-      setSelectedTreatment({
-        ...selectedTreatment,
-        status: e.target.value,
-      })
-    }
-  />
-</CCol>
+                      <CFormLabel htmlFor="fullName">Patient Name</CFormLabel>
+                      <input
+                        type="text"
+                        id="fullName"
+                        className="form-control"
+                        value={selectedTreatment.patient.fullName}
+                        onChange={(e) =>
+                          setSelectedTreatment({
+                            ...selectedTreatment,
+                            patient: {
+                              ...selectedTreatment.patient,
+                              fullName: e.target.value,
+                            },
+                          })
+                        }
+                      />
+                    </CCol>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="mobile">Patient Mobile</CFormLabel>
+                      <input
+                        type="text"
+                        id="mobile"
+                        className="form-control"
+                        value={selectedTreatment.patient.mobile}
+                        onChange={(e) =>
+                          setSelectedTreatment({
+                            ...selectedTreatment,
+                            patient: {
+                              ...selectedTreatment.patient,
+                              mobile: e.target.value,
+                            },
+                          })
+                        }
+                      />
+                    </CCol>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="doctorName">Doctor Name</CFormLabel>
+                      <input
+                        type="text"
+                        id="doctorName"
+                        className="form-control"
+                        value={selectedTreatment.doctor.fullName}
+                        onChange={(e) =>
+                          setSelectedTreatment({
+                            ...selectedTreatment,
+                            doctor: {
+                              ...selectedTreatment.doctor,
+                              fullName: e.target.value,
+                            },
+                          })
+                        }
+                      />
+                    </CCol>
+                    <CCol md={12}>
+                      <CFormLabel htmlFor="description">Description</CFormLabel>
+                      <textarea
+                        id="description"
+                        className="form-control"
+                        value={selectedTreatment.description}
+                        onChange={(e) =>
+                          setSelectedTreatment({
+                            ...selectedTreatment,
+                            description: e.target.value,
+                          })
+                        }
+                      />
+                    </CCol>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="treatmentDate">
+                        Treatment Date
+                      </CFormLabel>
+                      <input
+                        type="date"
+                        id="treatmentDate"
+                        className="form-control"
+                        value={selectedTreatment.treatmentDate}
+                        onChange={(e) =>
+                          setSelectedTreatment({
+                            ...selectedTreatment,
+                            treatmentDate: e.target.value,
+                          })
+                        }
+                      />
+                    </CCol>
+                    <CCol md={4}>
+                      <CFormLabel htmlFor="status">Status</CFormLabel>
+                      <input
+                        type="text"
+                        id="status"
+                        className="form-control"
+                        value={selectedTreatment.status}
+                        onChange={(e) =>
+                          setSelectedTreatment({
+                            ...selectedTreatment,
+                            status: e.target.value,
+                          })
+                        }
+                      />
+                    </CCol>
 
                     {/* Add other input fields for patient details */}
                   </div>

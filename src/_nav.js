@@ -29,20 +29,17 @@ const _nav = [
       text: "NEW",
     },
   },
-  {
-    component: CNavTitle,
-    name: "",
-  },
+
   {
     component: CNavItem,
-    name: "Appointment Details",
+    name: "Appointment",
     to: "/appointmentDetails",
     icon: <FaCalendarAlt className="nav-icon" />,
   },
 
   {
     component: CNavItem,
-    name: "Patient Details",
+    name: "Patient",
     to: "/patientDetails",
     icon: <FaUser className="nav-icon" />,
   },
@@ -64,7 +61,7 @@ const _nav = [
     component: CNavItem,
     name: "Services",
     to: "/services",
-    icon: <FaUserMd className="nav-icongr" />,
+    icon: <FaUserMd className="nav-icon" />,
   },
 
   {
@@ -79,12 +76,7 @@ const _nav = [
     to: "/addCategoryMaster",
     icon: <AiFillMedicineBox className="nav-icon" />,
   },
-  {
-    component: CNavItem,
-    name: "Category Master",
-    to: "/categoryMaster",
-    icon: <FaUserMd className="nav-icon" />,
-  },
+
   {
     component: CNavTitle,
     name: "Components",
