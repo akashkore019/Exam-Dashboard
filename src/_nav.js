@@ -72,7 +72,7 @@ const _nav = [
   },
   {
     component: CNavItem,
-    name: "Add Category Master",
+    name: "Category Master",
     to: "/addCategoryMaster",
     icon: <AiFillMedicineBox className="nav-icon" />,
   },
