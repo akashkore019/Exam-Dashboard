@@ -8,6 +8,10 @@ import { CSVLink } from "react-csv";
 import { Link } from "react-router-dom";
 import CIcon from "@coreui/icons-react";
 import { cilSearch, cilCloudDownload } from "@coreui/icons";
+import { FaTrash } from "react-icons/fa";
+import { AiFillEdit } from "react-icons/ai";
+import { IconContext } from "react-icons";
+import { FaPlusCircle } from "react-icons/fa";
 
 const Appointment = () => {
   const [appointments, setAppointments] = useState([]);
@@ -186,6 +190,8 @@ const Appointment = () => {
           <table className="table">
             <thead>
               <tr>
+                <th>Edit</th>
+                <th>Delete</th>
                 <th>ID</th>
                 <th>Doctor Name</th>
                 <th>Patient Name</th>
@@ -193,41 +199,38 @@ const Appointment = () => {
                 <th> Date</th>
                 <th> Time</th>
                 <th>Status</th>
-                <th>Edit</th>
-                <th>Delete</th>
               </tr>
             </thead>
-            <tbody>
-              {filteredAppointments.map((appointment) => (
-                <tr key={appointment.appointmentId}>
-                  <td>{appointment.appointmentId}</td>
-                  <td>{appointment.doctor.fullName}</td>
-                  <td>{appointment.patientName}</td>
-                  <td>{appointment.patientMobile}</td>
-                  <td>{appointment.appointmentDate}</td>
-                  <td>{appointment.appointmentTime}</td>
-                  <td>{appointment.status}</td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={() => handleEdit(appointment.appointmentId)}
-                    >
-                      Edit
-                    </button>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(appointment.appointmentId)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+
+            <IconContext.Provider
+              value={{
+                color: "white",
+                style: { fontSize: "20px", color: "grey" },
+                className: "submit-iconn",
+              }}
+            >
+              {/* Wrap the FaPlusCircle icon within the IconContext.Provider */}
+              <tbody>
+                {filteredAppointments.map((appointment) => (
+                  <tr key={appointment.appointmentId}>
+                    <td onClick={() => handleEdit(appointment.appointmentId)}>
+                      <AiFillEdit /> {/* Icon for Edit */}
+                    </td>
+                    <td onClick={() => handleDelete(appointment.appointmentId)}>
+                      <FaTrash /> {/* Icon for Delete */}
+                    </td>
+                    
+                    <td>{appointment.appointmentId}</td>
+                    <td>{appointment.doctor.fullName}</td>
+                    <td>{appointment.patientName}</td>
+                    <td>{appointment.patientMobile}</td>
+                    <td>{appointment.appointmentDate}</td>
+                    <td>{appointment.appointmentTime}</td>
+                    <td>{appointment.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </IconContext.Provider>
           </table>
         </CCardBody>
       </CCard>

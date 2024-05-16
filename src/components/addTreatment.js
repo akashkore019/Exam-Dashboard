@@ -379,25 +379,24 @@ const TreatmentList = () => {
                   id={`medicineId-${index}`}
                   name={`medicineId-${index}`}
                   options={medicineNames}
-                  value={
-                    medicineForm.medicineId
-                      ? medicineNames.find(
-                          (medicine) =>
-                            medicine.value ===
-                            parseInt(medicineForm.medicineId),
-                        )
-                      : null
-                  }
+                  value={medicineNames.find(
+                    (medicine) =>
+                      medicine.value === parseInt(medicineForm.medicineId),
+                  )}
                   onChange={(selectedOption) =>
-                    handleMedicineChange(selectedOption, index)
+                    handleMedicineChange(selectedOption.value, index)
                   }
                   isSearchable
                   placeholder="Select Medicine"
                 />
+                {medicineForm.medicineId === "" && (
+                  <CFormFeedback invalid>
+                    Please select a medicine.
+                  </CFormFeedback>
+                )}
+              </CCol>
 
-                <CFormFeedback invalid>Please select a medicine.</CFormFeedback>
-              </CCol>{" "}
-              <CCol md={4}>
+              <CCol md={2}>
                 <CFormLabel htmlFor="dosage">Select Dosage</CFormLabel>
                 <Select
                   id="dosage"
@@ -408,7 +407,7 @@ const TreatmentList = () => {
                   placeholder="Select Dosage"
                 />
               </CCol>
-              <CCol md={4}>
+              <CCol md={2}>
                 <CFormLabel htmlFor="duration">Select Duration</CFormLabel>
                 <Select
                   id="duration"
@@ -419,23 +418,36 @@ const TreatmentList = () => {
                   placeholder="Select Duration"
                 />
               </CCol>
+
+              <CCol md={4}>
+                <CFormLabel htmlFor="duration">Description</CFormLabel>
+
+                <CFormTextarea
+                  id="floatingTextarea"
+                  floatingLabel="Description:"
+                  placeholder="Leave a comment here"
+                  style={{ width: "300px" }} // Adjust the width as needed
+                />
+              </CCol>
             </CForm>
-            <div style={{ marginTop: "20px" }}>
-              <CFormTextarea
-                id="floatingTextarea"
-                floatingLabel="Description:"
-                placeholder="Leave a comment here"
-                style={{ width: "500px" }} // Adjust the width as needed
-              />
-            </div>
           </CCardBody>
         </CCard>
       ))}
+
+      {/* Common Submit Button */}
+      <CCol xs={12}>
+        <CButton type="submit" color="primary" onClick={handleSubmit}>
+          Submit
+        </CButton>
+      </CCol>
+
+      {/* WhatsApp Button */}
       <div style={{ marginBottom: "20px" }}>
         <button className="btn btn-success me-2" onClick={handleWhatsAppClick}>
           <FaWhatsapp /> WhatsApp
         </button>
       </div>
+      {/* Download PDF Button */}
       <div>
         {/* Your form JSX */}
         <PDFDownloadLink
