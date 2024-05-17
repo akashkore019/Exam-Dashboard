@@ -19,7 +19,6 @@ import {
 const AddMedicine = () => {
   const [validated, setValidated] = useState(false);
   const [medicine, setMedicine] = useState({
-    medicineId: "",
     medicineName: "",
     medicineType: "",
     medicineContents: "",
@@ -49,7 +48,6 @@ const AddMedicine = () => {
 
     try {
       const res = await axios.post("http://localhost:8080/api/v1/medicine", {
-        medicineId: medicine.medicineId,
         medicineName: medicine.medicineName,
         medicineType: medicine.medicineType,
         medicineContents: medicine.medicineContents,
@@ -98,19 +96,6 @@ const AddMedicine = () => {
           validated={validated}
           onSubmit={handleSubmit}
         >
-          <CCol md={4}>
-            <CFormLabel htmlFor="medicineId">Medicine ID</CFormLabel>
-            <CFormInput
-              type="text"
-              id="medicineId"
-              name="medicineId"
-              value={medicine.medicineId}
-              onChange={handleInputChange}
-              required
-            />
-            <CFormFeedback invalid>Please enter medicine ID.</CFormFeedback>
-            <CFormFeedback valid>Looks good!</CFormFeedback>
-          </CCol>
           <CCol md={4}>
             <CFormLabel htmlFor="medicineName">Medicine Name</CFormLabel>
             <CFormInput

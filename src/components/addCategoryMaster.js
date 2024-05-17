@@ -1,100 +1,78 @@
-import React, { useState } from 'react'
-import axios from 'axios'
+import React, { useState } from "react";
+import axios from "axios";
 import { Link } from "react-router-dom";
-
 import {
   CCard,
   CCardBody,
   CCardHeader,
   CCol,
   CForm,
-  CFormCheck,
   CFormFeedback,
   CFormInput,
   CFormLabel,
-  CRow,
   CButton,
-  CFormSelect,
-} from '@coreui/react'
+} from "@coreui/react";
 
-const Doctor = () => {
-  const [validated, setValidated] = useState(false)
-  const [doctor, setDoctor] = useState({
-    fullName: '',
-    email: '',
-    contactNo: '',
-    gender: '',
-    specialization: '',
-    experience: '',
-    address: '',
-    country: '',
-    city: '',
-    postalCode: '',
-    qualification: '',
-  })
+const AddCategory = () => {
+  const [validated, setValidated] = useState(false);
+  const [category, setCategory] = useState({
+    categoryName: "",
+  });
 
   const handleInputChange = (event) => {
-    const { name, value } = event.target
-    setDoctor({ ...doctor, [name]: value })
-  }
+    const { name, value } = event.target;
+    setCategory({ ...category, [name]: value });
+  };
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
-    const form = event.currentTarget
+    event.preventDefault();
+    const form = event.currentTarget;
 
     if (form.checkValidity() === false) {
-      event.stopPropagation()
-      setValidated(true)
-      return
+      event.stopPropagation();
+      setValidated(true);
+      return;
     }
 
     try {
-      const res = await axios.post('http://localhost:8080/api/v1/doctor', {
-        fullName: doctor.fullName,
-        email: doctor.email,
-        contactNo: doctor.contactNo,
-        gender: doctor.gender,
-        specialization: doctor.specialization,
-        experience: doctor.experience,
-        address: doctor.address,
-        country: doctor.country,
-        city: doctor.city,
-        postalCode: doctor.postalCode,
-        qualification: doctor.qualification,
-      })
+      const res = await axios.post("http://localhost:8080/api/v1/category", {
+        categoryName: category.categoryName,
+      });
 
       if (res.status === 200) {
-        window.alert('Data is submitted Successfully')
-        form.reset()
+        window.alert("Category submitted successfully");
+        form.reset();
+        setCategory({ categoryName: "" });
       } else {
-        throw new Error('Failed to submit data')
+        throw new Error("Failed to submit category");
       }
     } catch (error) {
-      console.error('Error:', error)
-      window.alert('Failed to submit data. Please try again later.')
+      console.error("Error:", error);
+      window.alert("Failed to submit category. Please try again later.");
     }
 
-    setValidated(true)
-  }
+    setValidated(true);
+  };
 
   return (
     <CCard className="mb-5">
-<CCardHeader
+      <CCardHeader
         style={{
           display: "flex",
           justifyContent: "space-between",
           padding: "5px",
         }}
       >
-        <span style={{ lineHeight: "44px" }}>Add Medicine</span>
+        <span style={{ lineHeight: "44px" }}>Add Category</span>
         <div style={{ display: "flex", alignItems: "center" }}>
           <div className="input-group-append">
-            <Link to="/categoryMaster" className="btn btn-primary">
+            <Link to="/CategoryMaster" className="btn btn-primary">
               Back
             </Link>
           </div>
         </div>
-      </CCardHeader>      <CCardBody>
+      </CCardHeader>
+      <CCardBody>
         <CForm
           className="row g-3 ml needs-validation"
           noValidate
@@ -102,16 +80,18 @@ const Doctor = () => {
           onSubmit={handleSubmit}
         >
           <CCol md={4}>
-            <CFormLabel htmlFor="fullName">Category Name</CFormLabel>
+            <CFormLabel htmlFor="categoryName">Category Name</CFormLabel>
             <CFormInput
               type="text"
-              id="Category Name"
-              name="Category Name"
-              value={doctor.fullName}
+              id="categoryName"
+              name="categoryName"
+              value={category.categoryName}
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please enter the qualification.</CFormFeedback>
+            <CFormFeedback invalid>
+              Please enter the category name.
+            </CFormFeedback>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
           <CCol xs={4} />
@@ -125,7 +105,7 @@ const Doctor = () => {
         </CForm>
       </CCardBody>
     </CCard>
-  )
-}
+  );
+};
 
-export default Doctor
+export default AddCategory;

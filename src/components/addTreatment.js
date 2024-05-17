@@ -242,6 +242,11 @@ const TreatmentList = () => {
           <span style={{ lineHeight: "44px" }}>Add Treatment</span>
           <div style={{ display: "flex", alignItems: "center" }}>
             <div className="input-group-append">
+                          <CCol xs={12}>
+              <CButton color="primary" onClick={handleAddMedicine}>
+                Add Medicine
+              </CButton>
+            </CCol>
               <Link to="/treatment" className="btn btn-primary">
                 Back
               </Link>
@@ -314,11 +319,7 @@ const TreatmentList = () => {
             </CCol>
             <CCol xs={12}></CCol>
             <CCol xs={12}></CCol>
-            <CCol xs={12}>
-              <CButton color="primary" onClick={handleAddMedicine}>
-                Add Medicine
-              </CButton>
-            </CCol>
+
           </CForm>
         </CCardBody>
       </CCard>
@@ -419,8 +420,13 @@ const TreatmentList = () => {
                 />
               </CCol>
 
+
+            </CForm>
+          </CCardBody>
+        </CCard>
+      ))}
               <CCol md={4}>
-                <CFormLabel htmlFor="duration">Description</CFormLabel>
+                {/* <CFormLabel htmlFor="duration">Description</CFormLabel> */}
 
                 <CFormTextarea
                   id="floatingTextarea"
@@ -429,11 +435,6 @@ const TreatmentList = () => {
                   style={{ width: "300px" }} // Adjust the width as needed
                 />
               </CCol>
-            </CForm>
-          </CCardBody>
-        </CCard>
-      ))}
-
       {/* Common Submit Button */}
       <CCol xs={12}>
         <CButton type="submit" color="primary" onClick={handleSubmit}>

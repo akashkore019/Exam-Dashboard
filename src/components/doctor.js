@@ -8,15 +8,31 @@ import { CSVLink } from "react-csv";
 import { Link } from "react-router-dom";
 import CIcon from "@coreui/icons-react";
 import { cilSearch, cilCloudDownload } from "@coreui/icons";
+import { FaTrash } from "react-icons/fa";
+import { AiFillEdit } from "react-icons/ai";
+import { IconContext } from "react-icons";
+import { FaPlusCircle } from "react-icons/fa";
 
 const Doctor = () => {
   const [doctors, setDoctors] = useState([]);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [csvData, setCSVData] = useState([]);
   const [searchBarVisible, setSearchBarVisible] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState({
+    fullName: "",
+    email: "",
+    contactNo: "",
+    gender: "",
+    specialization: "",
+    experience: "",
+    address: "",
+    country: "",
+    city: "",
+    postalCode: "",
+    qualification: "",
+  });
 
   useEffect(() => {
     fetchData();
@@ -157,6 +173,8 @@ const Doctor = () => {
           <table className="table">
             <thead>
               <tr>
+                <th>Edit</th>
+                <th>Delete</th>
                 <th>Id</th>
                 <th>Full Name</th>
                 <th>Email</th>
@@ -169,13 +187,17 @@ const Doctor = () => {
                 <th>City</th>
                 <th>Postal Code</th>
                 <th>Qualification</th>
-                <th>Edit</th>
-                <th>Delete</th>
               </tr>
             </thead>
             <tbody>
               {filteredDoctors.map((doctor) => (
                 <tr key={doctor.id}>
+                  <td onClick={() => handleEdit(doctor.id)}>
+                    <AiFillEdit /> {/* Icon for Edit */}
+                  </td>
+                  <td onClick={() => handleDelete(doctor.id)}>
+                    <FaTrash /> {/* Icon for Delete */}
+                  </td>
                   <td>{doctor.id}</td>
                   <td>{doctor.fullName}</td>
                   <td>{doctor.email}</td>
@@ -188,24 +210,6 @@ const Doctor = () => {
                   <td>{doctor.city}</td>
                   <td>{doctor.postalCode}</td>
                   <td>{doctor.qualification}</td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={() => handleEdit(doctor.id)}
-                    >
-                      Edit
-                    </button>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(doctor.id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
                 </tr>
               ))}
             </tbody>

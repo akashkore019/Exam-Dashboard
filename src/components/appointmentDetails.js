@@ -101,34 +101,6 @@ const Appointment = () => {
     setSelectedAppointment({ ...selectedAppointment, [name]: value });
   };
 
-  const handleEdit = (appointmentId) => {
-    const appointment = appointments.find(
-      (appointment) => appointment.appointmentId === appointmentId,
-    );
-    if (appointment) {
-      setSelectedAppointment(appointment);
-      setShowEditModal(true);
-    } else {
-      console.error("Appointment not found");
-      // Handle error - show toast message or any other UI indication
-    }
-  };
-
-  const handleSave = async () => {
-    try {
-      await axios.put(
-        `${config.apiUrl}appointment/${selectedAppointment.appointmentId}`,
-        selectedAppointment,
-      );
-      setShowEditModal(false);
-      fetchData(); // Refresh the table
-      toast.success("Updated Successfully!", { autoClose: 3000 });
-    } catch (error) {
-      console.error("Error updating appointment:", error);
-      // Handle error - show toast message or any other UI indication
-    }
-  };
-
   const handleDelete = async (appointmentId) => {
     if (window.confirm("Are you sure you want to delete this appointment?")) {
       try {
@@ -182,7 +154,7 @@ const Appointment = () => {
             <div className="input-group-append" style={{ marginRight: "10px" }}>
               <CSVLink data={csvData} filename={"appointment_data.csv"}>
                 <CIcon icon={cilCloudDownload} size="lg" />
-              </CSVLink>{" "}
+              </CSVLink>
             </div>
           </div>
         </CCardHeader>
@@ -219,7 +191,7 @@ const Appointment = () => {
                     <td onClick={() => handleDelete(appointment.appointmentId)}>
                       <FaTrash /> {/* Icon for Delete */}
                     </td>
-                    
+
                     <td>{appointment.appointmentId}</td>
                     <td>{appointment.doctor.fullName}</td>
                     <td>{appointment.patientName}</td>

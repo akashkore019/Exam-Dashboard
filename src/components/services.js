@@ -2,37 +2,54 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import config from "../config";
 import { toast } from "react-toastify";
-import { Link } from 'react-router-dom';
-
-import {
-  CCard,
-  CCardHeader,
-  CCardBody,
-  CButton,
-  CModal,
-  CModalHeader,
-  CModalBody,
-  CModalFooter,
-  CCol,
-  CFormLabel,
-} from "@coreui/react";
+import { Link } from "react-router-dom";
+import { CCard, CCardHeader, CCardBody, CCol, CFormLabel } from "@coreui/react";
 import { CSVLink } from "react-csv";
+import { AiFillEdit } from "react-icons/ai";
+import { FaTrash } from "react-icons/fa";
+import Draggable from "react-draggable";
+
 import CIcon from "@coreui/icons-react";
 import { cilSearch, cilCloudDownload } from "@coreui/icons";
-import Draggable from "react-draggable"; // Import Draggable component
 
 const Service = () => {
   const [services, setServices] = useState([]);
-  const [selectedService, setSelectedService] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [filteredServices, setFilteredServices] = useState([]);
   const [csvData, setCSVData] = useState([]);
   const [searchBarVisible, setSearchBarVisible] = useState(false);
+  const [selectedService, setSelectedService] = useState({
+    categoryName: "",
+    charge: "",
+    serviceName: "",
+  });
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setFilteredServices(
+      services.filter((service) =>
+        Object.values(service).some((value) => {
+          if (
+            typeof value === "string" &&
+            value.toLowerCase().includes(searchInput.toLowerCase())
+          ) {
+            return true;
+          }
+          if (
+            typeof value === "number" &&
+            value.toString().includes(searchInput)
+          ) {
+            return true;
+          }
+          return false;
+        }),
+      ),
+    );
+  }, [searchInput, services]);
 
   useEffect(() => {
     setCSVData(
@@ -40,7 +57,7 @@ const Service = () => {
         Id: service.id,
         "Service Name": service.serviceName,
         Charge: service.charge,
-        Category: service.category.categoryName,
+        Category: service.categoryName,
       })),
     );
   }, [services]);
@@ -82,7 +99,7 @@ const Service = () => {
     try {
       await axios.put(
         `${config.apiUrl}service/${selectedService.id}`, // Correct endpoint URL
-        selectedService // Use selectedService instead of selectedPatient
+        selectedService, // Use selectedService instead of selectedPatient
       );
       setShowEditModal(false);
       fetchData(); // Refresh the table
@@ -92,7 +109,6 @@ const Service = () => {
       // Handle error - show toast message or any other UI indication
     }
   };
-  
 
   return (
     <div>
@@ -140,37 +156,27 @@ const Service = () => {
           <table className="table">
             <thead>
               <tr>
+                <th>Edit</th>
+                <th>Delete</th>
                 <th>Id</th>
                 <th>Service Name</th>
                 <th>Charge</th>
                 <th>Category</th>
-                <th>Edit</th>
-                <th>Delete</th>
               </tr>
             </thead>
             <tbody>
-              {services.map((service) => (
+              {filteredServices.map((service) => (
                 <tr key={service.id}>
+                  <td onClick={() => handleEdit(service.medicineId)}>
+                    <AiFillEdit />
+                  </td>
+                  <td onClick={() => handleDelete(service.medicineId)}>
+                    <FaTrash />
+                  </td>
                   <td>{service.id}</td>
                   <td>{service.serviceName}</td>
                   <td>{service.charge}</td>
-                  <td>{service.category.categoryName}</td>
-                  <td>
-                    <CButton
-                      color="primary"
-                      onClick={() => handleEdit(service.id)}
-                    >
-                      Edit
-                    </CButton>
-                  </td>
-                  <td>
-                    <CButton
-                      color="danger"
-                      onClick={() => handleDelete(service.id)}
-                    >
-                      Delete
-                    </CButton>
-                  </td>
+                  <td>{service.categoryName}</td>
                 </tr>
               ))}
             </tbody>
@@ -259,7 +265,11 @@ const Service = () => {
                         type="text"
                         id="category"
                         className="form-control"
-                        value={selectedService.category.categoryName}
+                        value={
+                          selectedService.category
+                            ? selectedService.category.categoryName
+                            : ""
+                        }
                         onChange={(e) =>
                           setSelectedService({
                             ...selectedService,
