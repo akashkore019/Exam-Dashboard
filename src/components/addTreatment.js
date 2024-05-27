@@ -2,8 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import Select from "react-select";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { cilCloudDownload } from "@coreui/icons";
+import CIcon from "@coreui/icons-react";
+
 import {
   PDFDownloadLink,
   Document,
@@ -12,10 +15,10 @@ import {
   View,
   StyleSheet,
 } from "@react-pdf/renderer";
-import { FaWhatsapp } from "react-icons/fa"; // Import FaWhatsapp icon
-
+import { FaWhatsapp } from "react-icons/fa";
 import {
   CCard,
+  CRow,
   CCardBody,
   CCardHeader,
   CCol,
@@ -24,6 +27,12 @@ import {
   CFormLabel,
   CButton,
   CFormTextarea,
+  CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
+  CTableBody,
+  CTableDataCell,
 } from "@coreui/react";
 
 const TreatmentList = () => {
@@ -35,7 +44,8 @@ const TreatmentList = () => {
     patientId: "",
     doctorId: "",
     serviceId: "",
-    medicineForms: [], // Array to hold medicine details
+    medicineForms: [],
+    description: "",
   });
   const [medicineNames, setMedicineNames] = useState([]);
   const [dosageOptions] = useState([
@@ -54,8 +64,6 @@ const TreatmentList = () => {
     { value: "1 day", label: "1 day" },
     { value: "other custom days", label: "Other custom days" },
   ]);
-  const [selectedDosage, setSelectedDosage] = useState(null);
-  const [selectedDuration, setSelectedDuration] = useState(null);
 
   useEffect(() => {
     fetchPatients();
@@ -119,29 +127,49 @@ const TreatmentList = () => {
   };
 
   const handleMedicineChange = (selectedOption, index) => {
-    if (selectedOption) {
-      const selectedMedicineId = selectedOption.value;
-      setTreatment((prevTreatment) => {
-        const updatedMedicineForms = [...prevTreatment.medicineForms];
+    setTreatment((prevTreatment) => {
+      const updatedMedicineForms = [...prevTreatment.medicineForms];
+      // If selectedOption is null, clear the medicine selection
+      if (!selectedOption) {
+        updatedMedicineForms[index] = {
+          ...updatedMedicineForms[index],
+          medicineId: "",
+        };
+      } else {
+        const selectedMedicineId = selectedOption.value;
         updatedMedicineForms[index] = {
           ...updatedMedicineForms[index],
           medicineId: selectedMedicineId,
         };
-        return { ...prevTreatment, medicineForms: updatedMedicineForms };
-      });
-    }
+      }
+      return { ...prevTreatment, medicineForms: updatedMedicineForms };
+    });
   };
 
-  const handleDosageChange = (selectedOption) => {
-    setSelectedDosage(selectedOption);
+  const handleDosageChange = (selectedOption, index) => {
+    setTreatment((prevTreatment) => {
+      const updatedMedicineForms = [...prevTreatment.medicineForms];
+      updatedMedicineForms[index] = {
+        ...updatedMedicineForms[index],
+        dosage: selectedOption ? selectedOption.value : "",
+      };
+      return { ...prevTreatment, medicineForms: updatedMedicineForms };
+    });
   };
 
-  const handleDurationChange = (selectedOption) => {
-    setSelectedDuration(selectedOption);
+  const handleDurationChange = (selectedOption, index) => {
+    setTreatment((prevTreatment) => {
+      const updatedMedicineForms = [...prevTreatment.medicineForms];
+      updatedMedicineForms[index] = {
+        ...updatedMedicineForms[index],
+        duration: selectedOption ? selectedOption.value : "",
+      };
+      return { ...prevTreatment, medicineForms: updatedMedicineForms };
+    });
   };
 
-  const handleWhatsAppClick = (selectedOption) => {
-    //   setSelectedDuration(selectedOption);
+  const handleWhatsAppClick = () => {
+    // Logic for WhatsApp click
   };
 
   const handleSubmit = async (event) => {
@@ -156,8 +184,6 @@ const TreatmentList = () => {
       const res = await axios.post("http://localhost:8080/api/v1/treatment", {
         ...treatment,
         status: "Scheduled",
-        dosage: selectedDosage ? selectedDosage.value : "",
-        duration: selectedDuration ? selectedDuration.value : "",
       });
       if (res.status === 200) {
         window.alert("Treatment data submitted successfully!");
@@ -167,10 +193,9 @@ const TreatmentList = () => {
           patientId: "",
           doctorId: "",
           serviceId: "",
-          medicineForms: [], // Reset medicine forms
+          medicineForms: [],
+          description: "",
         });
-        setSelectedDosage(null);
-        setSelectedDuration(null);
       } else {
         throw new Error("Failed to submit treatment data");
       }
@@ -183,11 +208,13 @@ const TreatmentList = () => {
   const handleAddMedicine = () => {
     setTreatment((prevTreatment) => ({
       ...prevTreatment,
-      medicineForms: [...prevTreatment.medicineForms, { medicineId: "" }],
+      medicineForms: [
+        ...prevTreatment.medicineForms,
+        { medicineId: "", dosage: "", duration: "" },
+      ],
     }));
   };
 
-  // Define PDF styles
   const styles = StyleSheet.create({
     page: {
       flexDirection: "column",
@@ -208,7 +235,6 @@ const TreatmentList = () => {
     },
   });
 
-  // Invoice PDF component
   const InvoicePDF = ({ formData }) => (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -219,114 +245,44 @@ const TreatmentList = () => {
           <Text style={styles.text}>Service: {formData.serviceId}</Text>
           <Text style={styles.text}>Medicines:</Text>
           {formData.medicineForms.map((medicine, index) => (
-            <Text key={index} style={styles.text}>
-              Medicine {index + 1}: {medicine.medicineId}, Dosage:{" "}
-              {medicine.dosage}, Duration: {medicine.duration}
-            </Text>
+            <View key={index} style={styles.section}>
+              <Text style={styles.text}>
+                Medicine {index + 1}: {medicine.medicineId}
+              </Text>
+              <Text style={styles.text}>Dosage: {medicine.dosage}</Text>
+              <Text style={styles.text}>Duration: {medicine.duration}</Text>
+            </View>
           ))}
+          <Text style={styles.text}>Description: {formData.description}</Text>
         </View>
       </Page>
     </Document>
   );
 
+  const renderMedicineTableRows = () => {
+    return treatment.medicineForms.map((medicine, index) => (
+      <CTableRow key={index}>
+        <CTableDataCell>{index + 1}</CTableDataCell>
+        <CTableDataCell>
+          {medicineNames.find((option) => option.value === medicine.medicineId)
+            ?.label || ""}
+        </CTableDataCell>
+        <CTableDataCell>
+          {dosageOptions.find((option) => option.value === medicine.dosage)
+            ?.label || ""}
+        </CTableDataCell>
+        <CTableDataCell>
+          {durationOptions.find((option) => option.value === medicine.duration)
+            ?.label || ""}
+        </CTableDataCell>
+      </CTableRow>
+    ));
+  };
+
   return (
-    <>
-      <CCard className="mb-3">
-        <CCardHeader
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            padding: "5px",
-          }}
-        >
-          <span style={{ lineHeight: "44px" }}>Add Treatment</span>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div className="input-group-append">
-                          <CCol xs={12}>
-              <CButton color="primary" onClick={handleAddMedicine}>
-                Add Medicine
-              </CButton>
-            </CCol>
-              <Link to="/treatment" className="btn btn-primary">
-                Back
-              </Link>
-            </div>
-          </div>
-        </CCardHeader>
-        <CCardBody>
-          <CForm
-            className="row g-3 ml needs-validation"
-            noValidate
-            validated={validated}
-            onSubmit={handleSubmit}
-          >
-            <CCol md={4}>
-              <CFormLabel htmlFor="patientId">Select Patient</CFormLabel>
-              <select
-                id="patientId"
-                name="patientId"
-                className="form-select"
-                value={treatment.patientId}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select Patient</option>
-                {patients.map((patient) => (
-                  <option key={patient.id} value={patient.id}>
-                    {patient.fullName}
-                  </option>
-                ))}
-              </select>
-              <CFormFeedback invalid>Please select a patient.</CFormFeedback>
-            </CCol>
-            <CCol md={4}>
-              <CFormLabel htmlFor="doctorId">Select Doctor</CFormLabel>
-              <select
-                id="doctorId"
-                name="doctorId"
-                className="form-select"
-                value={treatment.doctorId}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select Doctor</option>
-                {doctors.map((doctor) => (
-                  <option key={doctor.id} value={doctor.id}>
-                    {doctor.fullName}
-                  </option>
-                ))}
-              </select>
-              <CFormFeedback invalid>Please select a doctor.</CFormFeedback>
-            </CCol>
-            <CCol md={4}>
-              <CFormLabel htmlFor="serviceId">Select Service</CFormLabel>
-              <select
-                id="serviceId"
-                name="serviceId"
-                className="form-select"
-                value={treatment.serviceId}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select Service</option>
-                {services.map((service) => (
-                  <option key={service.id} value={service.id}>
-                    {service.serviceName}
-                  </option>
-                ))}
-              </select>
-              <CFormFeedback invalid>Please select a service.</CFormFeedback>
-            </CCol>
-            <CCol xs={12}></CCol>
-            <CCol xs={12}></CCol>
-
-          </CForm>
-        </CCardBody>
-      </CCard>
-
-      {/* Medicine Forms */}
-      {treatment.medicineForms.map((medicineForm, index) => (
-        <CCard key={index} className="mb-3">
+    <CRow>
+      <CCol>
+        <CCard>
           <CCardHeader
             style={{
               display: "flex",
@@ -334,133 +290,279 @@ const TreatmentList = () => {
               padding: "5px",
             }}
           >
-            <span style={{ lineHeight: "44px" }}>Add Medicine</span>
+            <span style={{ lineHeight: "44px" }}>Add Appointment</span>
             <div style={{ display: "flex", alignItems: "center" }}>
               <div className="input-group-append">
-                <CButton onClick={handleAddMedicine}>
-                  <FontAwesomeIcon
-                    color="primary"
-                    size="20px"
-                    icon={faPlusCircle}
-                    style={{ color: "blak" }}
-                  />
-                </CButton>
-                <button
-                  type="button"
-                  className="border-none border-0 bg-transparent text-2xl mr-2"
-                  onClick={() => {
-                    const updatedMedicineForms = [...treatment.medicineForms];
-                    updatedMedicineForms.splice(index, 1);
-                    setTreatment((prevTreatment) => ({
-                      ...prevTreatment,
-                      medicineForms: updatedMedicineForms,
-                    }));
-                  }}
-                >
-                  <span aria-hidden="true" className="text-gray-700">
-                    &times;
-                  </span>
-                </button>
+                <Link to="/treatment" className="btn btn-primary">
+                  Back
+                </Link>
               </div>
             </div>
-          </CCardHeader>
-
+          </CCardHeader>{" "}
           <CCardBody>
             <CForm
-              className="row g-3 ml needs-validation"
+              className="mb-3 row g-3 needs-validation"
               noValidate
               validated={validated}
               onSubmit={handleSubmit}
             >
               <CCol md={4}>
-                <CFormLabel htmlFor={`medicineId-${index}`}>
-                  Search for Medicine
+                <CFormLabel htmlFor="patientId" style={{ color: "#000" }}>
+                  Select Patient
                 </CFormLabel>
                 <Select
-                  id={`medicineId-${index}`}
-                  name={`medicineId-${index}`}
-                  options={medicineNames}
-                  value={medicineNames.find(
-                    (medicine) =>
-                      medicine.value === parseInt(medicineForm.medicineId),
-                  )}
+                  id="patientId"
+                  name="patientId"
+                  options={patients.map((patient) => ({
+                    value: patient.id,
+                    label: patient.fullName,
+                  }))}
                   onChange={(selectedOption) =>
-                    handleMedicineChange(selectedOption.value, index)
+                    setTreatment({
+                      ...treatment,
+                      patientId: selectedOption.value,
+                    })
                   }
-                  isSearchable
-                  placeholder="Select Medicine"
+                  isClearable
+                  placeholder="Select a patient"
+                  required
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      color: "#000",
+                    }),
+                    singleValue: (base) => ({
+                      ...base,
+                      color: "#000",
+                    }),
+                  }}
                 />
-                {medicineForm.medicineId === "" && (
-                  <CFormFeedback invalid>
-                    Please select a medicine.
-                  </CFormFeedback>
-                )}
+                <CFormFeedback invalid>Please select a patient.</CFormFeedback>
               </CCol>
-
-              <CCol md={2}>
-                <CFormLabel htmlFor="dosage">Select Dosage</CFormLabel>
+              <CCol md={4}>
+                <CFormLabel htmlFor="doctorId" style={{ color: "#000" }}>
+                  Select Doctor
+                </CFormLabel>
                 <Select
-                  id="dosage"
-                  name="dosage"
-                  options={dosageOptions}
-                  value={selectedDosage}
-                  onChange={handleDosageChange}
-                  placeholder="Select Dosage"
+                  id="doctorId"
+                  name="doctorId"
+                  options={doctors.map((doctor) => ({
+                    value: doctor.id,
+                    label: doctor.fullName,
+                  }))}
+                  onChange={(selectedOption) =>
+                    setTreatment({
+                      ...treatment,
+                      doctorId: selectedOption.value,
+                    })
+                  }
+                  isClearable
+                  placeholder="Select a doctor"
+                  required
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      color: "#000",
+                    }),
+                    singleValue: (base) => ({
+                      ...base,
+                      color: "#000",
+                    }),
+                  }}
                 />
+                <CFormFeedback invalid>Please select a doctor.</CFormFeedback>
               </CCol>
-              <CCol md={2}>
-                <CFormLabel htmlFor="duration">Select Duration</CFormLabel>
+
+              <CCol md={4}>
+                <CFormLabel htmlFor="serviceId">Select Service</CFormLabel>
                 <Select
-                  id="duration"
-                  name="duration"
-                  options={durationOptions}
-                  value={selectedDuration}
-                  onChange={handleDurationChange}
-                  placeholder="Select Duration"
+                  id="serviceId"
+                  name="serviceId"
+                  options={services.map((service) => ({
+                    value: service.id,
+                    label: service.serviceName,
+                  }))}
+                  onChange={(selectedOption) =>
+                    setTreatment({
+                      ...treatment,
+                      serviceId: selectedOption.value,
+                    })
+                  }
+                  isClearable
+                  placeholder="Select a service"
+                  required
                 />
+                <CFormFeedback invalid>Please select a service.</CFormFeedback>
               </CCol>
 
+              {treatment.medicineForms.map((medicineForm, index) => (
+                <React.Fragment key={index}>
+                  <CCol md={4}>
+                    <CFormLabel htmlFor={`medicineId_${index}`}>
+                      Select Medicine {index + 1}
+                    </CFormLabel>
+                    <Select
+                      id={`medicineId_${index}`}
+                      name="medicineId"
+                      options={medicineNames}
+                      onChange={(selectedOption) =>
+                        handleMedicineChange(selectedOption, index)
+                      }
+                      isClearable
+                      placeholder={`Select medicine ${index + 1}`}
+                      value={
+                        medicineForm.medicineId
+                          ? medicineNames.find(
+                              (option) =>
+                                option.value === medicineForm.medicineId,
+                              
+                            )
+                          : null
+                      }
+                      required
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          color: "#000",
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          color: "#000",
+                        }),
+                      }}
+                    />
 
+                    <CFormFeedback invalid>
+                      Please select a medicine.
+                    </CFormFeedback>
+                  </CCol>
+                  <CCol md={4}>
+                    <CFormLabel htmlFor={`dosage_${index}`}>
+                      Select Dosage
+                    </CFormLabel>
+                    <Select
+                      id={`dosage_${index}`}
+                      name="dosage"
+                      options={dosageOptions}
+                      onChange={(selectedOption) =>
+                        handleDosageChange(selectedOption, index)
+                      }
+                      isClearable
+                      placeholder="Select dosage"
+                      value={
+                        dosageOptions.find(
+                          (option) => option.value === medicineForm.dosage,
+                        ) || null
+                      }
+                      required
+                    />
+                    <CFormFeedback invalid>
+                      Please select a dosage.
+                    </CFormFeedback>
+                  </CCol>
+                  <CCol md={4}>
+                    <CFormLabel htmlFor={`duration_${index}`}>
+                      Select Duration
+                    </CFormLabel>
+                    <Select
+                      id={`duration_${index}`}
+                      name="duration"
+                      options={durationOptions}
+                      onChange={(selectedOption) =>
+                        handleDurationChange(selectedOption, index)
+                      }
+                      isClearable
+                      placeholder="Select duration"
+                      value={
+                        durationOptions.find(
+                          (option) => option.value === medicineForm.duration,
+                        ) || null
+                      }
+                      required
+                    />
+                    <CFormFeedback invalid>
+                      Please select a duration.
+                    </CFormFeedback>
+                  </CCol>
+                </React.Fragment>
+              ))}
+              <CCol xs={12}>
+                <CButton
+                  type="button"
+                  color="primary"
+                  onClick={handleAddMedicine}
+                >
+                  <FontAwesomeIcon icon={faPlusCircle} /> Add Medicine
+                </CButton>
+              </CCol>
+              <CCol xs={12}>
+                <CFormLabel htmlFor="description">Description</CFormLabel>
+                <CFormTextarea
+                  id="description"
+                  name="description"
+                  value={treatment.description}
+                  onChange={handleInputChange}
+                  required
+                />
+                <CFormFeedback invalid>
+                  Please provide a description.
+                </CFormFeedback>
+              </CCol>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div
+                  className="input-group-append"
+                  style={{ marginRight: "10px" }}
+                >
+                  <CButton color="primary" type="submit">
+                    Submit
+                  </CButton>
+                </div>
+                <div
+                  className="input-group-append"
+                  style={{ marginRight: "10px" }}
+                >
+                  <PDFDownloadLink
+                    document={<InvoicePDF formData={treatment} />}
+                    fileName="invoice.pdf"
+                  >
+                    <CButton>
+                      <CIcon icon={cilCloudDownload} size="xl" />
+                    </CButton>
+                  </PDFDownloadLink>
+                </div>
+                <div
+                  className="input-group-append"
+                  style={{ marginRight: "10px" }}
+                >
+                  <CButton onClick={handleWhatsAppClick}>
+                    <FaWhatsapp size={25} />{" "}
+                  </CButton>
+                </div>
+              </div>
             </CForm>
+
+            <CCol xs={12}>
+              <CCard>
+                <CCardHeader>Medicine Details</CCardHeader>
+                <CCardBody>
+                  <CTable>
+                    <CTableHead>
+                      <CTableRow>
+                        <CTableHeaderCell>Sr.no</CTableHeaderCell>
+                        <CTableHeaderCell>Medicine</CTableHeaderCell>
+                        <CTableHeaderCell>Dosage</CTableHeaderCell>
+                        <CTableHeaderCell>Duration</CTableHeaderCell>
+                      </CTableRow>
+                    </CTableHead>
+                    <CTableBody>{renderMedicineTableRows()}</CTableBody>
+                  </CTable>
+                </CCardBody>
+              </CCard>
+            </CCol>
           </CCardBody>
         </CCard>
-      ))}
-              <CCol md={4}>
-                {/* <CFormLabel htmlFor="duration">Description</CFormLabel> */}
-
-                <CFormTextarea
-                  id="floatingTextarea"
-                  floatingLabel="Description:"
-                  placeholder="Leave a comment here"
-                  style={{ width: "300px" }} // Adjust the width as needed
-                />
-              </CCol>
-      {/* Common Submit Button */}
-      <CCol xs={12}>
-        <CButton type="submit" color="primary" onClick={handleSubmit}>
-          Submit
-        </CButton>
       </CCol>
-
-      {/* WhatsApp Button */}
-      <div style={{ marginBottom: "20px" }}>
-        <button className="btn btn-success me-2" onClick={handleWhatsAppClick}>
-          <FaWhatsapp /> WhatsApp
-        </button>
-      </div>
-      {/* Download PDF Button */}
-      <div>
-        {/* Your form JSX */}
-        <PDFDownloadLink
-          document={<InvoicePDF formData={treatment} />}
-          fileName="invoice.pdf"
-        >
-          {({ blob, url, loading, error }) =>
-            loading ? "Generating PDF..." : "Download PDF"
-          }
-        </PDFDownloadLink>
-      </div>
-    </>
+    </CRow>
   );
 };
 
