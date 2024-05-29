@@ -195,12 +195,12 @@ const Category = () => {
             style={{
               display: showEditModal ? "block" : "none",
               position: "fixed",
-              top: "5%",
-              left: "20%",
+              top: "14%",
+              left: "30%",
               transform: "translate(-50%, -50%)",
             }}
           >
-            <CCard className="mb-5" style={{ width: "70%", maxHeight: "90vh" }}>
+            <CCard className="mb-5" style={{ width: "50%", maxHeight: "50%" }}>
               <CCardHeader
                 className="modal-header"
                 style={{
@@ -210,9 +210,7 @@ const Category = () => {
                   cursor: "move",
                 }}
               >
-                <span style={{ lineHeight: "44px" }}>
-                  Update Category Details
-                </span>
+                <span>Update Category Details</span>
                 <button
                   type="button"
                   className="btn btn-secondary"
@@ -222,7 +220,7 @@ const Category = () => {
                 </button>
               </CCardHeader>
               <CCardBody>
-                <div className="modal-body" style={{ padding: "10px" }}>
+                <div className="modal-body" style={{}}>
                   <div
                     style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}
                   >

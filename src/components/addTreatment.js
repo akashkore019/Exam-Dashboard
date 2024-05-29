@@ -129,19 +129,10 @@ const TreatmentList = () => {
   const handleMedicineChange = (selectedOption, index) => {
     setTreatment((prevTreatment) => {
       const updatedMedicineForms = [...prevTreatment.medicineForms];
-      // If selectedOption is null, clear the medicine selection
-      if (!selectedOption) {
-        updatedMedicineForms[index] = {
-          ...updatedMedicineForms[index],
-          medicineId: "",
-        };
-      } else {
-        const selectedMedicineId = selectedOption.value;
-        updatedMedicineForms[index] = {
-          ...updatedMedicineForms[index],
-          medicineId: selectedMedicineId,
-        };
-      }
+      updatedMedicineForms[index] = {
+        ...updatedMedicineForms[index],
+        medicineId: selectedOption ? selectedOption.value : "",
+      };
       return { ...prevTreatment, medicineForms: updatedMedicineForms };
     });
   };
@@ -411,13 +402,9 @@ const TreatmentList = () => {
                       isClearable
                       placeholder={`Select medicine ${index + 1}`}
                       value={
-                        medicineForm.medicineId
-                          ? medicineNames.find(
-                              (option) =>
-                                option.value === medicineForm.medicineId,
-                              
-                            )
-                          : null
+                        medicineNames.find(
+                          (option) => option.value === medicineForm.medicineId,
+                        ) || null
                       }
                       required
                       styles={{

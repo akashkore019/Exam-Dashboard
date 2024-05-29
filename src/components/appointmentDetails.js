@@ -101,6 +101,31 @@ const Appointment = () => {
     setSelectedAppointment({ ...selectedAppointment, [name]: value });
   };
 
+  const handleSave = async () => {
+    try {
+      // Assuming that the appointmentId is included in the selectedAppointment
+      await axios.put(
+        `${config.apiUrl}appointment/${selectedAppointment.appointmentId}`, // Corrected URL
+        selectedAppointment
+      );
+      setShowEditModal(false);
+      fetchData();
+      toast.success("Updated Successfully!", { autoClose: 3000 });
+    } catch (error) {
+      console.error("Error updating appointment:", error);
+      // Handle error - show toast message or any other UI indication
+    }
+  };
+  
+
+  const handleEdit = (appointmentId) => {
+    const appointment = appointments.find(
+      (appointment) => appointment.appointmentId === appointmentId,
+    );
+    setSelectedAppointment(appointment);
+    setShowEditModal(true);
+  };
+
   const handleDelete = async (appointmentId) => {
     if (window.confirm("Are you sure you want to delete this appointment?")) {
       try {
@@ -174,35 +199,26 @@ const Appointment = () => {
               </tr>
             </thead>
 
-            <IconContext.Provider
-              value={{
-                color: "white",
-                style: { fontSize: "20px", color: "grey" },
-                className: "submit-iconn",
-              }}
-            >
-              {/* Wrap the FaPlusCircle icon within the IconContext.Provider */}
-              <tbody>
-                {filteredAppointments.map((appointment) => (
-                  <tr key={appointment.appointmentId}>
-                    <td onClick={() => handleEdit(appointment.appointmentId)}>
-                      <AiFillEdit /> {/* Icon for Edit */}
-                    </td>
-                    <td onClick={() => handleDelete(appointment.appointmentId)}>
-                      <FaTrash /> {/* Icon for Delete */}
-                    </td>
+            <tbody>
+              {filteredAppointments.map((appointment) => (
+                <tr key={appointment.appointmentId}>
+                  <td onClick={() => handleEdit(appointment.appointmentId)}>
+                    <AiFillEdit /> {/* Icon for Edit */}
+                  </td>
+                  <td onClick={() => handleDelete(appointment.appointmentId)}>
+                    <FaTrash /> {/* Icon for Delete */}
+                  </td>
 
-                    <td>{appointment.appointmentId}</td>
-                    <td>{appointment.doctor.fullName}</td>
-                    <td>{appointment.patientName}</td>
-                    <td>{appointment.patientMobile}</td>
-                    <td>{appointment.appointmentDate}</td>
-                    <td>{appointment.appointmentTime}</td>
-                    <td>{appointment.status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </IconContext.Provider>
+                  <td>{appointment.appointmentId}</td>
+                  <td>{appointment.doctor.fullName}</td>
+                  <td>{appointment.patientName}</td>
+                  <td>{appointment.patientMobile}</td>
+                  <td>{appointment.appointmentDate}</td>
+                  <td>{appointment.appointmentTime}</td>
+                  <td>{appointment.status}</td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </CCardBody>
       </CCard>
@@ -222,24 +238,28 @@ const Appointment = () => {
           >
             <CCard className="mb-5" style={{ width: "70%", maxHeight: "90vh" }}>
               <CCardHeader
-                className="modal-header"
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center",
-                  cursor: "move",
+                  padding: "5px",
                 }}
               >
                 <span style={{ lineHeight: "44px" }}>
                   Update Appointment Details
                 </span>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowEditModal(false)}
+                <div style={{ display: "flex", alignItems: "center" }}></div>
+                <div
+                  className="input-group-append"
+                  style={{ marginRight: "10px" }}
                 >
-                  Close
-                </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowEditModal(false)}
+                  >
+                    Close
+                  </button>
+                </div>
               </CCardHeader>
               <CCardBody>
                 <div className="modal-body" style={{ padding: "10px" }}>
@@ -286,7 +306,7 @@ const Appointment = () => {
                         id="doctorId"
                         name="doctorId"
                         className="form-select"
-                        value={selectedAppointment.doctorId}
+                        value={selectedAppointment.doctorId} // Update this line
                         onChange={handleInputChange}
                         required
                       >

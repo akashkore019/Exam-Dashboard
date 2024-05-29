@@ -254,9 +254,9 @@ const Doctor = () => {
               <CCardBody>
                 <div className="modal-body" style={{ padding: "10px" }}>
                   <div
-                    style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}
+                    style={{ display: "flex", flexWrap: "wrap", gap: "35px" }}
                   >
-                    <CCol md={4}>
+                    <CCol md={3}>
                       <CFormLabel htmlFor="fullName">Full Name</CFormLabel>
                       <input
                         type="text"
@@ -271,7 +271,7 @@ const Doctor = () => {
                         }
                       />
                     </CCol>
-                    <CCol md={4}>
+                    <CCol md={3}>
                       <CFormLabel htmlFor="email">Email</CFormLabel>
                       <input
                         type="text"
@@ -286,7 +286,7 @@ const Doctor = () => {
                         }
                       />
                     </CCol>
-                    <CCol md={4}>
+                    <CCol md={3}>
                       <CFormLabel htmlFor="contactNo">Contact No</CFormLabel>
                       <input
                         type="text"
@@ -301,7 +301,7 @@ const Doctor = () => {
                         }
                       />
                     </CCol>
-                    <CCol md={4}>
+                    <CCol md={3}>
                       <CFormLabel htmlFor="gender">Gender</CFormLabel>
                       <select
                         id="gender"
@@ -319,7 +319,7 @@ const Doctor = () => {
                         <option value="other">Other</option>
                       </select>
                     </CCol>
-                    <CCol md={4}>
+                    <CCol md={3}>
                       <CFormLabel htmlFor="specialization">
                         Specialization
                       </CFormLabel>
@@ -336,7 +336,7 @@ const Doctor = () => {
                         }
                       />
                     </CCol>
-                    <CCol md={4}>
+                    <CCol md={3}>
                       <CFormLabel htmlFor="experience">Experience</CFormLabel>
                       <input
                         type="number"
@@ -351,7 +351,7 @@ const Doctor = () => {
                         }
                       />
                     </CCol>
-                    <CCol md={4}>
+                    <CCol md={3}>
                       <CFormLabel htmlFor="address">Address</CFormLabel>
                       <input
                         type="text"
@@ -366,7 +366,7 @@ const Doctor = () => {
                         }
                       />
                     </CCol>
-                    <CCol md={4}>
+                    <CCol md={3}>
                       <CFormLabel htmlFor="country">Country</CFormLabel>
                       <input
                         type="text"
@@ -381,7 +381,7 @@ const Doctor = () => {
                         }
                       />
                     </CCol>
-                    <CCol md={4}>
+                    <CCol md={3}>
                       <CFormLabel htmlFor="city">City</CFormLabel>
                       <input
                         type="text"
@@ -396,7 +396,7 @@ const Doctor = () => {
                         }
                       />
                     </CCol>
-                    <CCol md={4}>
+                    <CCol md={3}>
                       <CFormLabel htmlFor="postalCode">Postal Code</CFormLabel>
                       <input
                         type="text"
@@ -411,7 +411,7 @@ const Doctor = () => {
                         }
                       />
                     </CCol>
-                    <CCol md={4}>
+                    <CCol md={3}>
                       <CFormLabel htmlFor="qualification">
                         Qualification
                       </CFormLabel>
@@ -431,23 +431,23 @@ const Doctor = () => {
                     {/* Add other input fields for doctor details */}
                   </div>
                 </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => handleSave()}
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowEditModal(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
               </CCardBody>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => handleSave()}
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
             </CCard>
           </div>
         </Draggable>

@@ -8,6 +8,8 @@ import { CSVLink } from "react-csv";
 import { Link } from "react-router-dom";
 import CIcon from "@coreui/icons-react";
 import { cilSearch, cilCloudDownload } from "@coreui/icons";
+import { FaTrash } from "react-icons/fa";
+import { AiFillEdit } from "react-icons/ai";
 
 const Treatment = () => {
   const [treatments, setTreatments] = useState([]);
@@ -90,7 +92,7 @@ const Treatment = () => {
   const handleSave = async () => {
     try {
       await axios.put(
-        `${config.apiUrl}treatments/${selectedTreatment.id}`,
+        `${config.apiUrl}treatment/${selectedTreatment.id}`, // Corrected URL
         selectedTreatment,
       );
       setShowEditModal(false);
@@ -163,43 +165,31 @@ const Treatment = () => {
           <table className="table">
             <thead>
               <tr>
+                <th>Edit</th>
+                <th>Delete</th>
                 <th>Patient Name</th>
                 <th>Patient Mobile</th>
                 <th>Doctor Name</th>
                 <th>Description</th>
                 <th>Treatment Date</th>
                 <th>Status</th>
-                <th>Edit</th>
-                <th>Delete</th>
               </tr>
             </thead>
             <tbody>
               {filteredTreatments.map((treatment) => (
                 <tr key={treatment.id}>
+                  <td onClick={() => handleEdit(treatment.id)}>
+                    <AiFillEdit /> {/* Icon for Edit */}
+                  </td>
+                  <td onClick={() => handleDelete(treatment.id)}>
+                    <FaTrash /> {/* Icon for Delete */}
+                  </td>
                   <td>{treatment.patient.fullName}</td>
                   <td>{treatment.patient.mobile}</td>
                   <td>{treatment.doctor.fullName}</td>
                   <td>{treatment.description}</td>
                   <td>{treatment.treatmentDate}</td>
                   <td>{treatment.status}</td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={() => handleEdit(treatment.id)}
-                    >
-                      Edit
-                    </button>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(treatment.id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
                 </tr>
               ))}
             </tbody>
@@ -224,24 +214,28 @@ const Treatment = () => {
               style={{ width: "70%", maxHeight: "90vh" }}
             >
               <CCardHeader
-                className="modal-header"
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center",
-                  cursor: "move",
+                  padding: "5px",
                 }}
               >
                 <span style={{ lineHeight: "44px" }}>
-                  Update Patient Details
+                  Update Treatment Details
                 </span>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowEditModal(false)}
+                <div style={{ display: "flex", alignItems: "center" }}></div>
+                <div
+                  className="input-group-append"
+                  style={{ marginRight: "10px" }}
                 >
-                  Close
-                </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowEditModal(false)}
+                  >
+                    Close
+                  </button>
+                </div>
               </CCardHeader>
               <CCardBody>
                 <div className="modal-body" style={{ padding: "10px" }}>
@@ -351,24 +345,24 @@ const Treatment = () => {
 
                     {/* Add other input fields for patient details */}
                   </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => handleSave()}
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowEditModal(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
+                </div>{" "}
               </CCardBody>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => handleSave()}
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
             </CCard>
           </div>
         </Draggable>

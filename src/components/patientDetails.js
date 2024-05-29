@@ -8,6 +8,8 @@ import { CSVLink } from "react-csv";
 import { Link } from "react-router-dom";
 import CIcon from "@coreui/icons-react";
 import { cilSearch, cilCloudDownload } from "@coreui/icons";
+import { AiFillEdit } from "react-icons/ai";
+import { FaTrash } from "react-icons/fa";
 
 const Patient = () => {
   const [patients, setPatients] = useState([]);
@@ -124,7 +126,6 @@ const Patient = () => {
       }
     }
   };
-  
 
   return (
     <div>
@@ -174,6 +175,8 @@ const Patient = () => {
           <table className="table">
             <thead>
               <tr>
+                <th>Edit</th>
+                <th>Delete</th>
                 <th>Id</th>
                 <th>Full Name</th>
                 <th>Mobile</th>
@@ -184,13 +187,17 @@ const Patient = () => {
                 <th>Age</th>
                 <th>Weight</th>
                 <th>Blood Group</th>
-                <th>Edit</th>
-                <th>Delete</th>
               </tr>
             </thead>
             <tbody>
               {filteredPatients.map((patient) => (
                 <tr key={patient.id}>
+                  <td onClick={() => handleEdit(patient.id)}>
+                    <AiFillEdit /> {/* Icon for Edit */}
+                  </td>
+                  <td onClick={() => handleDelete(patient.id)}>
+                    <FaTrash /> {/* Icon for Delete */}
+                  </td>
                   <td>{patient.id}</td>
                   <td>{patient.fullName}</td>
                   <td>{patient.mobile}</td>
@@ -201,24 +208,6 @@ const Patient = () => {
                   <td>{patient.age}</td>
                   <td>{patient.weight}</td>
                   <td>{patient.bloodGroup}</td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={() => handleEdit(patient.id)}
-                    >
-                      Edit
-                    </button>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(patient.id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
                 </tr>
               ))}
             </tbody>

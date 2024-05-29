@@ -3,7 +3,15 @@ import axios from "axios";
 import config from "../config";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
-import { CCard, CCardHeader, CCardBody, CCol, CFormLabel } from "@coreui/react";
+import {
+  CCard,
+  CCardHeader,
+  CCardBody,
+  CCol,
+  CFormLabel,
+  CFormSelect,
+  CFormFeedback,
+} from "@coreui/react";
 import { CSVLink } from "react-csv";
 import { AiFillEdit } from "react-icons/ai";
 import { FaTrash } from "react-icons/fa";
@@ -19,6 +27,8 @@ const Service = () => {
   const [filteredServices, setFilteredServices] = useState([]);
   const [csvData, setCSVData] = useState([]);
   const [searchBarVisible, setSearchBarVisible] = useState(false);
+  const [categories, setCategories] = useState([]);
+
   const [selectedService, setSelectedService] = useState({
     categoryName: "",
     charge: "",
@@ -66,6 +76,27 @@ const Service = () => {
     setSearchBarVisible(!searchBarVisible);
   };
 
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  console.log("Categories:", categories); // Add this line to check categories
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}category`);
+      setCategories(response.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      // Handle error
+    }
+  };
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setSelectedService({ ...selectedService, [name]: value });
+  };
+
   const fetchData = async () => {
     try {
       const response = await axios.get(`${config.apiUrl}service`);
@@ -77,9 +108,15 @@ const Service = () => {
   };
 
   const handleEdit = (serviceId) => {
+    console.log("Editing service with ID:", serviceId);
+
     const service = services.find((service) => service.id === serviceId);
-    setSelectedService(service);
-    setShowEditModal(true);
+    if (service) {
+      setSelectedService(service);
+      setShowEditModal(true);
+    } else {
+      console.error("Services not found");
+    }
   };
 
   const handleDelete = async (serviceId) => {
@@ -167,22 +204,23 @@ const Service = () => {
             <tbody>
               {filteredServices.map((service) => (
                 <tr key={service.id}>
-                  <td onClick={() => handleEdit(service.medicineId)}>
+                  <td onClick={() => handleEdit(service.id)}>
                     <AiFillEdit />
                   </td>
-                  <td onClick={() => handleDelete(service.medicineId)}>
+                  <td onClick={() => handleDelete(service.id)}>
                     <FaTrash />
                   </td>
                   <td>{service.id}</td>
                   <td>{service.serviceName}</td>
                   <td>{service.charge}</td>
-                  <td>{service.categoryName}</td>
+                  <td>{service.category.categoryName}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </CCardBody>
       </CCard>
+
       {/* Edit Modal */}
       {selectedService && (
         <Draggable handle=".modal-header">
@@ -221,12 +259,7 @@ const Service = () => {
               </CCardHeader>
               <CCardBody>
                 <div className="modal-body" style={{ padding: "10px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
+                  <div style={{ display: "flex", alignItems: "center" }}>
                     <CCol md={4}>
                       <CFormLabel htmlFor="serviceName">
                         Service Name
@@ -260,26 +293,24 @@ const Service = () => {
                       />
                     </CCol>
                     <CCol md={4}>
-                      <CFormLabel htmlFor="category">Category</CFormLabel>
-                      <input
-                        type="text"
-                        id="category"
-                        className="form-control"
-                        value={
-                          selectedService.category
-                            ? selectedService.category.categoryName
-                            : ""
-                        }
-                        onChange={(e) =>
-                          setSelectedService({
-                            ...selectedService,
-                            category: {
-                              ...selectedService.category,
-                              categoryName: e.target.value,
-                            },
-                          })
-                        }
-                      />
+                      <CFormLabel htmlFor="categoryId">Category</CFormLabel>
+                      <CFormSelect
+                        id="categoryId"
+                        name="categoryId"
+                        value={selectedService.categoryId}
+                        onChange={handleInputChange}
+                        required
+                      >
+                        <option value="">Select Category</option>
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.categoryName}
+                          </option>
+                        ))}
+                      </CFormSelect>
+                      <CFormFeedback invalid>
+                        Please select a category.
+                      </CFormFeedback>
                     </CCol>
                   </div>
                 </div>
