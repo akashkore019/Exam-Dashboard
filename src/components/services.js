@@ -11,6 +11,7 @@ import {
   CFormLabel,
   CFormSelect,
   CFormFeedback,
+  CButton,
 } from "@coreui/react";
 import { CSVLink } from "react-csv";
 import { AiFillEdit } from "react-icons/ai";
@@ -193,8 +194,7 @@ const Service = () => {
           <table className="table">
             <thead>
               <tr>
-                <th>Edit</th>
-                <th>Delete</th>
+                <th>Edit / Delete</th>
                 <th>Id</th>
                 <th>Service Name</th>
                 <th>Charge</th>
@@ -204,11 +204,23 @@ const Service = () => {
             <tbody>
               {filteredServices.map((service) => (
                 <tr key={service.id}>
-                  <td onClick={() => handleEdit(service.id)}>
-                    <AiFillEdit />
-                  </td>
-                  <td onClick={() => handleDelete(service.id)}>
-                    <FaTrash />
+                  <td style={{ display: "flex", gap: "10px" }}>
+                    <CButton
+                      color="info"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(service.id)}
+                    >
+                      <AiFillEdit />
+                    </CButton>
+                    <CButton
+                      color="danger"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(service.id)}
+                    >
+                      <FaTrash />
+                    </CButton>{" "}
                   </td>
                   <td>{service.id}</td>
                   <td>{service.serviceName}</td>

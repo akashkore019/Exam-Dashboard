@@ -2,7 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import config from "../config";
 import { toast } from "react-toastify";
-import { CCard, CCardHeader, CCardBody, CCol, CFormLabel } from "@coreui/react";
+import {
+  CCard,
+  CCardHeader,
+  CCardBody,
+  CCol,
+  CFormLabel,
+  CButton,
+} from "@coreui/react";
 import Draggable from "react-draggable"; // Import Draggable component
 import { CSVLink } from "react-csv";
 import { Link } from "react-router-dom";
@@ -106,7 +113,7 @@ const Appointment = () => {
       // Assuming that the appointmentId is included in the selectedAppointment
       await axios.put(
         `${config.apiUrl}appointment/${selectedAppointment.appointmentId}`, // Corrected URL
-        selectedAppointment
+        selectedAppointment,
       );
       setShowEditModal(false);
       fetchData();
@@ -116,7 +123,6 @@ const Appointment = () => {
       // Handle error - show toast message or any other UI indication
     }
   };
-  
 
   const handleEdit = (appointmentId) => {
     const appointment = appointments.find(
@@ -187,8 +193,7 @@ const Appointment = () => {
           <table className="table">
             <thead>
               <tr>
-                <th>Edit</th>
-                <th>Delete</th>
+                <th>Edit / Delete</th>
                 <th>ID</th>
                 <th>Doctor Name</th>
                 <th>Patient Name</th>
@@ -202,11 +207,23 @@ const Appointment = () => {
             <tbody>
               {filteredAppointments.map((appointment) => (
                 <tr key={appointment.appointmentId}>
-                  <td onClick={() => handleEdit(appointment.appointmentId)}>
-                    <AiFillEdit /> {/* Icon for Edit */}
-                  </td>
-                  <td onClick={() => handleDelete(appointment.appointmentId)}>
-                    <FaTrash /> {/* Icon for Delete */}
+                  <td style={{ display: "flex", gap: "10px" }}>
+                    <CButton
+                      color="info"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(appointment.appointmentId)}
+                    >
+                      <AiFillEdit />
+                    </CButton>
+                    <CButton
+                      color="danger"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(appointment.appointmentId)}
+                    >
+                      <FaTrash />
+                    </CButton>{" "}
                   </td>
 
                   <td>{appointment.appointmentId}</td>

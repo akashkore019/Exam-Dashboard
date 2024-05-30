@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 
 import {
   CCard,
+  CButton,
   CCardBody,
   CCardHeader,
   CTable,
@@ -166,19 +167,30 @@ const Category = () => {
           <CTable>
             <CTableHead>
               <tr>
-                <CTableHeaderCell>Edit</CTableHeaderCell>
-                <CTableHeaderCell>Delete</CTableHeaderCell>
+                <CTableHeaderCell>Edit / Delete</CTableHeaderCell>
                 <CTableHeaderCell>Category Name</CTableHeaderCell>
               </tr>
             </CTableHead>
             <tbody>
               {filteredCategory.map((category) => (
                 <tr key={category.id}>
-                  <CTableDataCell onClick={() => handleEdit(category.id)}>
-                    <AiFillEdit />
-                  </CTableDataCell>
-                  <CTableDataCell onClick={() => handleDelete(category.id)}>
-                    <FaTrash />
+                 <CTableDataCell style={{ display: "flex", gap: "10px" }}>
+                    <CButton
+                      color="info"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(category.id)}
+                    >
+                      <AiFillEdit />
+                    </CButton>
+                    <CButton
+                      color="danger"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(category.id)}
+                    >
+                      <FaTrash />
+                    </CButton>{" "}
                   </CTableDataCell>
                   <CTableDataCell>{category.categoryName}</CTableDataCell>
                 </tr>

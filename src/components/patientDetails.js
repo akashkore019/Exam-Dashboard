@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import config from "../config";
 import { toast } from "react-toastify";
-import { CCard, CCardHeader, CCardBody, CCol, CFormLabel } from "@coreui/react";
+import { CCard, CCardHeader, CCardBody, CCol, CFormLabel, CButton } from "@coreui/react";
 import Draggable from "react-draggable"; // Import Draggable component
 import { CSVLink } from "react-csv";
 import { Link } from "react-router-dom";
@@ -175,8 +175,7 @@ const Patient = () => {
           <table className="table">
             <thead>
               <tr>
-                <th>Edit</th>
-                <th>Delete</th>
+                <th>Edit / Delete</th>
                 <th>Id</th>
                 <th>Full Name</th>
                 <th>Mobile</th>
@@ -192,11 +191,23 @@ const Patient = () => {
             <tbody>
               {filteredPatients.map((patient) => (
                 <tr key={patient.id}>
-                  <td onClick={() => handleEdit(patient.id)}>
-                    <AiFillEdit /> {/* Icon for Edit */}
-                  </td>
-                  <td onClick={() => handleDelete(patient.id)}>
-                    <FaTrash /> {/* Icon for Delete */}
+                 <td style={{ display: "flex", gap: "10px" }}>
+                    <CButton
+                      color="info"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(patient.id)}
+                    >
+                      <AiFillEdit />
+                    </CButton>
+                    <CButton
+                      color="danger"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(patient.id)}
+                    >
+                      <FaTrash />
+                    </CButton>{" "}
                   </td>
                   <td>{patient.id}</td>
                   <td>{patient.fullName}</td>

@@ -2,7 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import config from "../config";
 import { toast } from "react-toastify";
-import { CCard, CCardHeader, CCardBody, CCol, CFormLabel } from "@coreui/react";
+import {
+  CCard,
+  CCardHeader,
+  CCardBody,
+  CCol,
+  CFormLabel,
+  CButton,
+} from "@coreui/react";
 import { CSVLink } from "react-csv";
 import { Link } from "react-router-dom";
 import { AiFillEdit } from "react-icons/ai";
@@ -156,7 +163,7 @@ const Medicine = () => {
             </div>
             <div className="input-group-append" style={{ marginRight: "10px" }}>
               <CSVLink data={csvData} filename={"medicine_data.csv"}>
-              <CIcon icon={cilCloudDownload} size="lg" />
+                <CIcon icon={cilCloudDownload} size="lg" />
               </CSVLink>{" "}
             </div>
           </div>
@@ -165,8 +172,7 @@ const Medicine = () => {
           <table className="table">
             <thead>
               <tr>
-                <th>Edit</th>
-                <th>Delete</th>
+                <th>Edit / Delete</th>
                 <th>ID</th>
                 <th>Medicine Name</th>
                 <th>Medicine Type</th>
@@ -179,11 +185,23 @@ const Medicine = () => {
             <tbody>
               {filteredMedicines.map((medicine) => (
                 <tr key={medicine.medicineId}>
-                  <td onClick={() => handleEdit(medicine.medicineId)}>
-                    <AiFillEdit />
-                  </td>
-                  <td onClick={() => handleDelete(medicine.medicineId)}>
-                    <FaTrash />
+                  <td style={{ display: "flex", gap: "10px" }}>
+                    <CButton
+                      color="info"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(medicine.medicineId)}
+                    >
+                      <AiFillEdit />
+                    </CButton>
+                    <CButton
+                      color="danger"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(medicine.medicineId)}
+                    >
+                      <FaTrash />
+                    </CButton>{" "}
                   </td>
                   <td>{medicine.medicineId}</td>
                   <td>{medicine.medicineName}</td>
