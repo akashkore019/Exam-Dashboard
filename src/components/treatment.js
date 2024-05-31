@@ -2,9 +2,38 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import config from "../config";
 import { toast } from "react-toastify";
-import { CCard, CCardHeader, CCardBody, CCol, CFormLabel, CButton } from "@coreui/react";
+import { FaWhatsapp } from "react-icons/fa";
+
+import {
+  PDFDownloadLink,
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+} from "@react-pdf/renderer";
+import {
+  CCard,
+  CRow,
+  CCardBody,
+  CCardHeader,
+  CCol,
+  CForm,
+  CFormFeedback,
+  CFormLabel,
+  CButton,
+  CFormTextarea,
+  CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
+  CTableBody,
+  CTableDataCell,
+} from "@coreui/react";
 import Draggable from "react-draggable"; // Import Draggable component
 import { CSVLink } from "react-csv";
+import Select from "react-select";
+
 import { Link } from "react-router-dom";
 import CIcon from "@coreui/icons-react";
 import { cilSearch, cilCloudDownload } from "@coreui/icons";
@@ -19,6 +48,18 @@ const Treatment = () => {
   const [filteredTreatments, setFilteredTreatments] = useState([]);
   const [csvData, setCSVData] = useState([]);
   const [searchBarVisible, setSearchBarVisible] = useState(false); // Add state for search bar visibility
+  const [validated, setValidated] = useState(false);
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [services, setServices] = useState([]);
+  const [medicineNames, setMedicineNames] = useState([]);
+  const [treatment, setTreatment] = useState({
+    patientId: "",
+    doctorId: "",
+    serviceId: "",
+    medicineForms: [],
+    description: "",
+  });
 
   useEffect(() => {
     fetchData();
@@ -31,6 +72,7 @@ const Treatment = () => {
         "Patient Name",
         "Patient Mobile",
         "Doctor Name",
+        "Service Name",
         "Description",
         "Treatment Date",
         "Status",
@@ -45,6 +87,125 @@ const Treatment = () => {
       ]),
     ]);
   }, [treatments]);
+
+  useEffect(() => {
+    fetchPatients();
+    fetchDoctors();
+    fetchServices();
+    fetchMedicineNames();
+  }, []);
+
+  const fetchPatients = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/v1/patients");
+      if (response.status === 200) {
+        setPatients(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+    }
+  };
+
+  const fetchDoctors = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/v1/doctor");
+      if (response.status === 200) {
+        setDoctors(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+    }
+  };
+
+  const fetchServices = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/v1/service");
+      if (response.status === 200) {
+        setServices(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    }
+  };
+
+  const fetchMedicineNames = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/v1/medicine");
+      if (response.status === 200) {
+        setMedicineNames(
+          response.data.map((medicine) => ({
+            value: medicine.id,
+            label: medicine.medicineName,
+          })),
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching medicine names:", error);
+    }
+  };
+
+  const renderMedicineTableRows = () => {
+    if (!selectedTreatment || !selectedTreatment.treatmentMedicineDetailsList) {
+      return null;
+    }
+
+    return selectedTreatment.treatmentMedicineDetailsList.map(
+      (medicineDetail, index) => (
+        <CTableRow key={index}>
+          <CTableDataCell>{index + 1}</CTableDataCell>
+          <CTableDataCell>
+            {medicineDetail.medicine.medicineName}
+          </CTableDataCell>
+          <CTableDataCell>{medicineDetail.dosageInstruction}</CTableDataCell>
+          <CTableDataCell>{medicineDetail.duration}</CTableDataCell>
+        </CTableRow>
+      ),
+    );
+  };
+
+  const styles = StyleSheet.create({
+    page: {
+      flexDirection: "column",
+      padding: 20,
+    },
+    section: {
+      margin: 10,
+      padding: 10,
+      flexGrow: 1,
+    },
+    heading: {
+      fontSize: 20,
+      marginBottom: 10,
+    },
+    text: {
+      fontSize: 12,
+      marginBottom: 5,
+    },
+  });
+
+  const InvoicePDF = ({ formData }) => (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.section}>
+          <Text style={styles.heading}>Invoice</Text>
+          <Text style={styles.text}>Patient: {formData.patientId}</Text>
+          <Text style={styles.text}>Doctor: {formData.doctorId}</Text>
+          <Text style={styles.text}>Service: {formData.serviceId}</Text>
+          <Text style={styles.text}>Medicines:</Text>
+          {formData.medicineForms.map((medicine, index) => (
+            <View key={index} style={styles.section}>
+              <Text style={styles.text}>
+                Medicine {index + 1}: {medicine.medicineId}
+              </Text>
+              <Text style={styles.text}>Dosage: {medicine.dosage}</Text>
+              <Text style={styles.text}>Duration: {medicine.duration}</Text>
+            </View>
+          ))}
+          <Text style={styles.text}>Description: {formData.description}</Text>
+        </View>
+      </Page>
+    </Document>
+  );
 
   useEffect(() => {
     // Filter treatments based on search input
@@ -85,17 +246,18 @@ const Treatment = () => {
     const selected = treatments.find(
       (treatment) => treatment.id === treatmentId,
     );
-    setSelectedTreatment(selected);
+    setSelectedTreatment(selected); // Set selectedTreatment for editing
     setShowEditModal(true);
   };
 
+  // Correct the handleSave function
   const handleSave = async () => {
     try {
       await axios.put(
         `${config.apiUrl}treatment/${selectedTreatment.id}`, // Corrected URL
         selectedTreatment,
       );
-      setShowEditModal(false);
+      setShowEditModal(false); // Close modal after saving
       fetchData(); // Refresh the table
       toast.success("Updated Successfully!", { autoClose: 3000 });
     } catch (error) {
@@ -165,7 +327,8 @@ const Treatment = () => {
           <table className="table">
             <thead>
               <tr>
-                <th>Edit / Delete</th>
+                <th>Edit</th>
+                <th>Delete</th>
                 <th>Patient Name</th>
                 <th>Patient Mobile</th>
                 <th>Doctor Name</th>
@@ -177,23 +340,11 @@ const Treatment = () => {
             <tbody>
               {filteredTreatments.map((treatment) => (
                 <tr key={treatment.id}>
-                  <td style={{ display: "flex", gap: "10px" }}>
-                    <CButton
-                      color="info"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(treatment.id)}
-                    >
-                      <AiFillEdit />
-                    </CButton>
-                    <CButton
-                      color="danger"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(treatment.id)}
-                    >
-                      <FaTrash />
-                    </CButton>{" "}
+                  <td onClick={() => handleEdit(treatment.id)}>
+                    <AiFillEdit /> {/* Icon for Edit */}
+                  </td>
+                  <td onClick={() => handleDelete(treatment.id)}>
+                    <FaTrash /> {/* Icon for Delete */}
                   </td>
                   <td>{treatment.patient.fullName}</td>
                   <td>{treatment.patient.mobile}</td>
@@ -217,163 +368,254 @@ const Treatment = () => {
               position: "fixed",
               top: "5%",
               left: "20%",
-              transform: "translate(-50%, -50%)",
             }}
           >
-            <CCard
-              className="mb-5 "
-              style={{ width: "70%", maxHeight: "90vh" }}
-            >
+            <CCard style={{ width: "800px" }}>
+              {/* Adjust the width as needed */}{" "}
               <CCardHeader
+                className="modal-header" // Make sure the className matches the handle
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                   padding: "5px",
                 }}
               >
-                <span style={{ lineHeight: "44px" }}>
-                  Update Treatment Details
-                </span>
-                <div style={{ display: "flex", alignItems: "center" }}></div>
-                <div
-                  className="input-group-append"
-                  style={{ marginRight: "10px" }}
-                >
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowEditModal(false)}
+                <span style={{ lineHeight: "44px" }}>Update details</span>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <div
+                    className="input-group-append"
+                    style={{ marginRight: "10px" }}
                   >
-                    Close
-                  </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setShowEditModal(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
               </CCardHeader>
               <CCardBody>
-                <div className="modal-body" style={{ padding: "10px" }}>
-                  <div
-                    style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}
-                  >
-                    <CCol md={4}>
-                      <CFormLabel htmlFor="fullName">Patient Name</CFormLabel>
-                      <input
-                        type="text"
-                        id="fullName"
-                        className="form-control"
-                        value={selectedTreatment.patient.fullName}
-                        onChange={(e) =>
-                          setSelectedTreatment({
-                            ...selectedTreatment,
-                            patient: {
-                              ...selectedTreatment.patient,
-                              fullName: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </CCol>
-                    <CCol md={4}>
-                      <CFormLabel htmlFor="mobile">Patient Mobile</CFormLabel>
-                      <input
-                        type="text"
-                        id="mobile"
-                        className="form-control"
-                        value={selectedTreatment.patient.mobile}
-                        onChange={(e) =>
-                          setSelectedTreatment({
-                            ...selectedTreatment,
-                            patient: {
-                              ...selectedTreatment.patient,
-                              mobile: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </CCol>
-                    <CCol md={4}>
-                      <CFormLabel htmlFor="doctorName">Doctor Name</CFormLabel>
-                      <input
-                        type="text"
-                        id="doctorName"
-                        className="form-control"
-                        value={selectedTreatment.doctor.fullName}
-                        onChange={(e) =>
-                          setSelectedTreatment({
-                            ...selectedTreatment,
-                            doctor: {
-                              ...selectedTreatment.doctor,
-                              fullName: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </CCol>
+                <CForm
+                  className="mb-3 row g-3 needs-validation"
+                  noValidate
+                  validated={validated}
+                  onSubmit={""}
+                >
+                  <CCol md={4}>
+                    <CFormLabel htmlFor="patientId" style={{ color: "#000" }}>
+                      Select Patient
+                    </CFormLabel>
+                    <Select
+                      id="patientId"
+                      name="patientId"
+                      options={patients.map((patient) => ({
+                        value: patient.id,
+                        label: patient.fullName,
+                      }))}
+                      onChange={(selectedOption) =>
+                        setSelectedTreatment({
+                          ...selectedTreatment,
+                          patientId: selectedOption.value, // Update selectedTreatment
+                        })
+                      }
+                      isClearable
+                      placeholder={selectedTreatment.patient.fullName}
+                      required
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          color: "#000",
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          color: "#000",
+                        }),
+                      }}
+                    />
+                    <CFormFeedback invalid>
+                      Please select a patient.
+                    </CFormFeedback>
+                  </CCol>
+                  <CCol md={4}>
+                    <CFormLabel htmlFor="doctorId" style={{ color: "#000" }}>
+                      Select Doctor
+                    </CFormLabel>
+                    <Select
+                      id="doctorId"
+                      name="doctorId"
+                      options={doctors.map((doctor) => ({
+                        value: doctor.id,
+                        label: doctor.fullName,
+                      }))}
+                      onChange={(selectedOption) =>
+                        setSelectedTreatment({
+                          ...selectedTreatment,
+                          doctorId: selectedOption.value, // Update selectedTreatment
+                        })
+                      }
+                      isClearable
+                      placeholder={selectedTreatment.doctor.fullName}
+                      required
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          color: "#000",
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          color: "#000",
+                        }),
+                      }}
+                    />
+                    <CFormFeedback invalid>
+                      Please select a doctor.
+                    </CFormFeedback>
+                  </CCol>
+
+                  <CCol md={4}>
+                    <CFormLabel htmlFor="serviceId" style={{ color: "#000" }}>
+                      Select Service
+                    </CFormLabel>
+                    <Select
+                      id="serviceId"
+                      name="serviceId"
+                      options={
+                        services && services.length > 0
+                          ? services.map((service) => ({
+                              value: service.id,
+                              label: service.serviceName,
+                            }))
+                          : []
+                      }
+                      onChange={(selectedOption) =>
+                        setSelectedTreatment({
+                          ...selectedTreatment,
+                          serviceId: selectedOption.value, // Update selectedTreatment
+                        })
+                      }
+                      isClearable
+                      required
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          color: "#000",
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          color: "#000",
+                        }),
+                      }}
+                    />
+                    <CFormFeedback invalid>
+                      Please select a service.
+                    </CFormFeedback>
+                  </CCol>
+
+                  <CCol md={4}>
+                    <CFormLabel
+                      htmlFor="treatmentDate"
+                      style={{ color: "#000" }}
+                    >
+                      Update Date
+                    </CFormLabel>
+                    <input
+                      id="treatmentDate"
+                      type="date"
+                      className="form-control"
+                      value={selectedTreatment.treatmentDate}
+                      onChange={(e) =>
+                        setSelectedTreatment({
+                          ...selectedTreatment,
+                          treatmentDate: e.target.value, // Update selectedTreatment with the entered date
+                        })
+                      }
+                      required
+                      style={{ color: "#000", height: "30px" }}
+                    />
+                    <CFormFeedback invalid>Please enter a date.</CFormFeedback>
+                  </CCol>
+
+                  {treatment.medicineForms.map((medicineForm, index) => (
+                    <React.Fragment key={index}>medicineName</React.Fragment>
+                  ))}
+
+                  <CCol md={8}>
+                    <CFormLabel htmlFor="description">Description</CFormLabel>
+                    <textarea
+                      id="description"
+                      className="form-control"
+                      value={selectedTreatment.description}
+                      onChange={(e) =>
+                        setSelectedTreatment({
+                          ...selectedTreatment,
+                          description: e.target.value,
+                        })
+                      }
+                    />
+                  </CCol>
+                  <div style={{ display: "flex", alignItems: "center" }}>
                     <CCol md={12}>
-                      <CFormLabel htmlFor="description">Description</CFormLabel>
-                      <textarea
-                        id="description"
-                        className="form-control"
-                        value={selectedTreatment.description}
-                        onChange={(e) =>
-                          setSelectedTreatment({
-                            ...selectedTreatment,
-                            description: e.target.value,
-                          })
-                        }
-                      />
-                    </CCol>
-                    <CCol md={4}>
-                      <CFormLabel htmlFor="treatmentDate">
-                        Treatment Date
-                      </CFormLabel>
-                      <input
-                        type="date"
-                        id="treatmentDate"
-                        className="form-control"
-                        value={selectedTreatment.treatmentDate}
-                        onChange={(e) =>
-                          setSelectedTreatment({
-                            ...selectedTreatment,
-                            treatmentDate: e.target.value,
-                          })
-                        }
-                      />
-                    </CCol>
-                    <CCol md={4}>
-                      <CFormLabel htmlFor="status">Status</CFormLabel>
-                      <input
-                        type="text"
-                        id="status"
-                        className="form-control"
-                        value={selectedTreatment.status}
-                        onChange={(e) =>
-                          setSelectedTreatment({
-                            ...selectedTreatment,
-                            status: e.target.value,
-                          })
-                        }
-                      />
+                      <button
+                        type="button"
+                        className="btn btn-primary "
+                        onClick={() => handleSave()} // Call handleSave on click
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => setShowEditModal(false)} // Close modal on cancel
+                      >
+                        Cancel
+                      </button>
                     </CCol>
 
-                    {/* Add other input fields for patient details */}
+                    <div
+                      className="input-group-append"
+                      style={{ marginRight: "10px" }}
+                    >
+                      <PDFDownloadLink
+                        document={<InvoicePDF formData={treatment} />}
+                        fileName="invoice.pdf"
+                      >
+                        <CButton>
+                          <CIcon icon={cilCloudDownload} size="xl" />
+                        </CButton>
+                      </PDFDownloadLink>
+                    </div>
+                    <div
+                      className="input-group-append"
+                      style={{ marginRight: "10px" }}
+                    >
+                      <CButton onClick={""}>
+                        <FaWhatsapp size={25} />
+                      </CButton>
+                    </div>
                   </div>
-                </div>{" "}
+                </CForm>
+
+                <CCol xs={12}>
+                  <CCard>
+                    <CCardHeader>Medicine Details</CCardHeader>
+                    <CCardBody>
+                      <CTable>
+                        <CTableHead>
+                          <CTableRow>
+                            <CTableHeaderCell>Sr.no</CTableHeaderCell>
+                            <CTableHeaderCell>Medicine</CTableHeaderCell>
+                            <CTableHeaderCell>Dosage</CTableHeaderCell>
+                            <CTableHeaderCell>Duration</CTableHeaderCell>
+                          </CTableRow>
+                        </CTableHead>
+                        <CTableBody>{renderMedicineTableRows()}</CTableBody>
+                      </CTable>
+                    </CCardBody>
+                  </CCard>
+                </CCol>
               </CCardBody>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => handleSave()}
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowEditModal(false)}
-                >
-                  Cancel
-                </button>
-              </div>
             </CCard>
           </div>
         </Draggable>
