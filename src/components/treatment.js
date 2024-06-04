@@ -12,6 +12,7 @@ import {
   View,
   StyleSheet,
 } from "@react-pdf/renderer";
+
 import {
   CCard,
   CRow,
@@ -254,7 +255,7 @@ const Treatment = () => {
   const handleSave = async () => {
     try {
       await axios.put(
-        `${config.apiUrl}treatment/${selectedTreatment.id}`, // Corrected URL
+        `${config.apiUrl}treatment/${selectedTreatment.treatmentId}`,
         selectedTreatment,
       );
       setShowEditModal(false); // Close modal after saving

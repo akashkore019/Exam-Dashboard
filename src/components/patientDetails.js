@@ -2,7 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import config from "../config";
 import { toast } from "react-toastify";
-import { CCard, CCardHeader, CCardBody, CCol, CFormLabel, CButton } from "@coreui/react";
+import {
+  CCard,
+  CCardHeader,
+  CCardBody,
+  CCol,
+  CFormLabel,
+  CButton,
+} from "@coreui/react";
 import Draggable from "react-draggable"; // Import Draggable component
 import { CSVLink } from "react-csv";
 import { Link } from "react-router-dom";
@@ -10,6 +17,7 @@ import CIcon from "@coreui/icons-react";
 import { cilSearch, cilCloudDownload } from "@coreui/icons";
 import { AiFillEdit } from "react-icons/ai";
 import { FaTrash } from "react-icons/fa";
+// import { set } from "core-js/core/dict";
 
 const Patient = () => {
   const [patients, setPatients] = useState([]);
@@ -191,7 +199,7 @@ const Patient = () => {
             <tbody>
               {filteredPatients.map((patient) => (
                 <tr key={patient.id}>
-                 <td style={{ display: "flex", gap: "10px" }}>
+                  <td style={{ display: "flex", gap: "10px" }}>
                     <CButton
                       color="info"
                       variant="outline"
@@ -210,11 +218,15 @@ const Patient = () => {
                     </CButton>{" "}
                   </td>
                   <td>{patient.id}</td>
-                  <td>{patient.fullName}</td>
+                  <td style={{ textTransform: "capitalize" }}>
+                    {patient.fullName}
+                  </td>
                   <td>{patient.mobile}</td>
                   <td>{patient.email}</td>
                   <td>{patient.address}</td>
-                  <td>{patient.gender}</td>
+                  <td style={{ textTransform: "capitalize" }}>
+                    {patient.gender}
+                  </td>
                   <td>{formatDateOfBirth(patient.dob)}</td>
                   <td>{patient.age}</td>
                   <td>{patient.weight}</td>
@@ -392,9 +404,8 @@ const Patient = () => {
                       />
                     </CCol>
                     <CCol md={4}>
-                      <CFormLabel htmlFor="bloodGroup">Blood Group</CFormLabel>
-                      <input
-                        type="text"
+                      <CFormLabel htmlFor="bloodgroup">Bloodgroup</CFormLabel>
+                      <select
                         id="bloodGroup"
                         className="form-control"
                         value={selectedPatient.bloodGroup}
@@ -404,7 +415,16 @@ const Patient = () => {
                             bloodGroup: e.target.value,
                           })
                         }
-                      />
+                      >
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                      </select>
                     </CCol>
                     {/* Add other input fields for patient details */}
                   </div>

@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import axios from 'axios'
-import config from '../config'
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom
+import React, { useState } from "react";
+import axios from "axios";
+import config from "../config";
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
 import {
   CCard,
@@ -16,36 +16,36 @@ import {
   CRow,
   CButton,
   CFormSelect,
-} from '@coreui/react'
+} from "@coreui/react";
 
 const Patient = () => {
-  const [validated, setValidated] = useState(false)
-  const [submitted, setSubmitted] = useState(false) // State variable to track form submission
+  const [validated, setValidated] = useState(false);
+  const [submitted, setSubmitted] = useState(false); // State variable to track form submission
   const [user, setUser] = useState({
-    fullName: '',
-    mobile: '',
-    email: '',
-    address: '',
-    gender: '',
-    dob: '',
-    age: '',
-    weight: '',
-    bloodGroup: '',
-  })
+    fullName: "",
+    mobile: "",
+    email: "",
+    address: "",
+    gender: "",
+    dob: "",
+    age: "",
+    weight: "",
+    bloodGroup: "",
+  });
 
   const handleInputChange = (event) => {
-    const { name, value } = event.target
-    setUser({ ...user, [name]: value })
-  }
+    const { name, value } = event.target;
+    setUser({ ...user, [name]: value });
+  };
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
-    const form = event.currentTarget
+    event.preventDefault();
+    const form = event.currentTarget;
 
     if (form.checkValidity() === false) {
-      event.stopPropagation()
-      setValidated(true)
-      return
+      event.stopPropagation();
+      setValidated(true);
+      return;
     }
 
     if (!submitted) {
@@ -61,37 +61,42 @@ const Patient = () => {
           age: user.age,
           weight: user.weight,
           bloodGroup: user.bloodGroup,
-        })
+        });
 
         if (res.status === 200) {
-          window.alert('Data submitted successfully!')
-          form.reset()
-          setSubmitted(true) // Update state to indicate form submission
+          window.alert("Data submitted successfully!");
+          form.reset();
+          setSubmitted(true); // Update state to indicate form submission
         } else {
-          throw new Error('Failed to submit data')
+          throw new Error("Failed to submit data");
         }
       } catch (error) {
-        console.error('Error:', error)
-        window.alert('Failed to submit data. Please try again later.')
+        console.error("Error:", error);
+        window.alert("Failed to submit data. Please try again later.");
       }
     }
 
-    setValidated(true)
-  }
+    setValidated(true);
+  };
 
   return (
     <CCard className="mb-5">
-        <CCardHeader style={{ display: 'flex', justifyContent: 'space-between', padding: '5px' }}>
-          <span style={{ lineHeight: '44px' }}>Patient Details</span>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            
-            <div className="input-group-append">
-              <Link to="/PatientDetails" className="btn btn-primary">
+      <CCardHeader
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          padding: "5px",
+        }}
+      >
+        <span style={{ lineHeight: "44px" }}>Patient Details</span>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div className="input-group-append">
+            <Link to="/PatientDetails" className="btn btn-primary">
               Back
-              </Link>
-            </div>               
+            </Link>
           </div>
-        </CCardHeader>
+        </div>
+      </CCardHeader>
       <CCardBody>
         <CForm
           className="row g-3 ml needs-validation"
@@ -122,7 +127,9 @@ const Patient = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please enter your mobile number.</CFormFeedback>
+            <CFormFeedback invalid>
+              Please enter your mobile number.
+            </CFormFeedback>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
 
@@ -136,7 +143,9 @@ const Patient = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please enter a valid email address.</CFormFeedback>
+            <CFormFeedback invalid>
+              Please enter a valid email address.
+            </CFormFeedback>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
 
@@ -182,7 +191,9 @@ const Patient = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please enter your date of birth.</CFormFeedback>
+            <CFormFeedback invalid>
+              Please enter your date of birth.
+            </CFormFeedback>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
 
@@ -216,18 +227,29 @@ const Patient = () => {
 
           <CCol md={4}>
             <CFormLabel htmlFor="bloodGroup">Blood Group</CFormLabel>
-            <CFormInput
-              type="text"
+            <select
               id="bloodGroup"
+              className="form-control"
               name="bloodGroup"
               value={user.bloodGroup}
               onChange={handleInputChange}
               required
-            />
-            <CFormFeedback invalid>Please enter your blood group.</CFormFeedback>
+            >
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+            <CFormFeedback invalid>
+              Please enter your blood group.
+            </CFormFeedback>
+
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
-
           <CCol xs={4}>
             <CButton color="primary" type="submit">
               Submit form
@@ -236,7 +258,7 @@ const Patient = () => {
         </CForm>
       </CCardBody>
     </CCard>
-  )
-}
+  );
+};
 
-export default Patient
+export default Patient;

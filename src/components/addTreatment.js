@@ -70,6 +70,7 @@ const TreatmentList = () => {
     fetchDoctors();
     fetchServices();
     fetchMedicineNames();
+    fetchMedicineData();
   }, []);
 
   const fetchPatients = async () => {
@@ -105,6 +106,19 @@ const TreatmentList = () => {
     }
   };
 
+  const fetchMedicineData = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/v1/medicine");
+      if (!response.ok) {
+        throw new Error("Failed to fetch medicine data");
+      }
+      const data = await response.json();
+      setMedicineNames(data);
+    } catch (error) {
+      console.error("Error fetching medicine data:", error);
+    }
+  };
+
   const fetchMedicineNames = async () => {
     try {
       const response = await axios.get("http://localhost:8080/api/v1/medicine");
@@ -113,7 +127,7 @@ const TreatmentList = () => {
           response.data.map((medicine) => ({
             value: medicine.id,
             label: medicine.medicineName,
-          })),
+          }))
         );
       }
     } catch (error) {
@@ -126,12 +140,14 @@ const TreatmentList = () => {
     setTreatment({ ...treatment, [name]: value });
   };
 
-  const handleMedicineChange = (selectedOption, index) => {
+  const handleMedicineChange = (selectedOptions, index) => {
     setTreatment((prevTreatment) => {
       const updatedMedicineForms = [...prevTreatment.medicineForms];
       updatedMedicineForms[index] = {
         ...updatedMedicineForms[index],
-        medicineId: selectedOption ? selectedOption.value : "",
+        medicineId: selectedOptions
+          ? selectedOptions.map((option) => option.value)
+          : [],
       };
       return { ...prevTreatment, medicineForms: updatedMedicineForms };
     });
@@ -153,7 +169,7 @@ const TreatmentList = () => {
       const updatedMedicineForms = [...prevTreatment.medicineForms];
       updatedMedicineForms[index] = {
         ...updatedMedicineForms[index],
-        duration: selectedOption ? selectedOption.value : "",
+        duration: selectedOption ? selectedOption.value : " ",
       };
       return { ...prevTreatment, medicineForms: updatedMedicineForms };
     });
@@ -201,7 +217,7 @@ const TreatmentList = () => {
       ...prevTreatment,
       medicineForms: [
         ...prevTreatment.medicineForms,
-        { medicineId: "", dosage: "", duration: "" },
+        { medicineId: [], dosage: "", duration: "" },
       ],
     }));
   };
@@ -381,6 +397,7 @@ const TreatmentList = () => {
                   }
                   isClearable
                   placeholder="Select a service"
+                  isMulti
                   required
                 />
                 <CFormFeedback invalid>Please select a service.</CFormFeedback>
@@ -390,39 +407,29 @@ const TreatmentList = () => {
                 <React.Fragment key={index}>
                   <CCol md={4}>
                     <CFormLabel htmlFor={`medicineId_${index}`}>
-                      Select Medicine {index + 1}
+                      Select Medicine
                     </CFormLabel>
                     <Select
                       id={`medicineId_${index}`}
                       name="medicineId"
-                      options={medicineNames}
-                      onChange={(selectedOption) =>
-                        handleMedicineChange(selectedOption, index)
+                      options={medicineNames.map((medicineForm) => ({
+                        value: medicineForm.medicineId,
+                        label: medicineForm.medicineName,
+                      }))}
+                      onChange={
+                        (selectedOption) =>
+                          handleMedicineChange(selectedOption, index) // Use handleMedicineChange function with index
                       }
                       isClearable
-                      placeholder={`Select medicine ${index + 1}`}
-                      value={
-                        medicineNames.find(
-                          (option) => option.value === medicineForm.medicineId,
-                        ) || null
-                      }
+                      placeholder="Select a medicine"
+                      isMulti
                       required
-                      styles={{
-                        control: (base) => ({
-                          ...base,
-                          color: "#000",
-                        }),
-                        singleValue: (base) => ({
-                          ...base,
-                          color: "#000",
-                        }),
-                      }}
                     />
-
                     <CFormFeedback invalid>
                       Please select a medicine.
                     </CFormFeedback>
                   </CCol>
+
                   <CCol md={4}>
                     <CFormLabel htmlFor={`dosage_${index}`}>
                       Select Dosage
@@ -438,7 +445,7 @@ const TreatmentList = () => {
                       placeholder="Select dosage"
                       value={
                         dosageOptions.find(
-                          (option) => option.value === medicineForm.dosage,
+                          (option) => option.value === medicineForm.dosage
                         ) || null
                       }
                       required
@@ -447,6 +454,7 @@ const TreatmentList = () => {
                       Please select a dosage.
                     </CFormFeedback>
                   </CCol>
+
                   <CCol md={4}>
                     <CFormLabel htmlFor={`duration_${index}`}>
                       Select Duration
@@ -462,7 +470,7 @@ const TreatmentList = () => {
                       placeholder="Select duration"
                       value={
                         durationOptions.find(
-                          (option) => option.value === medicineForm.duration,
+                          (option) => option.value === medicineForm.duration
                         ) || null
                       }
                       required
@@ -473,6 +481,7 @@ const TreatmentList = () => {
                   </CCol>
                 </React.Fragment>
               ))}
+
               <CCol xs={12}>
                 <CButton
                   type="button"
