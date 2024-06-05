@@ -2,7 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import config from "../config";
 import { toast } from "react-toastify";
-import { CCard, CCardHeader, CCardBody, CCol, CFormLabel, CButton } from "@coreui/react";
+import {
+  CCard,
+  CCardHeader,
+  CCardBody,
+  CCol,
+  CFormLabel,
+  CButton,
+} from "@coreui/react";
 import Draggable from "react-draggable"; // Import Draggable component
 import { CSVLink } from "react-csv";
 import { Link } from "react-router-dom";
@@ -143,7 +150,7 @@ const Doctor = () => {
               type="button"
               className="btn btn-secondary"
               onClick={toggleSearchBar}
-              style={{ marginRight: "10px" }} 
+              style={{ marginRight: "10px" }}
             >
               <CIcon icon={cilSearch} />
             </button>
@@ -191,23 +198,26 @@ const Doctor = () => {
             <tbody>
               {filteredDoctors.map((doctor) => (
                 <tr key={doctor.id}>
-                 <td style={{ display: "flex", gap: "10px" }}>
-                    <CButton
-                      color="info"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(doctor.id)}
-                    >
-                      <AiFillEdit />
-                    </CButton>
-                    <CButton
-                      color="danger"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(doctor.id)}
-                    >
-                      <FaTrash />
-                    </CButton>{" "}
+                  <td style={{ alignItems: "center" }}>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <CButton
+                        color="info"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(doctor.id)}
+                      >
+                        <AiFillEdit />
+                      </CButton>
+                      <CButton
+                        color="danger"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(doctor.id)}
+                        
+                      >
+                        <FaTrash />
+                      </CButton>
+                    </div>
                   </td>
                   <td>{doctor.id}</td>
                   <td>{doctor.fullName}</td>

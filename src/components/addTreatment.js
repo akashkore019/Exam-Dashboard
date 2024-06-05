@@ -127,7 +127,7 @@ const TreatmentList = () => {
           response.data.map((medicine) => ({
             value: medicine.id,
             label: medicine.medicineName,
-          }))
+          })),
         );
       }
     } catch (error) {
@@ -149,9 +149,20 @@ const TreatmentList = () => {
           ? selectedOptions.map((option) => option.value)
           : [],
       };
+  
+      // Get the selected medicine IDs
+      const selectedMedicineIds = selectedOptions
+        ? selectedOptions.map((option) => option.value).join(", ")
+        : "No medicines selected";
+  
+      // Show alert with selected medicine IDs
+      alert("Selected Medicine IDs: " + selectedMedicineIds);
+  
       return { ...prevTreatment, medicineForms: updatedMedicineForms };
     });
   };
+  
+  
 
   const handleDosageChange = (selectedOption, index) => {
     setTreatment((prevTreatment) => {
@@ -297,7 +308,7 @@ const TreatmentList = () => {
               padding: "5px",
             }}
           >
-            <span style={{ lineHeight: "44px" }}>Add Appointment</span>
+            <span style={{ lineHeight: "44px" }}>Add Treatment</span>
             <div style={{ display: "flex", alignItems: "center" }}>
               <div className="input-group-append">
                 <Link to="/treatment" className="btn btn-primary">
@@ -445,7 +456,7 @@ const TreatmentList = () => {
                       placeholder="Select dosage"
                       value={
                         dosageOptions.find(
-                          (option) => option.value === medicineForm.dosage
+                          (option) => option.value === medicineForm.dosage,
                         ) || null
                       }
                       required
@@ -470,7 +481,7 @@ const TreatmentList = () => {
                       placeholder="Select duration"
                       value={
                         durationOptions.find(
-                          (option) => option.value === medicineForm.duration
+                          (option) => option.value === medicineForm.duration,
                         ) || null
                       }
                       required
@@ -531,7 +542,7 @@ const TreatmentList = () => {
                   style={{ marginRight: "10px" }}
                 >
                   <CButton onClick={handleWhatsAppClick}>
-                    <FaWhatsapp size={25} />{" "}
+                    <FaWhatsapp size={25} />
                   </CButton>
                 </div>
               </div>

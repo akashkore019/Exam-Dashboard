@@ -255,7 +255,7 @@ const Treatment = () => {
   const handleSave = async () => {
     try {
       await axios.put(
-        `${config.apiUrl}treatment/${selectedTreatment.treatmentId}`,
+        `${config.apiUrl}treatment/${selectedTreatment.id}`, // Update the URL to use selectedTreatment.id
         selectedTreatment,
       );
       setShowEditModal(false); // Close modal after saving
@@ -328,8 +328,7 @@ const Treatment = () => {
           <table className="table">
             <thead>
               <tr>
-                <th>Edit</th>
-                <th>Delete</th>
+                <th>Edit / Delete</th>
                 <th>Patient Name</th>
                 <th>Patient Mobile</th>
                 <th>Doctor Name</th>
@@ -341,11 +340,26 @@ const Treatment = () => {
             <tbody>
               {filteredTreatments.map((treatment) => (
                 <tr key={treatment.id}>
-                  <td onClick={() => handleEdit(treatment.id)}>
-                    <AiFillEdit /> {/* Icon for Edit */}
-                  </td>
-                  <td onClick={() => handleDelete(treatment.id)}>
-                    <FaTrash /> {/* Icon for Delete */}
+                 <td style={{ alignItems: "center" }}>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <CButton
+                        color="info"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(treatment.id)}
+                      >
+                        <AiFillEdit />
+                      </CButton>
+                      <CButton
+                        color="danger"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(treatment.id)}
+                        
+                      >
+                        <FaTrash />
+                      </CButton>
+                    </div>
                   </td>
                   <td>{treatment.patient.fullName}</td>
                   <td>{treatment.patient.mobile}</td>
@@ -409,6 +423,7 @@ const Treatment = () => {
                       Select Patient
                     </CFormLabel>
                     <Select
+                      type="text"
                       id="patientId"
                       name="patientId"
                       options={patients.map((patient) => ({
@@ -538,7 +553,7 @@ const Treatment = () => {
                     <CFormFeedback invalid>Please enter a date.</CFormFeedback>
                   </CCol>
 
-                  {treatment.medicineForms.map((medicineForm, index) => (
+                  {treatment.medicineForms.map((medicineForms, index) => (
                     <React.Fragment key={index}>medicineName</React.Fragment>
                   ))}
 
@@ -557,7 +572,7 @@ const Treatment = () => {
                     />
                   </CCol>
                   <div style={{ display: "flex", alignItems: "center" }}>
-                    <CCol md={12}>
+                    <CCol md={18}>
                       <button
                         type="button"
                         className="btn btn-primary "
@@ -600,21 +615,21 @@ const Treatment = () => {
 
                 <CCol xs={12}>
                   <CCard>
-                    <CCardHeader>Medicine Details</CCardHeader>
-                    <CCardBody>
-                      <CTable>
-                        <CTableHead>
-                          <CTableRow>
-                            <CTableHeaderCell>Sr.no</CTableHeaderCell>
-                            <CTableHeaderCell>Medicine</CTableHeaderCell>
-                            <CTableHeaderCell>Dosage</CTableHeaderCell>
-                            <CTableHeaderCell>Duration</CTableHeaderCell>
-                          </CTableRow>
-                        </CTableHead>
-                        <CTableBody>{renderMedicineTableRows()}</CTableBody>
-                      </CTable>
-                    </CCardBody>
-                  </CCard>
+        <CCardHeader>Medicine Details</CCardHeader>
+        <CCardBody>
+          <CTable>
+            <CTableHead>
+              <CTableRow>
+                <CTableHeaderCell>Sr.no</CTableHeaderCell>
+                <CTableHeaderCell>Medicine</CTableHeaderCell>
+                <CTableHeaderCell>Dosage</CTableHeaderCell>
+                <CTableHeaderCell>Duration</CTableHeaderCell>
+              </CTableRow>
+            </CTableHead>
+            <CTableBody>{renderMedicineTableRows()}</CTableBody>
+          </CTable>
+        </CCardBody>
+      </CCard>
                 </CCol>
               </CCardBody>
             </CCard>

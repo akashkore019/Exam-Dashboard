@@ -204,23 +204,26 @@ const Service = () => {
             <tbody>
               {filteredServices.map((service) => (
                 <tr key={service.id}>
-                  <td style={{ display: "flex", gap: "10px" }}>
-                    <CButton
-                      color="info"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(service.id)}
-                    >
-                      <AiFillEdit />
-                    </CButton>
-                    <CButton
-                      color="danger"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(service.id)}
-                    >
-                      <FaTrash />
-                    </CButton>{" "}
+                  <td style={{ alignItems: "center" }}>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <CButton
+                        color="info"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(service.id)}
+                      >
+                        <AiFillEdit />
+                      </CButton>
+                      <CButton
+                        color="danger"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(service.id)}
+                        
+                      >
+                        <FaTrash />
+                      </CButton>
+                    </div>
                   </td>
                   <td>{service.id}</td>
                   <td>{service.serviceName}</td>
