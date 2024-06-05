@@ -140,29 +140,17 @@ const TreatmentList = () => {
     setTreatment({ ...treatment, [name]: value });
   };
 
-  const handleMedicineChange = (selectedOptions, index) => {
+  const handleMedicineChange = (selectedOption, index) => {
     setTreatment((prevTreatment) => {
       const updatedMedicineForms = [...prevTreatment.medicineForms];
       updatedMedicineForms[index] = {
         ...updatedMedicineForms[index],
-        medicineId: selectedOptions
-          ? selectedOptions.map((option) => option.value)
-          : [],
+        medicineId: selectedOption ? selectedOption.value : null,
       };
-  
-      // Get the selected medicine IDs
-      const selectedMedicineIds = selectedOptions
-        ? selectedOptions.map((option) => option.value).join(", ")
-        : "No medicines selected";
-  
-      // Show alert with selected medicine IDs
-      alert("Selected Medicine IDs: " + selectedMedicineIds);
-  
+
       return { ...prevTreatment, medicineForms: updatedMedicineForms };
     });
   };
-  
-  
 
   const handleDosageChange = (selectedOption, index) => {
     setTreatment((prevTreatment) => {
@@ -228,7 +216,7 @@ const TreatmentList = () => {
       ...prevTreatment,
       medicineForms: [
         ...prevTreatment.medicineForms,
-        { medicineId: [], dosage: "", duration: "" },
+        { medicineId: "", dosage: "", duration: "" },
       ],
     }));
   };
@@ -277,25 +265,25 @@ const TreatmentList = () => {
     </Document>
   );
 
-  const renderMedicineTableRows = () => {
-    return treatment.medicineForms.map((medicine, index) => (
-      <CTableRow key={index}>
-        <CTableDataCell>{index + 1}</CTableDataCell>
-        <CTableDataCell>
-          {medicineNames.find((option) => option.value === medicine.medicineId)
-            ?.label || ""}
-        </CTableDataCell>
-        <CTableDataCell>
-          {dosageOptions.find((option) => option.value === medicine.dosage)
-            ?.label || ""}
-        </CTableDataCell>
-        <CTableDataCell>
-          {durationOptions.find((option) => option.value === medicine.duration)
-            ?.label || ""}
-        </CTableDataCell>
-      </CTableRow>
-    ));
-  };
+  // const renderMedicineTableRows = () => {
+  //   return treatment.medicineForms.map((medicine, index) => (
+  //     <CTableRow key={index}>
+  //       <CTableDataCell>{index + 1}</CTableDataCell>
+  //       <CTableDataCell>
+  //         {medicineNames.find((option) => option.value === medicine.medicineId)
+  //           ?.label || ""}
+  //       </CTableDataCell>
+  //       <CTableDataCell>
+  //         {dosageOptions.find((option) => option.value === medicine.dosage)
+  //           ?.label || ""}
+  //       </CTableDataCell>
+  //       <CTableDataCell>
+  //         {durationOptions.find((option) => option.value === medicine.duration)
+  //           ?.label || ""}
+  //       </CTableDataCell>
+  //     </CTableRow>
+  //   ));
+  // };
 
   return (
     <CRow>
@@ -431,9 +419,7 @@ const TreatmentList = () => {
                         (selectedOption) =>
                           handleMedicineChange(selectedOption, index) // Use handleMedicineChange function with index
                       }
-                      isClearable
                       placeholder="Select a medicine"
-                      isMulti
                       required
                     />
                     <CFormFeedback invalid>
@@ -552,17 +538,24 @@ const TreatmentList = () => {
               <CCard>
                 <CCardHeader>Medicine Details</CCardHeader>
                 <CCardBody>
-                  <CTable>
-                    <CTableHead>
-                      <CTableRow>
-                        <CTableHeaderCell>Sr.no</CTableHeaderCell>
-                        <CTableHeaderCell>Medicine</CTableHeaderCell>
-                        <CTableHeaderCell>Dosage</CTableHeaderCell>
-                        <CTableHeaderCell>Duration</CTableHeaderCell>
-                      </CTableRow>
-                    </CTableHead>
-                    <CTableBody>{renderMedicineTableRows()}</CTableBody>
-                  </CTable>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Medicine</th>
+                        <th>Dosage</th>
+                        <th>Duration</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {treatment.medicineForms.map((medicineForm, index) => (
+                        <tr key={index}>
+                          <td>{medicineForm.medicineId}</td>
+                          <td>{medicineForm.dosage}</td>
+                          <td>{medicineForm.duration}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </CCardBody>
               </CCard>
             </CCol>
