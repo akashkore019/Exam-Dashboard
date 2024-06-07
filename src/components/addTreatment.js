@@ -39,15 +39,19 @@ const TreatmentList = () => {
   const [validated, setValidated] = useState(false);
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [medicine, setMedicine] = useState([]);
+
   const [services, setServices] = useState([]);
   const [treatment, setTreatment] = useState({
     patientId: "",
     doctorId: "",
     serviceId: "",
-    medicineForms: [],
-    description: "",
+    medicineId: "",
+    medicineName: "",
   });
+
   const [medicineNames, setMedicineNames] = useState([]);
+  const [treatmentsList, setTreatmentsList] = useState([]);
   const [dosageOptions] = useState([
     { value: "1:0:0", label: "1:0:0" },
     { value: "1:1:0", label: "1:1:0" },
@@ -69,8 +73,9 @@ const TreatmentList = () => {
     fetchPatients();
     fetchDoctors();
     fetchServices();
-    fetchMedicineNames();
-    fetchMedicineData();
+    fetchMedicines();
+    fetchDosages();
+    fetchDurations();
   }, []);
 
   const fetchPatients = async () => {
@@ -106,76 +111,38 @@ const TreatmentList = () => {
     }
   };
 
-  const fetchMedicineData = async () => {
+  const fetchDosages = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/v1/medicine");
-      if (!response.ok) {
-        throw new Error("Failed to fetch medicine data");
+      const response = await axios.get("http://localhost:8080/api/v1/doctor");
+      if (response.status === 200) {
+        setDoctors(response.data);
       }
-      const data = await response.json();
-      setMedicineNames(data);
     } catch (error) {
-      console.error("Error fetching medicine data:", error);
+      console.error("Error fetching doctors:", error);
     }
   };
 
-  const fetchMedicineNames = async () => {
+  const fetchDurations = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/v1/service");
+      if (response.status === 200) {
+        setServices(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    }
+  };
+
+  const fetchMedicines = async () => {
     try {
       const response = await axios.get("http://localhost:8080/api/v1/medicine");
       if (response.status === 200) {
-        setMedicineNames(
-          response.data.map((medicine) => ({
-            value: medicine.id,
-            label: medicine.medicineName,
-          })),
-        );
+        setMedicine(response.data);
+        console.log(response.data);
       }
     } catch (error) {
-      console.error("Error fetching medicine names:", error);
+      console.error("Error fetching medicines:", error);
     }
-  };
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setTreatment({ ...treatment, [name]: value });
-  };
-
-  const handleMedicineChange = (selectedOption, index) => {
-    setTreatment((prevTreatment) => {
-      const updatedMedicineForms = [...prevTreatment.medicineForms];
-      updatedMedicineForms[index] = {
-        ...updatedMedicineForms[index],
-        medicineId: selectedOption ? selectedOption.value : null,
-      };
-
-      return { ...prevTreatment, medicineForms: updatedMedicineForms };
-    });
-  };
-
-  const handleDosageChange = (selectedOption, index) => {
-    setTreatment((prevTreatment) => {
-      const updatedMedicineForms = [...prevTreatment.medicineForms];
-      updatedMedicineForms[index] = {
-        ...updatedMedicineForms[index],
-        dosage: selectedOption ? selectedOption.value : "",
-      };
-      return { ...prevTreatment, medicineForms: updatedMedicineForms };
-    });
-  };
-
-  const handleDurationChange = (selectedOption, index) => {
-    setTreatment((prevTreatment) => {
-      const updatedMedicineForms = [...prevTreatment.medicineForms];
-      updatedMedicineForms[index] = {
-        ...updatedMedicineForms[index],
-        duration: selectedOption ? selectedOption.value : " ",
-      };
-      return { ...prevTreatment, medicineForms: updatedMedicineForms };
-    });
-  };
-
-  const handleWhatsAppClick = () => {
-    // Logic for WhatsApp click
   };
 
   const handleSubmit = async (event) => {
@@ -187,10 +154,29 @@ const TreatmentList = () => {
     setValidated(true);
 
     try {
+      const serviceIds = Array.isArray(treatment.serviceId)
+        ? treatment.serviceId.map((service) => service.value)
+        : [];
+      const medicines = treatmentsList.map((item) => ({
+        medicineName: item.medicineName,
+        dosageInstruction: item.dosageName,
+        duration: item.durationName,
+      }));
+
       const res = await axios.post("http://localhost:8080/api/v1/treatment", {
-        ...treatment,
-        status: "Scheduled",
+        patientId: treatment.patientId,
+        doctorId: treatment.doctorId,
+        serviceItems: serviceIds.map((serviceId) => ({ id: serviceId })),
+        medicines: medicines.map((medicine) => ({
+          medicine: {
+            medicineName: medicine.medicineName,
+          },
+          dosageInstruction: medicine.dosageInstruction,
+          duration: medicine.duration,
+        })),
+        description: treatment.description,
       });
+
       if (res.status === 200) {
         window.alert("Treatment data submitted successfully!");
         form.reset();
@@ -198,10 +184,13 @@ const TreatmentList = () => {
         setTreatment({
           patientId: "",
           doctorId: "",
-          serviceId: "",
-          medicineForms: [],
+          serviceId: [],
+          medicineName: "",
+          dosageName: "",
+          durationName: "",
           description: "",
         });
+        setTreatmentsList([]);
       } else {
         throw new Error("Failed to submit treatment data");
       }
@@ -211,14 +200,37 @@ const TreatmentList = () => {
     }
   };
 
-  const handleAddMedicine = () => {
-    setTreatment((prevTreatment) => ({
-      ...prevTreatment,
-      medicineForms: [
-        ...prevTreatment.medicineForms,
-        { medicineId: "", dosage: "", duration: "" },
-      ],
-    }));
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setTreatment({
+      ...treatment,
+      [name]: value,
+    });
+  };
+
+  const handleSubmitMedicine = async (event) => {
+    event.preventDefault();
+    setTreatmentsList([...treatmentsList, treatment]);
+  };
+
+  const InvoicePDF = ({ formData }) => (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.section}>
+          <Text style={styles.heading}>Invoice</Text>
+          <Text style={styles.text}>Patient: {formData.patientId}</Text>
+          <Text style={styles.text}>Doctor: {formData.doctorId}</Text>
+          <Text style={styles.text}>Service: {formData.serviceId}</Text>
+          <Text style={styles.text}>Medicines:</Text>
+
+          <Text style={styles.text}>Description: {formData.description}</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+
+  const handleWhatsAppClick = () => {
+    // Logic for WhatsApp click
   };
 
   const styles = StyleSheet.create({
@@ -240,50 +252,6 @@ const TreatmentList = () => {
       marginBottom: 5,
     },
   });
-
-  const InvoicePDF = ({ formData }) => (
-    <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.section}>
-          <Text style={styles.heading}>Invoice</Text>
-          <Text style={styles.text}>Patient: {formData.patientId}</Text>
-          <Text style={styles.text}>Doctor: {formData.doctorId}</Text>
-          <Text style={styles.text}>Service: {formData.serviceId}</Text>
-          <Text style={styles.text}>Medicines:</Text>
-          {formData.medicineForms.map((medicine, index) => (
-            <View key={index} style={styles.section}>
-              <Text style={styles.text}>
-                Medicine {index + 1}: {medicine.medicineId}
-              </Text>
-              <Text style={styles.text}>Dosage: {medicine.dosage}</Text>
-              <Text style={styles.text}>Duration: {medicine.duration}</Text>
-            </View>
-          ))}
-          <Text style={styles.text}>Description: {formData.description}</Text>
-        </View>
-      </Page>
-    </Document>
-  );
-
-  // const renderMedicineTableRows = () => {
-  //   return treatment.medicineForms.map((medicine, index) => (
-  //     <CTableRow key={index}>
-  //       <CTableDataCell>{index + 1}</CTableDataCell>
-  //       <CTableDataCell>
-  //         {medicineNames.find((option) => option.value === medicine.medicineId)
-  //           ?.label || ""}
-  //       </CTableDataCell>
-  //       <CTableDataCell>
-  //         {dosageOptions.find((option) => option.value === medicine.dosage)
-  //           ?.label || ""}
-  //       </CTableDataCell>
-  //       <CTableDataCell>
-  //         {durationOptions.find((option) => option.value === medicine.duration)
-  //           ?.label || ""}
-  //       </CTableDataCell>
-  //     </CTableRow>
-  //   ));
-  // };
 
   return (
     <CRow>
@@ -310,7 +278,6 @@ const TreatmentList = () => {
               className="mb-3 row g-3 needs-validation"
               noValidate
               validated={validated}
-              onSubmit={handleSubmit}
             >
               <CCol md={4}>
                 <CFormLabel htmlFor="patientId" style={{ color: "#000" }}>
@@ -402,92 +369,6 @@ const TreatmentList = () => {
                 <CFormFeedback invalid>Please select a service.</CFormFeedback>
               </CCol>
 
-              {treatment.medicineForms.map((medicineForm, index) => (
-                <React.Fragment key={index}>
-                  <CCol md={4}>
-                    <CFormLabel htmlFor={`medicineId_${index}`}>
-                      Select Medicine
-                    </CFormLabel>
-                    <Select
-                      id={`medicineId_${index}`}
-                      name="medicineId"
-                      options={medicineNames.map((medicineForm) => ({
-                        value: medicineForm.medicineId,
-                        label: medicineForm.medicineName,
-                      }))}
-                      onChange={
-                        (selectedOption) =>
-                          handleMedicineChange(selectedOption, index) // Use handleMedicineChange function with index
-                      }
-                      placeholder="Select a medicine"
-                      required
-                    />
-                    <CFormFeedback invalid>
-                      Please select a medicine.
-                    </CFormFeedback>
-                  </CCol>
-
-                  <CCol md={4}>
-                    <CFormLabel htmlFor={`dosage_${index}`}>
-                      Select Dosage
-                    </CFormLabel>
-                    <Select
-                      id={`dosage_${index}`}
-                      name="dosage"
-                      options={dosageOptions}
-                      onChange={(selectedOption) =>
-                        handleDosageChange(selectedOption, index)
-                      }
-                      isClearable
-                      placeholder="Select dosage"
-                      value={
-                        dosageOptions.find(
-                          (option) => option.value === medicineForm.dosage,
-                        ) || null
-                      }
-                      required
-                    />
-                    <CFormFeedback invalid>
-                      Please select a dosage.
-                    </CFormFeedback>
-                  </CCol>
-
-                  <CCol md={4}>
-                    <CFormLabel htmlFor={`duration_${index}`}>
-                      Select Duration
-                    </CFormLabel>
-                    <Select
-                      id={`duration_${index}`}
-                      name="duration"
-                      options={durationOptions}
-                      onChange={(selectedOption) =>
-                        handleDurationChange(selectedOption, index)
-                      }
-                      isClearable
-                      placeholder="Select duration"
-                      value={
-                        durationOptions.find(
-                          (option) => option.value === medicineForm.duration,
-                        ) || null
-                      }
-                      required
-                    />
-                    <CFormFeedback invalid>
-                      Please select a duration.
-                    </CFormFeedback>
-                  </CCol>
-                </React.Fragment>
-              ))}
-
-              <CCol xs={12}>
-                <CButton
-                  type="button"
-                  color="primary"
-                  onClick={handleAddMedicine}
-                >
-                  <FontAwesomeIcon icon={faPlusCircle} /> Add Medicine
-                </CButton>
-              </CCol>
               <CCol xs={12}>
                 <CFormLabel htmlFor="description">Description</CFormLabel>
                 <CFormTextarea
@@ -501,66 +382,119 @@ const TreatmentList = () => {
                   Please provide a description.
                 </CFormFeedback>
               </CCol>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <div
-                  className="input-group-append"
-                  style={{ marginRight: "10px" }}
-                >
-                  <CButton color="primary" type="submit">
-                    Submit
-                  </CButton>
-                </div>
-                <div
-                  className="input-group-append"
-                  style={{ marginRight: "10px" }}
-                >
-                  <PDFDownloadLink
-                    document={<InvoicePDF formData={treatment} />}
-                    fileName="invoice.pdf"
-                  >
-                    <CButton>
-                      <CIcon icon={cilCloudDownload} size="xl" />
-                    </CButton>
-                  </PDFDownloadLink>
-                </div>
-                <div
-                  className="input-group-append"
-                  style={{ marginRight: "10px" }}
-                >
-                  <CButton onClick={handleWhatsAppClick}>
-                    <FaWhatsapp size={25} />
-                  </CButton>
-                </div>
-              </div>
-            </CForm>
 
-            <CCol xs={12}>
-              <CCard>
-                <CCardHeader>Medicine Details</CCardHeader>
-                <CCardBody>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Medicine</th>
-                        <th>Dosage</th>
-                        <th>Duration</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {treatment.medicineForms.map((medicineForm, index) => (
-                        <tr key={index}>
-                          <td>{medicineForm.medicineId}</td>
-                          <td>{medicineForm.dosage}</td>
-                          <td>{medicineForm.duration}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </CCardBody>
-              </CCard>
-            </CCol>
+              <CCol md={4}>
+                <CFormLabel htmlFor="medicineName">Select Medicine</CFormLabel>
+                <Select
+                  id="medicineName"
+                  name="medicineName"
+                  options={medicine.map((medicine) => ({
+                    value: medicine.medicineId, // Use medicineId instead of medicineName
+                    label: medicine.medicineName,
+                  }))}
+                  onChange={(selectedOption) =>
+                    handleInputChange({
+                      target: {
+                        name: "medicineName",
+                        value: selectedOption.value,
+                      },
+                    })
+                  }
+                  isClearable
+                  placeholder="Select a medicine"
+                  required
+                />
+
+                <CFormFeedback invalid>Please select a medicine.</CFormFeedback>
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel htmlFor="dosageName">Select Dosage</CFormLabel>
+                <Select
+                  id="dosageName"
+                  name="dosageName"
+                  options={dosageOptions}
+                  onChange={(selectedOption) =>
+                    handleInputChange({
+                      target: {
+                        name: "dosageName",
+                        value: selectedOption.value,
+                      },
+                    })
+                  }
+                  isClearable
+                  placeholder="Select a dosage"
+                  required
+                />
+                <CFormFeedback invalid>Please select a Dosage.</CFormFeedback>
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel htmlFor="durationName">Select Duration</CFormLabel>
+                <Select
+                  id="durationName"
+                  name="durationName"
+                  options={durationOptions}
+                  onChange={(selectedOption) =>
+                    handleInputChange({
+                      target: {
+                        name: "durationName",
+                        value: selectedOption.value,
+                      },
+                    })
+                  }
+                  isClearable
+                  placeholder="Select a duration"
+                  required
+                />
+                <CFormFeedback invalid>Please select a duration.</CFormFeedback>
+              </CCol>
+              <CCol md={12}>
+                <CButton color="primary" onClick={handleSubmitMedicine}>
+                  1Submit
+                </CButton>
+              </CCol>
+            </CForm>
+            <CTable>
+              <CTableHead>
+                <CTableRow>
+                  <CTableHeaderCell>Medicine</CTableHeaderCell>
+                  <CTableHeaderCell>Dosage</CTableHeaderCell>
+                  <CTableHeaderCell>Duration</CTableHeaderCell>
+                </CTableRow>
+              </CTableHead>
+              <CTableBody>
+                {treatmentsList.map((item, index) => (
+                  <CTableRow key={index}>
+                    <CTableDataCell>{item.medicineName}</CTableDataCell>
+                    <CTableDataCell>{item.dosageName}</CTableDataCell>
+                    <CTableDataCell>{item.durationName}</CTableDataCell>
+                  </CTableRow>
+                ))}
+              </CTableBody>
+            </CTable>
           </CCardBody>
         </CCard>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div className="input-group-append" style={{ marginRight: "10px" }}>
+            <CButton color="primary" type="submit" onClick={handleSubmit}>
+              Submit
+            </CButton>
+          </div>
+          <div className="input-group-append" style={{ marginRight: "10px" }}>
+            <PDFDownloadLink
+              document={<InvoicePDF formData={treatment} />}
+              fileName="invoice.pdf"
+            >
+              <CButton>
+                <CIcon icon={cilCloudDownload} size="xl" />
+              </CButton>
+            </PDFDownloadLink>
+          </div>
+          <div className="input-group-append" style={{ marginRight: "10px" }}>
+            <CButton onClick={handleWhatsAppClick}>
+              <FaWhatsapp size={25} />
+            </CButton>
+          </div>
+        </div>
       </CCol>
     </CRow>
   );
