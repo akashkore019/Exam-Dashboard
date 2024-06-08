@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Select from "react-select";
-import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { cilCloudDownload } from "@coreui/icons";
-import CIcon from "@coreui/icons-react";
-
 import {
   PDFDownloadLink,
   Document,
@@ -16,6 +11,9 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import { FaWhatsapp } from "react-icons/fa";
+import { cilCloudDownload } from "@coreui/icons";
+import { CIcon } from "@coreui/icons-react";
+
 import {
   CCard,
   CRow,
@@ -36,12 +34,12 @@ import {
 } from "@coreui/react";
 
 const TreatmentList = () => {
+  const { id } = useParams();
   const [validated, setValidated] = useState(false);
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
-  const [medicine, setMedicine] = useState([]);
-
   const [services, setServices] = useState([]);
+  const [medicines, setMedicines] = useState([]);
   const [treatment, setTreatment] = useState({
     patientId: "",
     doctorId: "",
@@ -52,9 +50,9 @@ const TreatmentList = () => {
     durationName: "",
     description: "",
   });
-
   const [treatmentsList, setTreatmentsList] = useState([]);
-  const [dosageOptions] = useState([
+
+  const dosageOptions = [
     { value: "1:0:0", label: "1:0:0" },
     { value: "1:1:0", label: "1:1:0" },
     { value: "0:1:0", label: "0:1:0" },
@@ -62,21 +60,62 @@ const TreatmentList = () => {
     { value: "1:1:1", label: "1:1:1" },
     { value: "0:0:1", label: "0:0:1" },
     { value: "1:0:1", label: "1:0:1" },
-  ]);
-  const [durationOptions] = useState([
+  ];
+
+  const durationOptions = [
     { value: "7 days", label: "7 days" },
     { value: "5 days", label: "5 days" },
     { value: "30 days", label: "30 days" },
     { value: "1 day", label: "1 day" },
     { value: "other custom days", label: "Other custom days" },
-  ]);
+  ];
 
   useEffect(() => {
     fetchPatients();
     fetchDoctors();
     fetchServices();
     fetchMedicines();
-  }, []);
+    alert("hiiiiii");
+
+
+    if (id) {
+      fetchTreatmentById(id);
+    }
+  }, [id]);
+
+  const fetchTreatmentById = async (id) => {
+    alert("hiiiiii");
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/v1/treatment/getAllTreatmentById/${id}`,
+      );
+      if (response.status === 200) {
+        const data = response.data;
+
+        console.log(JSON.stringify(data));
+
+        setTreatment({
+          patientId: data.patientId,
+          doctorId: data.doctorId,
+          serviceId: data.serviceItems.map((service) => ({
+            value: service.id,
+            label: service.serviceName,
+          })),
+          description: data.description,
+        });
+        setTreatmentsList(
+          data.medicines.map((med) => ({
+            medicineId: med.medicine.medicineId,
+            medicineName: med.medicine.medicineName,
+            dosageName: med.dosageInstruction,
+            durationName: med.duration,
+          })),
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching treatment by ID:", error);
+    }
+  };
 
   const fetchPatients = async () => {
     try {
@@ -91,7 +130,7 @@ const TreatmentList = () => {
 
   const fetchDoctors = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/doctor");
+      const response = await axios.get("http://localhost:8080/api/v1/doctors");
       if (response.status === 200) {
         setDoctors(response.data);
       }
@@ -102,7 +141,7 @@ const TreatmentList = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/service");
+      const response = await axios.get("http://localhost:8080/api/v1/services");
       if (response.status === 200) {
         setServices(response.data);
       }
@@ -113,10 +152,11 @@ const TreatmentList = () => {
 
   const fetchMedicines = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/medicine");
+      const response = await axios.get(
+        "http://localhost:8080/api/v1/medicines",
+      );
       if (response.status === 200) {
-        setMedicine(response.data);
-        console.log(response.data);
+        setMedicines(response.data);
       }
     } catch (error) {
       console.error("Error fetching medicines:", error);
@@ -132,20 +172,17 @@ const TreatmentList = () => {
     setValidated(true);
 
     try {
-      // alert(JSON.stringify(treatment));
       const serviceIds = Array.isArray(treatment.serviceId)
         ? treatment.serviceId.map((service) => service.value)
         : [];
 
-      // alert(JSON.stringify(serviceIds));
       const medicines = treatmentsList.map((item) => ({
         medicineId: item.medicineId,
         dosageInstruction: item.dosageName,
         duration: item.durationName,
       }));
-      // alert(JSON.stringify(medicines));
 
-      const res = await axios.post("http://localhost:8080/api/v1/treatment", {
+      const res = await axios.post("http://localhost:8080/api/v1/treatments", {
         patientId: treatment.patientId,
         doctorId: treatment.doctorId,
         serviceItems: serviceIds.map((serviceId) => ({ id: serviceId })),
@@ -184,12 +221,19 @@ const TreatmentList = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    // alert(name + value);
-    setTreatment({
-      ...treatment,
-      [name]: value,
-    });
+    if (name === "doctorId") {
+      // If the change is for the doctor selection, handle it separately
+      setTreatment({
+        ...treatment,
+        doctorId: value,
+      });
+    } else {
+      // For other input changes, update the state normally
+      setTreatment({
+        ...treatment,
+        [name]: value,
+      });
+    }
   };
 
   const handleServiceChange = (selectedOption) => {
@@ -207,9 +251,19 @@ const TreatmentList = () => {
     });
   };
 
-  const handleSubmitMedicine = async (event) => {
+  const handleSubmitMedicine = (event) => {
     event.preventDefault();
-    setTreatmentsList([...treatmentsList, treatment]);
+    if (
+      treatment.medicineId &&
+      treatment.dosageName &&
+      treatment.durationName
+    ) {
+      setTreatmentsList([...treatmentsList, { ...treatment }]);
+    } else {
+      window.alert(
+        "Please select medicine, dosage, and duration before adding.",
+      );
+    }
   };
 
   const InvoicePDF = ({ formData }) => (
@@ -220,10 +274,15 @@ const TreatmentList = () => {
           <Text style={styles.text}>Patient: {formData.patientId}</Text>
           <Text style={styles.text}>Doctor: {formData.doctorId}</Text>
           <Text style={styles.text}>
-            Service: {formData.serviceId.join(", ")}
+            Service: {formData.serviceId.map((s) => s.label).join(", ")}
           </Text>
           <Text style={styles.text}>Medicines:</Text>
-
+          {treatmentsList.map((med, index) => (
+            <Text key={index} style={styles.text}>
+              {med.medicineName} - Dosage: {med.dosageName} - Duration:{" "}
+              {med.durationName}
+            </Text>
+          ))}
           <Text style={styles.text}>Description: {formData.description}</Text>
         </View>
       </Page>
@@ -231,7 +290,17 @@ const TreatmentList = () => {
   );
 
   const handleWhatsAppClick = () => {
-    // Logic for WhatsApp click
+    const message = `Patient: ${treatment.patientId}\nDoctor: ${treatment.doctorId}\nServices: ${treatment.serviceId
+      .map((s) => s.label)
+      .join(
+        ", ",
+      )}\nDescription: ${treatment.description}\nMedicines:\n${treatmentsList
+      .map(
+        (med) =>
+          `${med.medicineName} - Dosage: ${med.dosageName} - Duration: ${med.durationName}`,
+      )
+      .join("\n")}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   const styles = StyleSheet.create({
@@ -265,7 +334,7 @@ const TreatmentList = () => {
               padding: "5px",
             }}
           >
-            <span style={{ lineHeight: "44px" }}>Add Treatment</span>
+            <span style={{ lineHeight: "44px" }}>Update Treatment</span>
             <div style={{ display: "flex", alignItems: "center" }}>
               <div className="input-group-append">
                 <Link to="/treatment" className="btn btn-primary">
@@ -273,7 +342,7 @@ const TreatmentList = () => {
                 </Link>
               </div>
             </div>
-          </CCardHeader>{" "}
+          </CCardHeader>
           <CCardBody>
             <CForm
               className="mb-3 row g-3 needs-validation"
@@ -382,7 +451,7 @@ const TreatmentList = () => {
               <CCol md={4}>
                 <CFormLabel htmlFor="medicineName">Select Medicine</CFormLabel>
                 <Select
-                  options={medicine.map((med) => ({
+                  options={medicines.map((med) => ({
                     value: med.medicineId,
                     label: med.medicineName,
                   }))}
@@ -390,7 +459,6 @@ const TreatmentList = () => {
                   onChange={handleMedicineChange}
                   required
                 />
-
                 <CFormFeedback invalid>Please select a medicine.</CFormFeedback>
               </CCol>
               <CCol md={4}>
@@ -411,7 +479,7 @@ const TreatmentList = () => {
                   placeholder="Select a dosage"
                   required
                 />
-                <CFormFeedback invalid>Please select a Dosage.</CFormFeedback>
+                <CFormFeedback invalid>Please select a dosage.</CFormFeedback>
               </CCol>
               <CCol md={4}>
                 <CFormLabel htmlFor="durationName">Select Duration</CFormLabel>

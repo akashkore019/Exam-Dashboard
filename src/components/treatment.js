@@ -3,6 +3,7 @@ import axios from "axios";
 import config from "../config";
 import { toast } from "react-toastify";
 import { FaWhatsapp } from "react-icons/fa";
+import Select from "react-select";
 
 import {
   PDFDownloadLink,
@@ -33,7 +34,6 @@ import {
 } from "@coreui/react";
 import Draggable from "react-draggable"; // Import Draggable component
 import { CSVLink } from "react-csv";
-import Select from "react-select";
 
 import { Link } from "react-router-dom";
 import CIcon from "@coreui/icons-react";
@@ -145,7 +145,34 @@ const Treatment = () => {
     }
   };
 
+  const [editModeIndex, setEditModeIndex] = useState(null);
+
+  const handleEditMedicine = (index) => {
+    const medicineDetailToEdit =
+      selectedTreatment.treatmentMedicineDetailsList[index];
+    setTreatment({
+      ...treatment,
+      medicineId: medicineDetailToEdit.medicine.medicineId,
+      medicineName: medicineDetailToEdit.medicine.medicineName,
+      dosageName: medicineDetailToEdit.dosageInstruction,
+      durationName: medicineDetailToEdit.duration,
+    });
+    setEditModeIndex(index);
+  };
+
+  const handleDeleteMedicine = (index) => {
+    const updatedMedicines = [
+      ...selectedTreatment.treatmentMedicineDetailsList,
+    ];
+    updatedMedicines.splice(index, 1); // Remove the medicine detail at the specified index
+    setSelectedTreatment({
+      ...selectedTreatment,
+      treatmentMedicineDetailsList: updatedMedicines,
+    });
+  };
+
   const renderMedicineTableRows = () => {
+    console.log(JSON.stringify(selectedTreatment));
     if (!selectedTreatment || !selectedTreatment.treatmentMedicineDetailsList) {
       return null;
     }
@@ -159,6 +186,24 @@ const Treatment = () => {
           </CTableDataCell>
           <CTableDataCell>{medicineDetail.dosageInstruction}</CTableDataCell>
           <CTableDataCell>{medicineDetail.duration}</CTableDataCell>
+          <CTableDataCell>
+            <CButton
+              color="info"
+              variant="outline"
+              size="sm"
+              onClick={() => handleEditMedicine(index)}
+            >
+              <AiFillEdit />
+            </CButton>
+            <CButton
+              color="danger"
+              variant="outline"
+              size="sm"
+              onClick={() => handleDeleteMedicine(index)}
+            >
+              <FaTrash />
+            </CButton>
+          </CTableDataCell>
         </CTableRow>
       ),
     );
@@ -222,6 +267,7 @@ const Treatment = () => {
   const fetchData = async () => {
     try {
       const response = await axios.get(`${config.apiUrl}treatment`);
+
       setTreatments(response.data);
     } catch (error) {
       console.error("Error fetching treatments:", error);
@@ -247,8 +293,11 @@ const Treatment = () => {
     const selected = treatments.find(
       (treatment) => treatment.id === treatmentId,
     );
-    setSelectedTreatment(selected); // Set selectedTreatment for editing
-    setShowEditModal(true);
+    // alert("hiiiiii");
+    // console.log(JSON.stringify(selectedTreatment));
+
+    setSelectedTreatment(selected);
+    setShowEditModal(true); // Open the edit modal
   };
 
   // Correct the handleSave function
@@ -340,7 +389,7 @@ const Treatment = () => {
             <tbody>
               {filteredTreatments.map((treatment) => (
                 <tr key={treatment.id}>
-                 <td style={{ alignItems: "center" }}>
+                  <td style={{ alignItems: "center" }}>
                     <div style={{ display: "flex", gap: "10px" }}>
                       <CButton
                         color="info"
@@ -355,7 +404,6 @@ const Treatment = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => handleDelete(treatment.id)}
-                        
                       >
                         <FaTrash />
                       </CButton>
@@ -373,6 +421,7 @@ const Treatment = () => {
           </table>
         </CCardBody>
       </CCard>
+
       {/* Edit Modal */}
       {selectedTreatment && (
         <Draggable handle=".modal-header">
@@ -512,6 +561,13 @@ const Treatment = () => {
                         })
                       }
                       isClearable
+                      isMulti
+                      value={selectedTreatment.treatmentItemDetailsList.map(
+                        (item) => ({
+                          value: item.serviceItem.id,
+                          label: item.serviceItem.serviceName,
+                        }),
+                      )}
                       required
                       styles={{
                         control: (base) => ({
@@ -615,21 +671,21 @@ const Treatment = () => {
 
                 <CCol xs={12}>
                   <CCard>
-        <CCardHeader>Medicine Details</CCardHeader>
-        <CCardBody>
-          <CTable>
-            <CTableHead>
-              <CTableRow>
-                <CTableHeaderCell>Sr.no</CTableHeaderCell>
-                <CTableHeaderCell>Medicine</CTableHeaderCell>
-                <CTableHeaderCell>Dosage</CTableHeaderCell>
-                <CTableHeaderCell>Duration</CTableHeaderCell>
-              </CTableRow>
-            </CTableHead>
-            <CTableBody>{renderMedicineTableRows()}</CTableBody>
-          </CTable>
-        </CCardBody>
-      </CCard>
+                    <CCardHeader>Medicine Details</CCardHeader>
+                    <CCardBody>
+                      <CTable>
+                        <CTableHead>
+                          <CTableRow>
+                            <CTableHeaderCell>Sr.no</CTableHeaderCell>
+                            <CTableHeaderCell>Medicine</CTableHeaderCell>
+                            <CTableHeaderCell>Dosage</CTableHeaderCell>
+                            <CTableHeaderCell>Duration</CTableHeaderCell>
+                          </CTableRow>
+                        </CTableHead>
+                        <CTableBody>{renderMedicineTableRows()}</CTableBody>
+                      </CTable>
+                    </CCardBody>
+                  </CCard>
                 </CCol>
               </CCardBody>
             </CCard>
