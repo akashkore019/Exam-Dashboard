@@ -544,30 +544,36 @@ const Treatment = () => {
                       Select Service
                     </CFormLabel>
                     <Select
-                      id="serviceId"
-                      name="serviceId"
-                      options={
-                        services && services.length > 0
-                          ? services.map((service) => ({
-                              value: service.id,
-                              label: service.serviceName,
-                            }))
-                          : []
-                      }
-                      onChange={(selectedOption) =>
-                        setSelectedTreatment({
-                          ...selectedTreatment,
-                          serviceId: selectedOption.value, // Update selectedTreatment
-                        })
-                      }
-                      isClearable
-                      isMulti
-                      value={selectedTreatment.treatmentItemDetailsList.map(
-                        (item) => ({
-                          value: item.serviceItem.id,
-                          label: item.serviceItem.serviceName,
-                        }),
-                      )}
+  id="serviceId"
+  name="serviceId"
+  options={
+    services && services.length > 0
+      ? services.map((service) => ({
+          value: service.id,
+          label: service.serviceName,
+        }))
+      : []
+  }
+  onChange={(selectedOptions) => {
+    // Update selectedTreatment with the new selected options
+    setSelectedTreatment({
+      ...selectedTreatment,
+      treatmentItemDetailsList: selectedOptions.map((selectedOption) => ({
+        serviceItem: {
+          id: selectedOption.value,
+          serviceName: selectedOption.label,
+        },
+      })),
+    });
+  }}
+  isClearable
+  isMulti
+  value={selectedTreatment.treatmentItemDetailsList.map((item) => ({
+    value: item.serviceItem.id,
+    label: item.serviceItem.serviceName,
+  }))}
+
+
                       required
                       styles={{
                         control: (base) => ({
