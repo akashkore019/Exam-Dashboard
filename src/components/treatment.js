@@ -54,11 +54,16 @@ const Treatment = () => {
   const [doctors, setDoctors] = useState([]);
   const [services, setServices] = useState([]);
   const [medicineNames, setMedicineNames] = useState([]);
+  const [medicine, setMedicine] = useState([]);
   const [treatment, setTreatment] = useState({
     patientId: "",
     doctorId: "",
     serviceId: "",
     medicineForms: [],
+    medicineName: "",
+    medicineId: "",
+    dosageName: "",
+    durationName: "",
     description: "",
   });
 
@@ -177,36 +182,42 @@ const Treatment = () => {
       return null;
     }
 
-    return selectedTreatment.treatmentMedicineDetailsList.map(
-      (medicineDetail, index) => (
-        <CTableRow key={index}>
-          <CTableDataCell>{index + 1}</CTableDataCell>
-          <CTableDataCell>
-            {medicineDetail.medicine.medicineName}
-          </CTableDataCell>
-          <CTableDataCell>{medicineDetail.dosageInstruction}</CTableDataCell>
-          <CTableDataCell>{medicineDetail.duration}</CTableDataCell>
-          <CTableDataCell>
-            <CButton
-              color="info"
-              variant="outline"
-              size="sm"
-              onClick={() => handleEditMedicine(index)}
-            >
-              <AiFillEdit />
-            </CButton>
-            <CButton
-              color="danger"
-              variant="outline"
-              size="sm"
-              onClick={() => handleDeleteMedicine(index)}
-            >
-              <FaTrash />
-            </CButton>
-          </CTableDataCell>
-        </CTableRow>
-      ),
-    );
+    // Combine the selected treatment medicine details with the new treatments list
+    const allMedicineDetails = [
+      ...selectedTreatment.treatmentMedicineDetailsList,
+      ...treatmentsList.map((item) => ({
+        medicine: { medicineName: item.medicineName },
+        dosageInstruction: item.dosageName,
+        duration: item.durationName,
+      })),
+    ];
+
+    return allMedicineDetails.map((medicineDetail, index) => (
+      <CTableRow key={index}>
+        <CTableDataCell>{index + 1}</CTableDataCell>
+        <CTableDataCell>{medicineDetail.medicine.medicineName}</CTableDataCell>
+        <CTableDataCell>{medicineDetail.dosageInstruction}</CTableDataCell>
+        <CTableDataCell>{medicineDetail.duration}</CTableDataCell>
+        <CTableDataCell>
+          <CButton
+            color="info"
+            variant="outline"
+            size="sm"
+            onClick={() => handleEditMedicine(index)}
+          >
+            <AiFillEdit />
+          </CButton>
+          <CButton
+            color="danger"
+            variant="outline"
+            size="sm"
+            onClick={() => handleDeleteMedicine(index)}
+          >
+            <FaTrash />
+          </CButton>
+        </CTableDataCell>
+      </CTableRow>
+    ));
   };
 
   const styles = StyleSheet.create({
@@ -298,6 +309,62 @@ const Treatment = () => {
 
     setSelectedTreatment(selected);
     setShowEditModal(true); // Open the edit modal
+  };
+
+  const handleMedicineChange = (selectedOption) => {
+    setTreatment({
+      ...treatment,
+      medicineId: selectedOption ? selectedOption.value : "",
+      medicineName: selectedOption ? selectedOption.label : "",
+    });
+  };
+
+  const [treatmentsList, setTreatmentsList] = useState([]);
+  const [dosageOptions] = useState([
+    { value: "1:0:0", label: "1:0:0" },
+    { value: "1:1:0", label: "1:1:0" },
+    { value: "0:1:0", label: "0:1:0" },
+    { value: "0:1:1", label: "0:1:1" },
+    { value: "1:1:1", label: "1:1:1" },
+    { value: "0:0:1", label: "0:0:1" },
+    { value: "1:0:1", label: "1:0:1" },
+  ]);
+  const [durationOptions] = useState([
+    { value: "7 days", label: "7 days" },
+    { value: "5 days", label: "5 days" },
+    { value: "30 days", label: "30 days" },
+    { value: "1 day", label: "1 day" },
+    { value: "other custom days", label: "Other custom days" },
+  ]);
+
+  useEffect(() => {
+    fetchMedicines();
+  }, []);
+  const fetchMedicines = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/v1/medicine");
+      if (response.status === 200) {
+        setMedicine(response.data);
+        console.log(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching medicines:", error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    // alert(name + value);
+    setTreatment({
+      ...treatment,
+      [name]: value,
+    });
+  };
+
+  const handleSubmitMedicine = async (event) => {
+    event.preventDefault();
+    setTreatmentsList([...treatmentsList, treatment]);
   };
 
   // Correct the handleSave function
@@ -544,36 +611,38 @@ const Treatment = () => {
                       Select Service
                     </CFormLabel>
                     <Select
-  id="serviceId"
-  name="serviceId"
-  options={
-    services && services.length > 0
-      ? services.map((service) => ({
-          value: service.id,
-          label: service.serviceName,
-        }))
-      : []
-  }
-  onChange={(selectedOptions) => {
-    // Update selectedTreatment with the new selected options
-    setSelectedTreatment({
-      ...selectedTreatment,
-      treatmentItemDetailsList: selectedOptions.map((selectedOption) => ({
-        serviceItem: {
-          id: selectedOption.value,
-          serviceName: selectedOption.label,
-        },
-      })),
-    });
-  }}
-  isClearable
-  isMulti
-  value={selectedTreatment.treatmentItemDetailsList.map((item) => ({
-    value: item.serviceItem.id,
-    label: item.serviceItem.serviceName,
-  }))}
-
-
+                      id="serviceId"
+                      name="serviceId"
+                      options={
+                        services && services.length > 0
+                          ? services.map((service) => ({
+                              value: service.id,
+                              label: service.serviceName,
+                            }))
+                          : []
+                      }
+                      onChange={(selectedOptions) => {
+                        // Update selectedTreatment with the new selected options
+                        setSelectedTreatment({
+                          ...selectedTreatment,
+                          treatmentItemDetailsList: selectedOptions.map(
+                            (selectedOption) => ({
+                              serviceItem: {
+                                id: selectedOption.value,
+                                serviceName: selectedOption.label,
+                              },
+                            }),
+                          ),
+                        });
+                      }}
+                      isClearable
+                      isMulti
+                      value={selectedTreatment.treatmentItemDetailsList.map(
+                        (item) => ({
+                          value: item.serviceItem.id,
+                          label: item.serviceItem.serviceName,
+                        }),
+                      )}
                       required
                       styles={{
                         control: (base) => ({
@@ -633,6 +702,80 @@ const Treatment = () => {
                       }
                     />
                   </CCol>
+
+                  <CCol md={4}>
+                    <CFormLabel htmlFor="medicineName">
+                      Select Medicine
+                    </CFormLabel>
+                    <Select
+                      options={medicine.map((med) => ({
+                        value: med.medicineId,
+                        label: med.medicineName,
+                      }))}
+                      name="medicineId"
+                      onChange={handleMedicineChange}
+                      required
+                    />
+
+                    <CFormFeedback invalid>
+                      Please select a medicine.
+                    </CFormFeedback>
+                  </CCol>
+
+                  <CCol md={4}>
+                    <CFormLabel htmlFor="dosageName">Select Dosage</CFormLabel>
+                    <Select
+                      id="dosageName"
+                      name="dosageName"
+                      options={dosageOptions}
+                      onChange={(selectedOption) =>
+                        handleInputChange({
+                          target: {
+                            name: "dosageName",
+                            value: selectedOption.value,
+                          },
+                        })
+                      }
+                      isClearable
+                      placeholder="Select a dosage"
+                      required
+                    />
+                    <CFormFeedback invalid>
+                      Please select a Dosage.
+                    </CFormFeedback>
+                  </CCol>
+
+                  <CCol md={4}>
+                    <CFormLabel htmlFor="durationName">
+                      Select Duration
+                    </CFormLabel>
+                    <Select
+                      id="durationName"
+                      name="durationName"
+                      options={durationOptions}
+                      onChange={(selectedOption) =>
+                        handleInputChange({
+                          target: {
+                            name: "durationName",
+                            value: selectedOption.value,
+                          },
+                        })
+                      }
+                      isClearable
+                      placeholder="Select a duration"
+                      required
+                    />
+                    <CFormFeedback invalid>
+                      Please select a duration.
+                    </CFormFeedback>
+                  </CCol>
+
+                  <CCol md={12}>
+                    <CButton color="primary" onClick={handleSubmitMedicine}>
+                      Add Medicine
+                    </CButton>
+                  </CCol>
+
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <CCol md={18}>
                       <button
@@ -688,7 +831,17 @@ const Treatment = () => {
                             <CTableHeaderCell>Duration</CTableHeaderCell>
                           </CTableRow>
                         </CTableHead>
-                        <CTableBody>{renderMedicineTableRows()}</CTableBody>
+                        <CTableBody>
+                          {renderMedicineTableRows()}
+                          {/* {treatmentsList.map((item, index) => (
+                  <CTableRow key={index}>
+                    <CTableDataCell>{index + 1}</CTableDataCell>
+                    <CTableDataCell>{item.medicineName}</CTableDataCell>
+                    <CTableDataCell>{item.dosageName}</CTableDataCell>
+                    <CTableDataCell>{item.durationName}</CTableDataCell>
+                  </CTableRow>
+                ))} */}
+                        </CTableBody>
                       </CTable>
                     </CCardBody>
                   </CCard>
