@@ -158,6 +158,8 @@ const TreatmentList = () => {
       description: treatment.description,
     });
 
+    alert(JSON.stringify(serviceIds))
+
     if (res.status === 200) {
       window.alert("Treatment data submitted successfully!");
       form.reset();

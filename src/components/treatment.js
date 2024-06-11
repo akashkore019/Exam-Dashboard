@@ -390,51 +390,53 @@ const Treatment = () => {
   // };
 
   const handleSave = async () => {
-    // Validate the form
-
-    alert(selectedTreatment.id);
     try {
       // Check if selectedTreatment is defined
       if (!selectedTreatment) {
         throw new Error("Selected treatment is not defined.");
       }
-
+  
       // Extract necessary data from selectedTreatment state
-      const { patientId, doctorId, description, treatmentItemDetailsList } =
-        selectedTreatment;
-
+      const { patientId, doctorId, description, treatmentItemDetailsList, medicines } = selectedTreatment;
+  
       // Check if patientId and doctorId are defined and are non-empty strings
-      // if (
-      //   typeof patientId !== "string" ||
-      //   !patientId.trim() ||
-      //   typeof doctorId !== "string" ||
-      //   !doctorId.trim()
-      // ) {
-      //   throw new Error("Patient ID or Doctor ID is missing or invalid.");
-      // }
-
-      // Extract serviceIds from treatmentItemDetailsList
-      const serviceIds = treatmentItemDetailsList.map(
-        (item) => item.serviceItem.id,
-      );
-
+      if (!patientId || !doctorId) {
+        throw new Error("Patient ID or Doctor ID is missing or invalid.");
+      }
+  
+      // Extract serviceItems from treatmentItemDetailsList
+      const serviceItems = treatmentItemDetailsList.map((item) => ({
+        id: item.serviceItem.id,
+        serviceName: item.serviceItem.serviceName,
+        // Add other necessary fields here if needed
+      }));
+  
+      // Construct the medicines array
+      // const medicinesPayload = medicines.map((medicine) => ({
+      //   medicine: {
+      //     medicineId: medicine.medicineId,
+      //   },
+      //   dosageInstruction: medicine.dosageInstruction,
+      //   duration: medicine.duration,
+      // }));
+  
       // Construct the payload to be sent to the API
       const payload = {
         patientId,
         doctorId,
         description,
-        serviceIds, // Include serviceIds in the payload
-        // Add other necessary fields from selectedTreatment or elsewhere
+        serviceItems, // Include serviceItems in the payload
+        // medicines: medicinesPayload, // Include medicines in the payload
       };
-
+  
       alert(JSON.stringify(payload));
-
+  
       // Make the API call to save the data
       const res = await axios.put(
         `http://localhost:8080/api/v1/treatment/${selectedTreatment.id}`,
-        payload,
+        payload
       );
-
+  
       // Check the response status
       if (res.status === 200) {
         // Reset the form and state after successful save
@@ -442,10 +444,8 @@ const Treatment = () => {
         setSelectedTreatment({
           patientId: "",
           doctorId: "",
-          serviceId: [],
-          medicineName: "",
-          dosageName: "",
-          durationName: "",
+          treatmentItemDetailsList: [],
+          medicines: [],
           description: "",
           // Make sure to reset all necessary fields
         });
@@ -461,7 +461,7 @@ const Treatment = () => {
       // window.alert("Failed to update treatment data. Please try again later.");
     }
   };
-
+  
   const handleDelete = async (treatmentId) => {
     if (window.confirm("Are you sure you want to delete this Treatment?")) {
       try {
