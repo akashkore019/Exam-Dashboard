@@ -58,7 +58,7 @@ const Treatment = () => {
   const [treatment, setTreatment] = useState({
     patientId: "",
     doctorId: "",
-    serviceId: "",
+    serviceId: [],
     medicineForms: [],
     medicineName: "",
     medicineId: "",
@@ -166,14 +166,28 @@ const Treatment = () => {
   };
 
   const handleDeleteMedicine = (index) => {
-    const updatedMedicines = [
-      ...selectedTreatment.treatmentMedicineDetailsList,
-    ];
-    updatedMedicines.splice(index, 1); // Remove the medicine detail at the specified index
-    setSelectedTreatment({
-      ...selectedTreatment,
-      treatmentMedicineDetailsList: updatedMedicines,
-    });
+    // Check if index is within the range of selectedTreatment.treatmentMedicineDetailsList
+    if (index < selectedTreatment.treatmentMedicineDetailsList.length) {
+      // If within range, delete from selectedTreatment.treatmentMedicineDetailsList
+      const updatedDetailsList = [
+        ...selectedTreatment.treatmentMedicineDetailsList.slice(0, index),
+        ...selectedTreatment.treatmentMedicineDetailsList.slice(index + 1),
+      ];
+      setSelectedTreatment({
+        ...selectedTreatment,
+        treatmentMedicineDetailsList: updatedDetailsList,
+      });
+    } else {
+      // If not within range, calculate the adjusted index for treatmentsList
+      const adjustedIndex =
+        index - selectedTreatment.treatmentMedicineDetailsList.length;
+      // Delete from treatmentsList
+      const updatedTreatmentsList = [
+        ...treatmentsList.slice(0, adjustedIndex),
+        ...treatmentsList.slice(adjustedIndex + 1),
+      ];
+      setTreatmentsList(updatedTreatmentsList);
+    }
   };
 
   const renderMedicineTableRows = () => {
@@ -199,14 +213,6 @@ const Treatment = () => {
         <CTableDataCell>{medicineDetail.dosageInstruction}</CTableDataCell>
         <CTableDataCell>{medicineDetail.duration}</CTableDataCell>
         <CTableDataCell>
-          <CButton
-            color="info"
-            variant="outline"
-            size="sm"
-            onClick={() => handleEditMedicine(index)}
-          >
-            <AiFillEdit />
-          </CButton>
           <CButton
             color="danger"
             variant="outline"
@@ -247,7 +253,7 @@ const Treatment = () => {
           <Text style={styles.heading}>Invoice</Text>
           <Text style={styles.text}>Patient: {formData.patientId}</Text>
           <Text style={styles.text}>Doctor: {formData.doctorId}</Text>
-          <Text style={styles.text}>Service: {formData.serviceId}</Text>
+          {/* <Text style={styles.text}>Service: {formData.serviceId}</Text> */}
           <Text style={styles.text}>Medicines:</Text>
           {formData.medicineForms.map((medicine, index) => (
             <View key={index} style={styles.section}>
@@ -368,18 +374,91 @@ const Treatment = () => {
   };
 
   // Correct the handleSave function
+  // const handleSave = async () => {
+  //   try {
+  //     await axios.put(
+  //       "http://localhost:8080/api/v1/treatment", // Update the URL to use selectedTreatment.id
+  //       selectedTreatment,
+  //     );
+  //     setShowEditModal(false); // Close modal after saving
+  //     fetchData(); // Refresh the table
+  //     toast.success("Updated Successfully!", { autoClose: 3000 });
+  //   } catch (error) {
+  //     console.error("Error updating treatment:", error);
+  //     // Handle error - show toast message or any other UI indication
+  //   }
+  // };
+
   const handleSave = async () => {
+    // Validate the form
+
+    alert(selectedTreatment.id);
     try {
-      await axios.put(
-        `${config.apiUrl}treatment/${selectedTreatment.id}`, // Update the URL to use selectedTreatment.id
-        selectedTreatment,
+      // Check if selectedTreatment is defined
+      if (!selectedTreatment) {
+        throw new Error("Selected treatment is not defined.");
+      }
+
+      // Extract necessary data from selectedTreatment state
+      const { patientId, doctorId, description, treatmentItemDetailsList } =
+        selectedTreatment;
+
+      // Check if patientId and doctorId are defined and are non-empty strings
+      // if (
+      //   typeof patientId !== "string" ||
+      //   !patientId.trim() ||
+      //   typeof doctorId !== "string" ||
+      //   !doctorId.trim()
+      // ) {
+      //   throw new Error("Patient ID or Doctor ID is missing or invalid.");
+      // }
+
+      // Extract serviceIds from treatmentItemDetailsList
+      const serviceIds = treatmentItemDetailsList.map(
+        (item) => item.serviceItem.id,
       );
-      setShowEditModal(false); // Close modal after saving
-      fetchData(); // Refresh the table
-      toast.success("Updated Successfully!", { autoClose: 3000 });
+
+      // Construct the payload to be sent to the API
+      const payload = {
+        patientId,
+        doctorId,
+        description,
+        serviceIds, // Include serviceIds in the payload
+        // Add other necessary fields from selectedTreatment or elsewhere
+      };
+
+      alert(JSON.stringify(payload));
+
+      // Make the API call to save the data
+      const res = await axios.put(
+        `http://localhost:8080/api/v1/treatment/${selectedTreatment.id}`,
+        payload,
+      );
+
+      // Check the response status
+      if (res.status === 200) {
+        // Reset the form and state after successful save
+        setValidated(false);
+        setSelectedTreatment({
+          patientId: "",
+          doctorId: "",
+          serviceId: [],
+          medicineName: "",
+          dosageName: "",
+          durationName: "",
+          description: "",
+          // Make sure to reset all necessary fields
+        });
+        setTreatmentsList([]);
+        // Optionally show success message
+        // window.alert("Treatment data updated successfully!");
+      } else {
+        throw new Error("Failed to update treatment data");
+      }
     } catch (error) {
-      console.error("Error updating treatment:", error);
-      // Handle error - show toast message or any other UI indication
+      console.error("Error:", error);
+      // Optionally show error message
+      // window.alert("Failed to update treatment data. Please try again later.");
     }
   };
 
@@ -778,12 +857,13 @@ const Treatment = () => {
 
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <CCol md={18}>
+                      hhhh{" "}
                       <button
                         type="button"
                         className="btn btn-primary "
                         onClick={() => handleSave()} // Call handleSave on click
                       >
-                        Save
+                        1111Save
                       </button>
                       <button
                         type="button"

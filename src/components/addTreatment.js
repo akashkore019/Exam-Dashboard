@@ -124,64 +124,66 @@ const TreatmentList = () => {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.stopPropagation();
-    }
-    setValidated(true);
+  event.preventDefault();
+  const form = event.target; // Use event.target instead of event.currentTarget
+  
+  if (form.checkValidity() === false) {
+    event.stopPropagation();
+    setValidated(true); // Move inside the if block to only set validated if form is invalid
+    return; // Exit early if form is invalid
+  }
+  
+  try {
+    const serviceIds = Array.isArray(treatment.serviceId)
+      ? treatment.serviceId.map((service) => service.value)
+      : [];
+      
+    const medicines = treatmentsList.map((item) => ({
+      medicineId: item.medicineId,
+      dosageInstruction: item.dosageName,
+      duration: item.durationName,
+    }));
+    
+    const res = await axios.post("http://localhost:8080/api/v1/treatment", {
+      patientId: treatment.patientId,
+      doctorId: treatment.doctorId,
+      serviceItems: serviceIds.map((serviceId) => ({ id: serviceId })),
+      medicines: medicines.map((medicine) => ({
+        medicine: {
+          medicineId: medicine.medicineId,
+        },
+        dosageInstruction: medicine.dosageInstruction,
+        duration: medicine.duration,
+      })),
+      description: treatment.description,
+    });
 
-    try {
-      // alert(JSON.stringify(treatment));
-      const serviceIds = Array.isArray(treatment.serviceId)
-        ? treatment.serviceId.map((service) => service.value)
-        : [];
-
-      // alert(JSON.stringify(serviceIds));
-      const medicines = treatmentsList.map((item) => ({
-        medicineId: item.medicineId,
-        dosageInstruction: item.dosageName,
-        duration: item.durationName,
-      }));
-      // alert(JSON.stringify(medicines));
-
-      const res = await axios.post("http://localhost:8080/api/v1/treatment", {
-        patientId: treatment.patientId,
-        doctorId: treatment.doctorId,
-        serviceItems: serviceIds.map((serviceId) => ({ id: serviceId })),
-        medicines: medicines.map((medicine) => ({
-          medicine: {
-            medicineId: medicine.medicineId,
-          },
-          dosageInstruction: medicine.dosageInstruction,
-          duration: medicine.duration,
-        })),
-        description: treatment.description,
+    if (res.status === 200) {
+      window.alert("Treatment data submitted successfully!");
+      form.reset();
+      setValidated(false);
+      setTreatment({
+        patientId: "",
+        doctorId: "",
+        serviceId: [],
+        medicineName: "",
+        dosageName: "",
+        durationName: "",
+        description: "",
       });
-
-      if (res.status === 200) {
-        window.alert("Treatment data submitted successfully!");
-        form.reset();
-        setValidated(false);
-        setTreatment({
-          patientId: "",
-          doctorId: "",
-          serviceId: [],
-          medicineName: "",
-          dosageName: "",
-          durationName: "",
-          description: "",
-        });
-        setTreatmentsList([]);
-      } else {
-        throw new Error("Failed to submit treatment data");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      window.alert("Failed to submit treatment data. Please try again later.");
+      setTreatmentsList([]);
+    } else {
+      throw new Error("Failed to submit treatment data");
     }
-  };
+  } catch (error) {
+    console.error("Error:", error);
+    window.alert("Failed to submit treatment data. Please try again later.");
+  }
+};
 
+
+
+     
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
