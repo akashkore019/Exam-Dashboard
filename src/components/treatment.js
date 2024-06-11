@@ -191,18 +191,20 @@ const Treatment = () => {
   };
 
   const renderMedicineTableRows = () => {
-    console.log(JSON.stringify(selectedTreatment));
     if (!selectedTreatment || !selectedTreatment.treatmentMedicineDetailsList) {
       return null;
     }
+
+    alert(JSON.stringify(selectedTreatment));
+    console.log(JSON.stringify(selectedTreatment));
 
     // Combine the selected treatment medicine details with the new treatments list
     const allMedicineDetails = [
       ...selectedTreatment.treatmentMedicineDetailsList,
       ...treatmentsList.map((item) => ({
         medicine: { medicineName: item.medicineName },
-        dosageInstruction: item.dosageName,
-        duration: item.durationName,
+        dosageInstruction: item.dosageInstruction,
+        duration: item.duration,
       })),
     ];
 
@@ -370,7 +372,7 @@ const Treatment = () => {
 
   const handleSubmitMedicine = async (event) => {
     event.preventDefault();
-    
+
     // Create a new medicine object with the selected medicine details
     const newMedicine = {
       medicineId: treatment.medicineId,
@@ -378,14 +380,20 @@ const Treatment = () => {
       dosageInstruction: treatment.dosageName,
       duration: treatment.durationName,
     };
-  
+
+    alert(JSON.stringify(newMedicine));
+    console.log(JSON.stringify(newMedicine));
+
+    setTreatmentsList([...treatmentsList, newMedicine]);
     // Update the selectedTreatment state with the new medicine
-    setSelectedTreatment(prevState => ({
+    setSelectedTreatment((prevState) => ({
       ...prevState,
-      medicines: Array.isArray(prevState.medicines) ? [...prevState.medicines, newMedicine] : [newMedicine],
+      medicines: Array.isArray(prevState.medicines)
+        ? [...prevState.medicines, newMedicine]
+        : [newMedicine],
     }));
   };
-  
+
   // Correct the handleSave function
 
   const handleSave = async () => {
