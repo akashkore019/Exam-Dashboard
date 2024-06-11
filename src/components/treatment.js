@@ -370,24 +370,23 @@ const Treatment = () => {
 
   const handleSubmitMedicine = async (event) => {
     event.preventDefault();
-    setTreatmentsList([...treatmentsList, treatment]);
+    
+    // Create a new medicine object with the selected medicine details
+    const newMedicine = {
+      medicineId: treatment.medicineId,
+      medicineName: treatment.medicineName,
+      dosageInstruction: treatment.dosageName,
+      duration: treatment.durationName,
+    };
+  
+    // Update the selectedTreatment state with the new medicine
+    setSelectedTreatment(prevState => ({
+      ...prevState,
+      medicines: Array.isArray(prevState.medicines) ? [...prevState.medicines, newMedicine] : [newMedicine],
+    }));
   };
-
+  
   // Correct the handleSave function
-  // const handleSave = async () => {
-  //   try {
-  //     await axios.put(
-  //       "http://localhost:8080/api/v1/treatment", // Update the URL to use selectedTreatment.id
-  //       selectedTreatment,
-  //     );
-  //     setShowEditModal(false); // Close modal after saving
-  //     fetchData(); // Refresh the table
-  //     toast.success("Updated Successfully!", { autoClose: 3000 });
-  //   } catch (error) {
-  //     console.error("Error updating treatment:", error);
-  //     // Handle error - show toast message or any other UI indication
-  //   }
-  // };
 
   const handleSave = async () => {
     try {
@@ -395,48 +394,56 @@ const Treatment = () => {
       if (!selectedTreatment) {
         throw new Error("Selected treatment is not defined.");
       }
-  
+
       // Extract necessary data from selectedTreatment state
-      const { patientId, doctorId, description, treatmentItemDetailsList, medicines } = selectedTreatment;
-  
+      const {
+        patientId,
+        doctorId,
+        description,
+        treatmentItemDetailsList,
+        medicines,
+      } = selectedTreatment;
+
       // Check if patientId and doctorId are defined and are non-empty strings
       if (!patientId || !doctorId) {
         throw new Error("Patient ID or Doctor ID is missing or invalid.");
       }
-  
+
       // Extract serviceItems from treatmentItemDetailsList
       const serviceItems = treatmentItemDetailsList.map((item) => ({
         id: item.serviceItem.id,
         serviceName: item.serviceItem.serviceName,
         // Add other necessary fields here if needed
       }));
-  
+
+      alert(JSON.stringify(medicines));
       // Construct the medicines array
-      // const medicinesPayload = medicines.map((medicine) => ({
-      //   medicine: {
-      //     medicineId: medicine.medicineId,
-      //   },
-      //   dosageInstruction: medicine.dosageInstruction,
-      //   duration: medicine.duration,
-      // }));
-  
+      const medicinesPayload = medicines.map((medicine) => ({
+        medicine: {
+          medicineId: medicine.medicineId,
+        },
+        dosageInstruction: medicine.dosageInstruction,
+        duration: medicine.duration,
+      }));
+
+      // alert(JSON.stringify(medicinesPayload))
       // Construct the payload to be sent to the API
       const payload = {
         patientId,
         doctorId,
         description,
         serviceItems, // Include serviceItems in the payload
-        // medicines: medicinesPayload, // Include medicines in the payload
+        medicines: medicinesPayload, // Include medicines in the payload
       };
-  
+
       alert(JSON.stringify(payload));
-  
+
       // Make the API call to save the data
       const res = await axios.put(
         `http://localhost:8080/api/v1/treatment/${selectedTreatment.id}`,
-        payload
+        payload,
       );
-  
+
       // Check the response status
       if (res.status === 200) {
         // Reset the form and state after successful save
@@ -461,7 +468,7 @@ const Treatment = () => {
       // window.alert("Failed to update treatment data. Please try again later.");
     }
   };
-  
+
   const handleDelete = async (treatmentId) => {
     if (window.confirm("Are you sure you want to delete this Treatment?")) {
       try {
@@ -684,7 +691,6 @@ const Treatment = () => {
                       Please select a doctor.
                     </CFormFeedback>
                   </CCol>
-
                   <CCol md={4}>
                     <CFormLabel htmlFor="serviceId" style={{ color: "#000" }}>
                       Select Service
@@ -911,17 +917,7 @@ const Treatment = () => {
                             <CTableHeaderCell>Duration</CTableHeaderCell>
                           </CTableRow>
                         </CTableHead>
-                        <CTableBody>
-                          {renderMedicineTableRows()}
-                          {/* {treatmentsList.map((item, index) => (
-                  <CTableRow key={index}>
-                    <CTableDataCell>{index + 1}</CTableDataCell>
-                    <CTableDataCell>{item.medicineName}</CTableDataCell>
-                    <CTableDataCell>{item.dosageName}</CTableDataCell>
-                    <CTableDataCell>{item.durationName}</CTableDataCell>
-                  </CTableRow>
-                ))} */}
-                        </CTableBody>
+                        <CTableBody>{renderMedicineTableRows()}</CTableBody>
                       </CTable>
                     </CCardBody>
                   </CCard>
