@@ -44,7 +44,7 @@ const Appointment = () => {
 
   const fetchDoctors = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/doctor");
+      const response = await axios.get("${config.apiUrl}doctor");
       if (response.status === 200) {
         setDoctors(response.data);
       }

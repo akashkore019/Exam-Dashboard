@@ -32,7 +32,7 @@ const Appointment = () => {
 
   const fetchDoctors = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/doctor");
+      const response = await axios.get("${config.apiUrl}doctor");
       if (response.status === 200) {
         setDoctors(response.data);
       }
@@ -55,7 +55,7 @@ const Appointment = () => {
     setValidated(true);
 
     try {
-      const res = await axios.post("http://localhost:8080/api/v1/appointment", {
+      const res = await axios.post("${config.apiUrl}appointment", {
         ...appointment,
         status: "Scheduled",
       });

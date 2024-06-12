@@ -47,7 +47,7 @@ const AddMedicine = () => {
     setIsSubmitting(true); // Set submitting to true
 
     try {
-      const res = await axios.post("http://localhost:8080/api/v1/medicine", {
+      const res = await axios.post("${config.apiUrl}medicine", {
         medicineName: medicine.medicineName,
         medicineType: medicine.medicineType,
         medicineContents: medicine.medicineContents,

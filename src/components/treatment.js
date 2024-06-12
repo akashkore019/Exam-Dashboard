@@ -4,6 +4,7 @@ import config from "../config";
 import { toast } from "react-toastify";
 import { FaWhatsapp } from "react-icons/fa";
 import Select from "react-select";
+import { useNavigate } from "react-router-dom";
 
 import {
   PDFDownloadLink,
@@ -43,6 +44,15 @@ import { AiFillEdit } from "react-icons/ai";
 
 const Treatment = () => {
   const [treatments, setTreatments] = useState([]);
+  // here assigned navigate for close modal
+  const navigate = useNavigate();
+
+  const formatDateDMY = (date) => {
+    if (!date) return "";
+    const [year, month, day] = date.split("-");
+    return `${day}-${month}-${year}`;
+  };
+
   const [selectedTreatment, setSelectedTreatment] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [searchInput, setSearchInput] = useState("");
@@ -81,15 +91,13 @@ const Treatment = () => {
         "Service Name",
         "Description",
         "Treatment Date",
-        "Status",
       ],
       ...treatments.map((treatment) => [
         treatment.patient.fullName,
         treatment.patient.mobile,
         treatment.doctor.fullName,
         treatment.description,
-        treatment.treatmentDate,
-        treatment.status,
+        formatDateDMY(treatment.treatmentDate),
       ]),
     ]);
   }, [treatments]);
@@ -103,7 +111,7 @@ const Treatment = () => {
 
   const fetchPatients = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/patients");
+      const response = await axios.get("${config.apiUrl}patients");
       if (response.status === 200) {
         setPatients(response.data);
       }
@@ -114,7 +122,7 @@ const Treatment = () => {
 
   const fetchDoctors = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/doctor");
+      const response = await axios.get("${config.apiUrl}doctor");
       if (response.status === 200) {
         setDoctors(response.data);
       }
@@ -125,7 +133,7 @@ const Treatment = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/service");
+      const response = await axios.get("${config.apiUrl}service");
       if (response.status === 200) {
         setServices(response.data);
       }
@@ -136,7 +144,7 @@ const Treatment = () => {
 
   const fetchMedicineNames = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/medicine");
+      const response = await axios.get("${config.apiUrl}medicine");
       if (response.status === 200) {
         setMedicineNames(
           response.data.map((medicine) => ({
@@ -194,9 +202,6 @@ const Treatment = () => {
     if (!selectedTreatment || !selectedTreatment.treatmentMedicineDetailsList) {
       return null;
     }
-
-    alert(JSON.stringify(selectedTreatment));
-    console.log(JSON.stringify(selectedTreatment));
 
     // Combine the selected treatment medicine details with the new treatments list
     const allMedicineDetails = [
@@ -350,7 +355,7 @@ const Treatment = () => {
   }, []);
   const fetchMedicines = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/medicine");
+      const response = await axios.get("${config.apiUrl}medicine");
       if (response.status === 200) {
         setMedicine(response.data);
         console.log(response.data);
@@ -380,9 +385,6 @@ const Treatment = () => {
       dosageInstruction: treatment.dosageName,
       duration: treatment.durationName,
     };
-
-    alert(JSON.stringify(newMedicine));
-    console.log(JSON.stringify(newMedicine));
 
     setTreatmentsList([...treatmentsList, newMedicine]);
     // Update the selectedTreatment state with the new medicine
@@ -424,7 +426,6 @@ const Treatment = () => {
         // Add other necessary fields here if needed
       }));
 
-      alert(JSON.stringify(medicines));
       // Construct the medicines array
       const medicinesPayload = medicines.map((medicine) => ({
         medicine: {
@@ -434,7 +435,6 @@ const Treatment = () => {
         duration: medicine.duration,
       }));
 
-      // alert(JSON.stringify(medicinesPayload))
       // Construct the payload to be sent to the API
       const payload = {
         patientId,
@@ -444,11 +444,9 @@ const Treatment = () => {
         medicines: medicinesPayload, // Include medicines in the payload
       };
 
-      alert(JSON.stringify(payload));
-
       // Make the API call to save the data
       const res = await axios.put(
-        `http://localhost:8080/api/v1/treatment/${selectedTreatment.id}`,
+        `${config.apiUrl}treatment/${selectedTreatment.id}`,
         payload,
       );
 
@@ -465,8 +463,10 @@ const Treatment = () => {
           // Make sure to reset all necessary fields
         });
         setTreatmentsList([]);
+        setShowEditModal(false);
         // Optionally show success message
-        // window.alert("Treatment data updated successfully!");
+        window.alert("Treatment data updated successfully!");
+        navigate("/treatment"); // Ensure this is called after closing the modal
       } else {
         throw new Error("Failed to update treatment data");
       }
@@ -476,16 +476,22 @@ const Treatment = () => {
       // window.alert("Failed to update treatment data. Please try again later.");
     }
   };
-
   const handleDelete = async (treatmentId) => {
+
+
+    
     if (window.confirm("Are you sure you want to delete this Treatment?")) {
       try {
-        await axios.delete(`${config.apiUrl}treatments/${treatmentId}`);
+        await axios.delete(
+          `${config.apiUrl}treatment/${treatmentId}`,
+        );
         fetchData(); // Refresh the table after deletion
         toast.success("Treatment deleted successfully!", { autoClose: 3000 });
       } catch (error) {
         console.error("Error deleting Treatment:", error);
-        // Handle error - show toast message or any other UI indication
+        toast.error("Error deleting treatment. Please try again.", {
+          autoClose: 3000,
+        });
       }
     }
   };
@@ -544,11 +550,10 @@ const Treatment = () => {
                 <th>Doctor Name</th>
                 <th>Description</th>
                 <th>Treatment Date</th>
-                <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {filteredTreatments.map((treatment) => (
+              {treatments.map((treatment) => (
                 <tr key={treatment.id}>
                   <td style={{ alignItems: "center" }}>
                     <div style={{ display: "flex", gap: "10px" }}>
@@ -574,8 +579,7 @@ const Treatment = () => {
                   <td>{treatment.patient.mobile}</td>
                   <td>{treatment.doctor.fullName}</td>
                   <td>{treatment.description}</td>
-                  <td>{treatment.treatmentDate}</td>
-                  <td>{treatment.status}</td>
+                  <td>{formatDateDMY(treatment.treatmentDate)}</td>
                 </tr>
               ))}
             </tbody>
@@ -641,13 +645,19 @@ const Treatment = () => {
                         label: patient.fullName,
                       }))}
                       onChange={(selectedOption) =>
-                        setSelectedTreatment({
-                          ...selectedTreatment,
-                          patientId: selectedOption.value, // Update selectedTreatment
-                        })
+                        setSelectedTreatment((prev) => ({
+                          ...prev,
+                          patientId: selectedOption?.value || "",
+                          patient: {
+                            fullName: selectedOption?.label || "",
+                          },
+                        }))
                       }
                       isClearable
-                      placeholder={selectedTreatment.patient.fullName}
+                      placeholder={
+                        selectedTreatment?.patient?.fullName ||
+                        "Select a patient"
+                      }
                       required
                       styles={{
                         control: (base) => ({
@@ -660,10 +670,12 @@ const Treatment = () => {
                         }),
                       }}
                     />
+
                     <CFormFeedback invalid>
                       Please select a patient.
                     </CFormFeedback>
                   </CCol>
+
                   <CCol md={4}>
                     <CFormLabel htmlFor="doctorId" style={{ color: "#000" }}>
                       Select Doctor
@@ -676,13 +688,18 @@ const Treatment = () => {
                         label: doctor.fullName,
                       }))}
                       onChange={(selectedOption) =>
-                        setSelectedTreatment({
-                          ...selectedTreatment,
-                          doctorId: selectedOption.value, // Update selectedTreatment
-                        })
+                        setSelectedTreatment((prev) => ({
+                          ...prev,
+                          doctorId: selectedOption?.value || "",
+                          doctor: {
+                            fullName: selectedOption?.label || "",
+                          },
+                        }))
                       }
                       isClearable
-                      placeholder={selectedTreatment.doctor.fullName}
+                      placeholder={
+                        selectedTreatment?.doctor?.fullName || "Select a doctor"
+                      }
                       required
                       styles={{
                         control: (base) => ({
@@ -869,15 +886,35 @@ const Treatment = () => {
                     </CButton>
                   </CCol>
 
+                  {/* here is the rendered table */}
+                  <CCol xs={12}>
+                    <CCard>
+                      <CCardHeader>Medicine Details</CCardHeader>
+                      <CCardBody>
+                        <CTable>
+                          <CTableHead>
+                            <CTableRow>
+                              <CTableHeaderCell>Sr.no</CTableHeaderCell>
+                              <CTableHeaderCell>Medicine</CTableHeaderCell>
+                              <CTableHeaderCell>Dosage</CTableHeaderCell>
+                              <CTableHeaderCell>Duration</CTableHeaderCell>
+                            </CTableRow>
+                          </CTableHead>
+                          <CTableBody>{renderMedicineTableRows()}</CTableBody>
+                        </CTable>
+                      </CCardBody>
+                    </CCard>
+                  </CCol>
+
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <CCol md={18}>
-                      hhhh{" "}
+                      {" "}
                       <button
                         type="button"
                         className="btn btn-primary "
                         onClick={() => handleSave()} // Call handleSave on click
                       >
-                        1111Save
+                        Save
                       </button>
                       <button
                         type="button"
@@ -911,25 +948,6 @@ const Treatment = () => {
                     </div>
                   </div>
                 </CForm>
-
-                <CCol xs={12}>
-                  <CCard>
-                    <CCardHeader>Medicine Details</CCardHeader>
-                    <CCardBody>
-                      <CTable>
-                        <CTableHead>
-                          <CTableRow>
-                            <CTableHeaderCell>Sr.no</CTableHeaderCell>
-                            <CTableHeaderCell>Medicine</CTableHeaderCell>
-                            <CTableHeaderCell>Dosage</CTableHeaderCell>
-                            <CTableHeaderCell>Duration</CTableHeaderCell>
-                          </CTableRow>
-                        </CTableHead>
-                        <CTableBody>{renderMedicineTableRows()}</CTableBody>
-                      </CTable>
-                    </CCardBody>
-                  </CCard>
-                </CCol>
               </CCardBody>
             </CCard>
           </div>

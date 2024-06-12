@@ -35,7 +35,7 @@ const AddCategory = () => {
     }
 
     try {
-      const res = await axios.post("http://localhost:8080/api/v1/category", {
+      const res = await axios.post("${config.apiUrl}category", {
         categoryName: category.categoryName,
       });
 

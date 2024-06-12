@@ -77,7 +77,6 @@ const TreatmentList = () => {
     fetchMedicines();
     alert("hiiiiii");
 
-
     if (id) {
       fetchTreatmentById(id);
     }
@@ -87,7 +86,7 @@ const TreatmentList = () => {
     alert("hiiiiii");
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/v1/treatment/getAllTreatmentById/${id}`,
+        `${config.apiUrl}treatment/getAllTreatmentById/${id}`,
       );
       if (response.status === 200) {
         const data = response.data;
@@ -119,7 +118,7 @@ const TreatmentList = () => {
 
   const fetchPatients = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/patients");
+      const response = await axios.get("${config.apiUrl}patients");
       if (response.status === 200) {
         setPatients(response.data);
       }
@@ -130,7 +129,7 @@ const TreatmentList = () => {
 
   const fetchDoctors = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/doctors");
+      const response = await axios.get("${config.apiUrl}doctors");
       if (response.status === 200) {
         setDoctors(response.data);
       }
@@ -141,7 +140,7 @@ const TreatmentList = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/services");
+      const response = await axios.get("${config.apiUrl}services");
       if (response.status === 200) {
         setServices(response.data);
       }
@@ -152,9 +151,7 @@ const TreatmentList = () => {
 
   const fetchMedicines = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8080/api/v1/medicines",
-      );
+      const response = await axios.get("${config.apiUrl}medicines");
       if (response.status === 200) {
         setMedicines(response.data);
       }
@@ -182,7 +179,7 @@ const TreatmentList = () => {
         duration: item.durationName,
       }));
 
-      const res = await axios.post("http://localhost:8080/api/v1/treatments", {
+      const res = await axios.post("${config.apiUrl}treatments", {
         patientId: treatment.patientId,
         doctorId: treatment.doctorId,
         serviceItems: serviceIds.map((serviceId) => ({ id: serviceId })),
