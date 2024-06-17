@@ -111,52 +111,76 @@ const Treatment = () => {
 
   const fetchPatients = async () => {
     try {
-      const response = await axios.get("${config.apiUrl}patients");
+      const response = await axios.get(`${config.apiUrl}patients`);
+      console.log("Patients response:", response); // Debugging log
       if (response.status === 200) {
         setPatients(response.data);
+      } else {
+        console.error("Failed to fetch patients. Status:", response.status);
       }
     } catch (error) {
       console.error("Error fetching patients:", error);
     }
   };
 
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
   const fetchDoctors = async () => {
     try {
-      const response = await axios.get("${config.apiUrl}doctor");
+      const response = await axios.get(`${config.apiUrl}doctor`);
+      console.log("Doctors response:", response); // Debugging log
       if (response.status === 200) {
         setDoctors(response.data);
+      } else {
+        console.error("Failed to fetch doctors. Status:", response.status);
       }
     } catch (error) {
       console.error("Error fetching doctors:", error);
     }
   };
 
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
   const fetchServices = async () => {
     try {
-      const response = await axios.get("${config.apiUrl}service");
+      const response = await axios.get(`${config.apiUrl}service`);
+      console.log("Services response:", response); // Debugging log
       if (response.status === 200) {
         setServices(response.data);
+      } else {
+        console.error("Failed to fetch services. Status:", response.status);
       }
     } catch (error) {
       console.error("Error fetching services:", error);
     }
   };
 
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
   const fetchMedicineNames = async () => {
     try {
-      const response = await axios.get("${config.apiUrl}medicine");
+      const response = await axios.get(`${config.apiUrl}medicine`);
       if (response.status === 200) {
-        setMedicineNames(
-          response.data.map((medicine) => ({
-            value: medicine.id,
-            label: medicine.medicineName,
-          })),
-        );
+        const medicineOptions = response.data.map((medicine) => ({
+          value: medicine.id,
+          label: medicine.medicineName,
+        }));
+        setMedicineNames(medicineOptions);
       }
     } catch (error) {
       console.error("Error fetching medicine names:", error);
     }
   };
+
+  useEffect(() => {
+    fetchMedicineNames();
+  }, []);
 
   const [editModeIndex, setEditModeIndex] = useState(null);
 
@@ -314,11 +338,16 @@ const Treatment = () => {
   };
 
   const handleEdit = (treatmentId) => {
+    // alert(JSON.stringify(treatments));
+    // console.log(JSON.stringify(treatments));
     const selected = treatments.find(
       (treatment) => treatment.id === treatmentId,
     );
     // alert("hiiiiii");
-    // console.log(JSON.stringify(selectedTreatment));
+    //alert(JSON.stringify(selected));
+
+    //alert(JSON.stringify(selectedTreatment));
+    //console.log(JSON.stringify(selectedTreatment));
 
     setSelectedTreatment(selected);
     setShowEditModal(true); // Open the edit modal
@@ -355,10 +384,19 @@ const Treatment = () => {
   }, []);
   const fetchMedicines = async () => {
     try {
-      const response = await axios.get("${config.apiUrl}medicine");
+      const response = await axios.get(`${config.apiUrl}medicine`);
       if (response.status === 200) {
-        setMedicine(response.data);
-        console.log(response.data);
+        if (Array.isArray(response.data)) {
+          setMedicine(response.data);
+          console.log(response.data);
+        } else {
+          console.error(
+            "Expected an array of medicines, but received:",
+            response.data,
+          );
+        }
+      } else {
+        console.error("Failed to fetch medicines. Status:", response.status);
       }
     } catch (error) {
       console.error("Error fetching medicines:", error);
@@ -399,6 +437,7 @@ const Treatment = () => {
   // Correct the handleSave function
 
   const handleSave = async () => {
+    console.log(JSON.stringify(selectedTreatment));
     try {
       // Check if selectedTreatment is defined
       if (!selectedTreatment) {
@@ -426,10 +465,10 @@ const Treatment = () => {
         // Add other necessary fields here if needed
       }));
 
-      // Construct the medicines array
+      // Construct the medicines array with medicineId included
       const medicinesPayload = medicines.map((medicine) => ({
         medicine: {
-          medicineId: medicine.medicineId,
+          medicineId: medicine.medicineId, // Ensure medicineId is correctly included
         },
         dosageInstruction: medicine.dosageInstruction,
         duration: medicine.duration,
@@ -476,15 +515,11 @@ const Treatment = () => {
       // window.alert("Failed to update treatment data. Please try again later.");
     }
   };
+
   const handleDelete = async (treatmentId) => {
-
-
-    
     if (window.confirm("Are you sure you want to delete this Treatment?")) {
       try {
-        await axios.delete(
-          `${config.apiUrl}treatment/${treatmentId}`,
-        );
+        await axios.delete(`${config.apiUrl}treatment/${treatmentId}`);
         fetchData(); // Refresh the table after deletion
         toast.success("Treatment deleted successfully!", { autoClose: 3000 });
       } catch (error) {
@@ -636,20 +671,26 @@ const Treatment = () => {
                     <CFormLabel htmlFor="patientId" style={{ color: "#000" }}>
                       Select Patient
                     </CFormLabel>
+
                     <Select
-                      type="text"
                       id="patientId"
                       name="patientId"
-                      options={patients.map((patient) => ({
-                        value: patient.id,
-                        label: patient.fullName,
-                      }))}
+                      options={
+                        Array.isArray(patients)
+                          ? patients.map((patient) => ({
+                              value: patient.id,
+                              label: patient.fullName,
+                            }))
+                          : []
+                      }
                       onChange={(selectedOption) =>
-                        setSelectedTreatment((prev) => ({
-                          ...prev,
-                          patientId: selectedOption?.value || "",
+                        setSelectedTreatment((prevTreatment) => ({
+                          ...prevTreatment,
+                          patientId: selectedOption.value,
                           patient: {
-                            fullName: selectedOption?.label || "",
+                            id: selectedOption.value,
+                            fullName: selectedOption.label,
+                            // Include other patient details you need
                           },
                         }))
                       }
@@ -683,16 +724,20 @@ const Treatment = () => {
                     <Select
                       id="doctorId"
                       name="doctorId"
-                      options={doctors.map((doctor) => ({
-                        value: doctor.id,
-                        label: doctor.fullName,
-                      }))}
+                      options={
+                        Array.isArray(doctors)
+                          ? doctors.map((doctor) => ({
+                              value: doctor.id,
+                              label: doctor.fullName,
+                            }))
+                          : []
+                      }
                       onChange={(selectedOption) =>
                         setSelectedTreatment((prev) => ({
                           ...prev,
                           doctorId: selectedOption?.value || "",
                           doctor: {
-                            fullName: selectedOption?.label || "",
+                            doctorId: selectedOption?.value || "",
                           },
                         }))
                       }
@@ -727,14 +772,13 @@ const Treatment = () => {
                         services && services.length > 0
                           ? services.map((service) => ({
                               value: service.id,
-                              label: service.serviceName,
+                              label: service.serviceName, // Adjust to match your service object's property
                             }))
                           : []
                       }
-                      onChange={(selectedOptions) => {
-                        // Update selectedTreatment with the new selected options
-                        setSelectedTreatment({
-                          ...selectedTreatment,
+                      onChange={(selectedOptions) =>
+                        setSelectedTreatment((prev) => ({
+                          ...prev,
                           treatmentItemDetailsList: selectedOptions.map(
                             (selectedOption) => ({
                               serviceItem: {
@@ -743,8 +787,8 @@ const Treatment = () => {
                               },
                             }),
                           ),
-                        });
-                      }}
+                        }))
+                      }
                       isClearable
                       isMulti
                       value={selectedTreatment.treatmentItemDetailsList.map(
@@ -818,10 +862,11 @@ const Treatment = () => {
                       Select Medicine
                     </CFormLabel>
                     <Select
-                      options={medicine.map((med) => ({
-                        value: med.medicineId,
-                        label: med.medicineName,
-                      }))}
+                      options={
+                        Array.isArray(medicineNames) && medicineNames.length > 0
+                          ? medicineNames
+                          : []
+                      }
                       name="medicineId"
                       onChange={handleMedicineChange}
                       required

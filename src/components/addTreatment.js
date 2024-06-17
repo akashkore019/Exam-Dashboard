@@ -6,7 +6,6 @@ import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { cilCloudDownload } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
-import { useNavigate } from "react-router-dom";
 
 import {
   PDFDownloadLink,
@@ -55,8 +54,6 @@ const TreatmentList = () => {
   });
 
   const [treatmentsList, setTreatmentsList] = useState([]);
-  const navigate = useNavigate();
-
   const [dosageOptions] = useState([
     { value: "1:0:0", label: "1:0:0" },
     { value: "1:1:0", label: "1:1:0" },
@@ -83,7 +80,7 @@ const TreatmentList = () => {
 
   const fetchPatients = async () => {
     try {
-      const response = await axios.get("${config.apiUrl}patients");
+      const response = await axios.get("http://localhost:8080/api/v1/patients");
       if (response.status === 200) {
         setPatients(response.data);
       }
@@ -94,7 +91,7 @@ const TreatmentList = () => {
 
   const fetchDoctors = async () => {
     try {
-      const response = await axios.get("${config.apiUrl}doctor");
+      const response = await axios.get("http://localhost:8080/api/v1/doctor");
       if (response.status === 200) {
         setDoctors(response.data);
       }
@@ -105,7 +102,7 @@ const TreatmentList = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get("${config.apiUrl}service");
+      const response = await axios.get("http://localhost:8080/api/v1/service");
       if (response.status === 200) {
         setServices(response.data);
       }
@@ -116,7 +113,7 @@ const TreatmentList = () => {
 
   const fetchMedicines = async () => {
     try {
-      const response = await axios.get("${config.apiUrl}medicine");
+      const response = await axios.get("http://localhost:8080/api/v1/medicine");
       if (response.status === 200) {
         setMedicine(response.data);
         console.log(response.data);
@@ -127,67 +124,68 @@ const TreatmentList = () => {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    const form = event.target; // Use event.target instead of event.currentTarget
+  event.preventDefault();
+  const form = event.target; // Use event.target instead of event.currentTarget
+  
+  if (form.checkValidity() === false) {
+    event.stopPropagation();
+    setValidated(true); // Move inside the if block to only set validated if form is invalid
+    return; // Exit early if form is invalid
+  }
+  
+  try {
+    const serviceIds = Array.isArray(treatment.serviceId)
+      ? treatment.serviceId.map((service) => service.value)
+      : [];
+      
+    const medicines = treatmentsList.map((item) => ({
+      medicineId: item.medicineId,
+      dosageInstruction: item.dosageName,
+      duration: item.durationName,
+    }));
+    
+    const res = await axios.post("http://localhost:8080/api/v1/treatment", {
+      patientId: treatment.patientId,
+      doctorId: treatment.doctorId,
+      serviceItems: serviceIds.map((serviceId) => ({ id: serviceId })),
+      medicines: medicines.map((medicine) => ({
+        medicine: {
+          medicineId: medicine.medicineId,
+        },
+        dosageInstruction: medicine.dosageInstruction,
+        duration: medicine.duration,
+      })),
+      description: treatment.description,
+    });
 
-    if (form.checkValidity() === false) {
-      event.stopPropagation();
-      setValidated(true); // Move inside the if block to only set validated if form is invalid
-      return; // Exit early if form is invalid
-    }
+    alert(JSON.stringify(serviceIds))
 
-    try {
-      const serviceIds = Array.isArray(treatment.serviceId)
-        ? treatment.serviceId.map((service) => service.value)
-        : [];
-
-      const medicines = treatmentsList.map((item) => ({
-        medicineId: item.medicineId,
-        dosageInstruction: item.dosageName,
-        duration: item.durationName,
-      }));
-
-      const res = await axios.post("${config.apiUrl}treatment", {
-        patientId: treatment.patientId,
-        doctorId: treatment.doctorId,
-        serviceItems: serviceIds.map((serviceId) => ({ id: serviceId })),
-        medicines: medicines.map((medicine) => ({
-          medicine: {
-            medicineId: medicine.medicineId,
-          },
-          dosageInstruction: medicine.dosageInstruction,
-          duration: medicine.duration,
-        })),
-        description: treatment.description,
+    if (res.status === 200) {
+      window.alert("Treatment data submitted successfully!");
+      form.reset();
+      setValidated(false);
+      setTreatment({
+        patientId: "",
+        doctorId: "",
+        serviceId: [],
+        medicineName: "",
+        dosageName: "",
+        durationName: "",
+        description: "",
       });
-
-      alert(JSON.stringify(serviceIds));
-
-      if (res.status === 200) {
-        window.alert("Treatment data submitted successfully!");
-        form.reset();
-        setValidated(false);
-        setTreatment({
-          patientId: "",
-          doctorId: "",
-          serviceId: [],
-          medicineName: "",
-          dosageName: "",
-          durationName: "",
-          description: "",
-        });
-        setTreatmentsList([]);
-        navigate("/treatment");
-      } else {
-        throw new Error("Failed to submit treatment data");
-      }
-    } catch (error) {
-      navigate("/treatment");
-      // console.error("Error:", error);
-      // window.alert("Failed to submit treatment data. Please try again later.");
+      setTreatmentsList([]);
+    } else {
+      throw new Error("Failed to submit treatment data");
     }
-  };
+  } catch (error) {
+    console.error("Error:", error);
+    window.alert("Failed to submit treatment data. Please try again later.");
+  }
+};
 
+
+
+     
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -463,40 +461,30 @@ const TreatmentList = () => {
                 ))}
               </CTableBody>
             </CTable>
-
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <div
-                className="input-group-append"
-                style={{ marginRight: "10px" }}
-              >
-                <CButton color="primary" type="submit" onClick={handleSubmit}>
-                  Submit
-                </CButton>
-              </div>
-              <div
-                className="input-group-append"
-                style={{ marginRight: "10px" }}
-              >
-                <PDFDownloadLink
-                  document={<InvoicePDF formData={treatment} />}
-                  fileName="invoice.pdf"
-                >
-                  <CButton>
-                    <CIcon icon={cilCloudDownload} size="xl" />
-                  </CButton>
-                </PDFDownloadLink>
-              </div>
-              <div
-                className="input-group-append"
-                style={{ marginRight: "10px" }}
-              >
-                <CButton onClick={handleWhatsAppClick}>
-                  <FaWhatsapp size={25} />
-                </CButton>
-              </div>
-            </div>
           </CCardBody>
         </CCard>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div className="input-group-append" style={{ marginRight: "10px" }}>
+            <CButton color="primary" type="submit" onClick={handleSubmit}>
+              Submit
+            </CButton>
+          </div>
+          <div className="input-group-append" style={{ marginRight: "10px" }}>
+            <PDFDownloadLink
+              document={<InvoicePDF formData={treatment} />}
+              fileName="invoice.pdf"
+            >
+              <CButton>
+                <CIcon icon={cilCloudDownload} size="xl" />
+              </CButton>
+            </PDFDownloadLink>
+          </div>
+          <div className="input-group-append" style={{ marginRight: "10px" }}>
+            <CButton onClick={handleWhatsAppClick}>
+              <FaWhatsapp size={25} />
+            </CButton>
+          </div>
+        </div>
       </CCol>
     </CRow>
   );
