@@ -168,9 +168,12 @@ const Treatment = () => {
       const response = await axios.get(`${config.apiUrl}medicine`);
       if (response.status === 200) {
         const medicineOptions = response.data.map((medicine) => ({
-          value: medicine.id,
+          value: medicine.medicineId,
           label: medicine.medicineName,
         }));
+
+        // alert("HHHHHHHHHH  ___ " + JSON.stringify(medicineOptions));
+
         setMedicineNames(medicineOptions);
       }
     } catch (error) {
@@ -182,20 +185,20 @@ const Treatment = () => {
     fetchMedicineNames();
   }, []);
 
-  const [editModeIndex, setEditModeIndex] = useState(null);
+  // const [editModeIndex, setEditModeIndex] = useState(null);
 
-  const handleEditMedicine = (index) => {
-    const medicineDetailToEdit =
-      selectedTreatment.treatmentMedicineDetailsList[index];
-    setTreatment({
-      ...treatment,
-      medicineId: medicineDetailToEdit.medicine.medicineId,
-      medicineName: medicineDetailToEdit.medicine.medicineName,
-      dosageName: medicineDetailToEdit.dosageInstruction,
-      durationName: medicineDetailToEdit.duration,
-    });
-    setEditModeIndex(index);
-  };
+  // const handleEditMedicine = (index) => {
+  //   const medicineDetailToEdit =
+  //     selectedTreatment.treatmentMedicineDetailsList[index];
+  //   setTreatment({
+  //     ...treatment,
+  //     medicineId: medicineDetailToEdit.medicine.medicineId,
+  //     medicineName: medicineDetailToEdit.medicine.medicineName,
+  //     dosageName: medicineDetailToEdit.dosageInstruction,
+  //     durationName: medicineDetailToEdit.duration,
+  //   });
+  //   setEditModeIndex(index);
+  // };
 
   const handleDeleteMedicine = (index) => {
     // Check if index is within the range of selectedTreatment.treatmentMedicineDetailsList
@@ -354,11 +357,22 @@ const Treatment = () => {
   };
 
   const handleMedicineChange = (selectedOption) => {
-    setTreatment({
-      ...treatment,
-      medicineId: selectedOption ? selectedOption.value : "",
-      medicineName: selectedOption ? selectedOption.label : "",
-    });
+    // alert("hihi   ==   " + JSON.stringify(selectedOption));
+
+    if (selectedOption) {
+      setTreatment({
+        ...treatment,
+        medicineId: selectedOption.value,
+        medicineName: selectedOption.label,
+      });
+    } else {
+      // Handle case where selectedOption is null or undefined
+      setTreatment({
+        ...treatment,
+        medicineId: "",
+        medicineName: "",
+      });
+    }
   };
 
   const [treatmentsList, setTreatmentsList] = useState([]);
@@ -424,6 +438,8 @@ const Treatment = () => {
       duration: treatment.durationName,
     };
 
+    // alert("hihi   ==   " + JSON.stringify(newMedicine));
+
     setTreatmentsList([...treatmentsList, newMedicine]);
     // Update the selectedTreatment state with the new medicine
     setSelectedTreatment((prevState) => ({
@@ -437,7 +453,7 @@ const Treatment = () => {
   // Correct the handleSave function
 
   const handleSave = async () => {
-    console.log(JSON.stringify(selectedTreatment));
+    console.log("hihi   ==   " + JSON.stringify(selectedTreatment));
     try {
       // Check if selectedTreatment is defined
       if (!selectedTreatment) {
@@ -473,6 +489,8 @@ const Treatment = () => {
         dosageInstruction: medicine.dosageInstruction,
         duration: medicine.duration,
       }));
+
+      console.log("hihi   ==   " + JSON.stringify(medicinesPayload));
 
       // Construct the payload to be sent to the API
       const payload = {
