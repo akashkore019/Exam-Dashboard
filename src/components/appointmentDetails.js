@@ -44,7 +44,7 @@ const Appointment = () => {
 
   const fetchDoctors = async () => {
     try {
-      const response = await axios.get("${config.apiUrl}doctor");
+      const response = await axios.get(`${config.apiUrl}doctor`);
       if (response.status === 200) {
         setDoctors(response.data);
       }
@@ -52,6 +52,7 @@ const Appointment = () => {
       console.error("Error fetching doctors:", error);
     }
   };
+  
 
   useEffect(() => {
     setFilteredAppointments(
