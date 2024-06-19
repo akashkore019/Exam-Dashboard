@@ -200,28 +200,44 @@ const Treatment = () => {
   //   setEditModeIndex(index);
   // };
 
-  const handleDeleteMedicine = (index) => {
-    // Check if index is within the range of selectedTreatment.treatmentMedicineDetailsList
-    if (index < selectedTreatment.treatmentMedicineDetailsList.length) {
-      // If within range, delete from selectedTreatment.treatmentMedicineDetailsList
-      const updatedDetailsList = [
-        ...selectedTreatment.treatmentMedicineDetailsList.slice(0, index),
-        ...selectedTreatment.treatmentMedicineDetailsList.slice(index + 1),
-      ];
-      setSelectedTreatment({
-        ...selectedTreatment,
-        treatmentMedicineDetailsList: updatedDetailsList,
-      });
-    } else {
-      // If not within range, calculate the adjusted index for treatmentsList
-      const adjustedIndex =
-        index - selectedTreatment.treatmentMedicineDetailsList.length;
-      // Delete from treatmentsList
-      const updatedTreatmentsList = [
-        ...treatmentsList.slice(0, adjustedIndex),
-        ...treatmentsList.slice(adjustedIndex + 1),
-      ];
-      setTreatmentsList(updatedTreatmentsList);
+  const handleDeleteMedicine = async (index, medicineId) => {
+    if (window.confirm("Are you sure you want to delete this medicine?")) {
+      try {
+        // Construct the API endpoint for deleting the medicine
+        const apiUrl = `http://localhost:8080/api/v1/treatment/medicine/${medicineId}/${selectedTreatment.id}`;
+
+        // Make the DELETE request
+        const response = await axios.delete(apiUrl);
+
+        // Check response status
+        if (response.status === 200) {
+          toast.success("Medicine deleted successfully!", { autoClose: 3000 });
+
+          // Update the frontend state to reflect deletion
+          const updatedDetailsList =
+            selectedTreatment.treatmentMedicineDetailsList.filter(
+              (med) => med.medicine.medicineId !== medicineId,
+            );
+
+          setSelectedTreatment({
+            ...selectedTreatment,
+            treatmentMedicineDetailsList: updatedDetailsList,
+          });
+
+          // Optionally, refetch data or update treatmentsList if necessary
+          // fetchData();
+          // setTreatmentsList(updatedTreatmentsList);
+        } else {
+          toast.error("Failed to delete medicine. Please try again.", {
+            autoClose: 3000,
+          });
+        }
+      } catch (error) {
+        console.error("Error deleting medicine:", error);
+        toast.error("Error deleting medicine. Please try again.", {
+          autoClose: 3000,
+        });
+      }
     }
   };
 
@@ -251,7 +267,9 @@ const Treatment = () => {
             color="danger"
             variant="outline"
             size="sm"
-            onClick={() => handleDeleteMedicine(index)}
+            onClick={() =>
+              handleDeleteMedicine(index, medicineDetail.medicine.medicineId)
+            }
           >
             <FaTrash />
           </CButton>
