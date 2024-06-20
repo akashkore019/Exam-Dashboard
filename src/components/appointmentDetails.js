@@ -208,23 +208,25 @@ const Appointment = () => {
             <tbody>
               {filteredAppointments.map((appointment) => (
                 <tr key={appointment.appointmentId}>
-                  <td style={{ display: "flex", gap: "10px" }}>
-                    <CButton
-                      color="info"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(appointment.appointmentId)}
-                    >
-                      <AiFillEdit />
-                    </CButton>
-                    <CButton
-                      color="danger"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(appointment.appointmentId)}
-                    >
-                      <FaTrash />
-                    </CButton>{" "}
+                  <td style={{ alignItems: "center" }}>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <CButton
+                        color="info"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(appointment.appointmentId)}
+                      >
+                        <AiFillEdit />
+                      </CButton>
+                      <CButton
+                        color="danger"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(appointment.appointmentId)}
+                      >
+                        <FaTrash />
+                      </CButton>
+                    </div>
                   </td>
 
                   <td>{appointment.appointmentId}</td>

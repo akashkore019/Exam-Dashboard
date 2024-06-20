@@ -5,7 +5,8 @@ import { toast } from "react-toastify";
 import { FaWhatsapp } from "react-icons/fa";
 import Select from "react-select";
 import { useNavigate } from "react-router-dom";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import {
   PDFDownloadLink,
   Document,
@@ -65,6 +66,7 @@ const Treatment = () => {
   const [services, setServices] = useState([]);
   const [medicineNames, setMedicineNames] = useState([]);
   const [medicine, setMedicine] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [treatment, setTreatment] = useState({
     patientId: "",
     doctorId: "",
@@ -348,15 +350,15 @@ const Treatment = () => {
     setSearchBarVisible(!searchBarVisible);
   };
 
-  const handleSearch = () => {
-    setFilteredTreatments(
-      treatments.filter((treatment) =>
-        Object.values(treatment).some((value) =>
-          String(value).toLowerCase().includes(searchInput.toLowerCase()),
-        ),
-      ),
-    );
-  };
+  // const handleSearch = () => {
+  //   setFilteredTreatments(
+  //     treatments.filter((treatment) =>
+  //       Object.values(treatment).some((value) =>
+  //         String(value).toLowerCase().includes(searchInput.toLowerCase()),
+  //       ),
+  //     ),
+  //   );
+  // };
 
   const handleEdit = (treatmentId) => {
     // alert(JSON.stringify(treatments));
@@ -471,14 +473,13 @@ const Treatment = () => {
   // Correct the handleSave function
 
   const handleSave = async () => {
-    console.log("hihi   ==   " + JSON.stringify(selectedTreatment));
     try {
       // Check if selectedTreatment is defined
       if (!selectedTreatment) {
         throw new Error("Selected treatment is not defined.");
       }
 
-      // Extract necessary data from selectedTreatment state
+      // Destructure selectedTreatment for validation
       const {
         patientId,
         doctorId,
@@ -487,85 +488,145 @@ const Treatment = () => {
         medicines,
       } = selectedTreatment;
 
-      // Check if patientId and doctorId are defined and are non-empty strings
+      // Validation checks
       if (!patientId || !doctorId) {
-        throw new Error("Patient ID or Doctor ID is missing or invalid.");
+        throw new Error("Please select a patient and a doctor.");
       }
 
-      // Extract serviceItems from treatmentItemDetailsList
+      if (!description.trim()) {
+        throw new Error("Description cannot be empty.");
+      }
+
+      if (treatmentItemDetailsList.length === 0) {
+        throw new Error("Please select at least one service.");
+      }
+
+      if (medicines.length === 0) {
+        throw new Error("Please select at least one medicine.");
+      }
+
+      // Construct payload for API request
       const serviceItems = treatmentItemDetailsList.map((item) => ({
         id: item.serviceItem.id,
         serviceName: item.serviceItem.serviceName,
         // Add other necessary fields here if needed
       }));
 
-      // Construct the medicines array with medicineId included
       const medicinesPayload = medicines.map((medicine) => ({
         medicine: {
-          medicineId: medicine.medicineId, // Ensure medicineId is correctly included
+          medicineId: medicine.medicineId,
         },
         dosageInstruction: medicine.dosageInstruction,
         duration: medicine.duration,
       }));
 
-      console.log("hihi   ==   " + JSON.stringify(medicinesPayload));
-
-      // Construct the payload to be sent to the API
       const payload = {
         patientId,
         doctorId,
         description,
-        serviceItems, // Include serviceItems in the payload
-        medicines: medicinesPayload, // Include medicines in the payload
+        serviceItems,
+        medicines: medicinesPayload,
       };
 
-      // Make the API call to save the data
+      // Make API call to update treatment
       const res = await axios.put(
         `${config.apiUrl}treatment/${selectedTreatment.id}`,
         payload,
       );
 
-      // Check the response status
+      // Handle response
       if (res.status === 200) {
-        // Reset the form and state after successful save
-        setValidated(false);
+        // Reset form and state after successful save
         setSelectedTreatment({
           patientId: "",
           doctorId: "",
           treatmentItemDetailsList: [],
           medicines: [],
           description: "",
-          // Make sure to reset all necessary fields
+          // Reset other fields as needed
         });
-        setTreatmentsList([]);
         setShowEditModal(false);
-        // Optionally show success message
-        window.alert("Treatment data updated successfully!");
-        navigate("/treatment"); // Ensure this is called after closing the modal
+        toast.success("Treatment data updated successfully!");
+        navigate("/treatment"); // Redirect or navigate to the desired page
       } else {
-        throw new Error("Failed to update treatment data");
+        throw new Error("Failed to update treatment data.");
       }
     } catch (error) {
-      console.error("Error:", error);
-      // Optionally show error message
-      // window.alert("Failed to update treatment data. Please try again later.");
+      console.error("Error:", error.message);
+      toast.error(`Failed to update treatment data. ${error.message}`);
     }
   };
 
-  const handleDelete = async (treatmentId) => {
-    if (window.confirm("Are you sure you want to delete this Treatment?")) {
+  const handleDeleteService = async (serviceId) => {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this service from treatment?",
+      )
+    ) {
       try {
-        await axios.delete(`${config.apiUrl}treatment/${treatmentId}`);
-        fetchData(); // Refresh the table after deletion
-        toast.success("Treatment deleted successfully!", { autoClose: 3000 });
+        const apiUrl = `http://localhost:8080/api/v1/treatment/service/${serviceId}/${selectedTreatment.id}`;
+        setLoading(true);
+
+        const response = await axios.delete(apiUrl);
+
+        if (response.status === 200) {
+          // Remove the deleted service from the state
+          const updatedServiceList =
+            selectedTreatment.treatmentItemDetailsList.filter(
+              (item) => item.serviceItem.id !== serviceId,
+            );
+
+          setSelectedTreatment({
+            ...selectedTreatment,
+            treatmentItemDetailsList: updatedServiceList,
+          });
+
+          setLoading(false);
+          alert("Service deleted successfully!");
+        } else {
+          console.error("Failed to delete service:", response.data);
+          alert("Failed to delete service. Please try again.");
+        }
       } catch (error) {
-        console.error("Error deleting Treatment:", error);
-        toast.error("Error deleting treatment. Please try again.", {
-          autoClose: 3000,
-        });
+        console.error("Error deleting service:", error);
+        alert("Error deleting service. Please try again later.");
       }
     }
   };
+
+  // Inside your functional component
+  const handleDelete = async (treatmentId) => {
+    if (window.confirm("Are you sure you want to delete this patient?")) {
+      try {
+        // Implement deletion logic here
+        await axios.delete(`${config.apiUrl}treatment/${treatmentId}`);
+        // Optionally update state or perform other actions upon successful deletion
+        fetchData(); // Assuming fetchData is a function to refetch treatments
+        toast.success("Patient deleted successfully!", { autoClose: 3000 });
+      } catch (error) {
+        console.error("Error deleting treatment:", error);
+        toast.error("Failed to delete treatment. Please try again.");
+      }
+    }
+  };
+
+  // const renderServiceList = () => {
+  //   if (!selectedTreatment || !selectedTreatment.treatmentItemDetailsList) {
+  //     return null;
+  //   }
+
+  //   return selectedTreatment.treatmentItemDetailsList.map((item) => (
+  //     <div key={item.serviceItem.id}>
+  //       <span>{item.serviceItem.serviceName}</span>
+  //       <button onClick={() => handleEditService(item.serviceItem.id)}>
+  //         Edit
+  //       </button>
+  //       <button onClick={() => handleDeleteService(item.serviceItem.id)}>
+  //         Delete
+  //       </button>
+  //     </div>
+  //   ));
+  // };
 
   return (
     <div>
@@ -579,35 +640,40 @@ const Treatment = () => {
         >
           <span style={{ lineHeight: "44px" }}>Treatment Details</span>
           <div style={{ display: "flex", alignItems: "center" }}>
-            {/* Search button */}
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={toggleSearchBar}
-              style={{ marginRight: "10px" }}
-            >
-              <CIcon icon={cilSearch} />
-            </button>
-            {/* Search bar */}
-            <div className={`input-group ${searchBarVisible ? "" : "d-none"}`}>
-              <input
-                type="text"
-                placeholder="Search treatment details"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="form-control"
-                style={{ height: "30px", marginRight: "10px" }}
-              />
-            </div>
-            <div className="input-group-append" style={{ marginRight: "10px" }}>
-              <Link to="/addTreatment" className="btn btn-primary">
-                Add
-              </Link>
-            </div>
-            <div className="input-group-append">
-              <CSVLink data={csvData} filename={"treatment_data.csv"}>
-                <CIcon icon={cilCloudDownload} size="lg" />
-              </CSVLink>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={toggleSearchBar}
+                style={{ marginRight: "10px" }}
+              >
+                <CIcon icon={cilSearch} />
+              </button>
+              <div
+                className={`input-group ${searchBarVisible ? "" : "d-none"}`}
+              >
+                <input
+                  type="text"
+                  placeholder="Search treatment details"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="form-control"
+                  style={{ height: "30px", marginRight: "10px" }}
+                />
+              </div>
+              <div
+                className="input-group-append"
+                style={{ marginRight: "10px" }}
+              >
+                <Link to="/addTreatment" className="btn btn-primary">
+                  Add
+                </Link>
+              </div>
+              <div className="input-group-append">
+                <CSVLink data={csvData} filename={"treatment_data.csv"}>
+                  <CIcon icon={cilCloudDownload} size="lg" />
+                </CSVLink>
+              </div>
             </div>
           </div>
         </CCardHeader>
@@ -616,6 +682,7 @@ const Treatment = () => {
             <thead>
               <tr>
                 <th>Edit / Delete</th>
+                <th>ID</th>
                 <th>Patient Name</th>
                 <th>Patient Mobile</th>
                 <th>Doctor Name</th>
@@ -646,6 +713,7 @@ const Treatment = () => {
                       </CButton>
                     </div>
                   </td>
+                  <td>{treatment.id}</td>
                   <td>{treatment.patient.fullName}</td>
                   <td>{treatment.patient.mobile}</td>
                   <td>{treatment.doctor.fullName}</td>
@@ -707,7 +775,6 @@ const Treatment = () => {
                     <CFormLabel htmlFor="patientId" style={{ color: "#000" }}>
                       Select Patient
                     </CFormLabel>
-
                     <Select
                       id="patientId"
                       name="patientId"
@@ -722,20 +789,26 @@ const Treatment = () => {
                       onChange={(selectedOption) =>
                         setSelectedTreatment((prevTreatment) => ({
                           ...prevTreatment,
-                          patientId: selectedOption.value,
+                          patientId: selectedOption?.value || "", // Ensure value is set or empty string
                           patient: {
-                            id: selectedOption.value,
-                            fullName: selectedOption.label,
+                            id: selectedOption?.value || "",
+                            fullName: selectedOption?.label || "",
                             // Include other patient details you need
                           },
                         }))
                       }
-                      isClearable
-                      placeholder={
-                        selectedTreatment?.patient?.fullName ||
-                        "Select a patient"
+                      value={
+                        selectedTreatment.patient
+                          ? {
+                              value: selectedTreatment.patient.id,
+                              label: selectedTreatment.patient.fullName,
+                            }
+                          : null
                       }
-                      required
+                      isClearable
+                      // className={
+                      //   !selectedTreatment.patientId ? "is-invalid" : ""
+                      // }
                       styles={{
                         control: (base) => ({
                           ...base,
@@ -746,13 +819,14 @@ const Treatment = () => {
                           color: "#000",
                         }),
                       }}
+                      required
                     />
-
-                    <CFormFeedback invalid>
+                    {/* <CFormFeedback invalid>
                       Please select a patient.
-                    </CFormFeedback>
+                    </CFormFeedback> */}
                   </CCol>
 
+                  {/* Select Doctor */}
                   <CCol md={4}>
                     <CFormLabel htmlFor="doctorId" style={{ color: "#000" }}>
                       Select Doctor
@@ -771,17 +845,26 @@ const Treatment = () => {
                       onChange={(selectedOption) =>
                         setSelectedTreatment((prev) => ({
                           ...prev,
-                          doctorId: selectedOption?.value || "",
+                          doctorId: selectedOption?.value || "", // Ensure value is set or empty string
                           doctor: {
-                            doctorId: selectedOption?.value || "",
+                            id: selectedOption?.value || "",
+                            fullName: selectedOption?.label || "",
+                            // Include other doctor details if needed
                           },
                         }))
                       }
-                      isClearable
-                      placeholder={
-                        selectedTreatment?.doctor?.fullName || "Select a doctor"
+                      value={
+                        selectedTreatment.doctor
+                          ? {
+                              value: selectedTreatment.doctor.id,
+                              label: selectedTreatment.doctor.fullName,
+                            }
+                          : null
                       }
-                      required
+                      isClearable
+                      // className={
+                      //   !selectedTreatment.doctorId ? "is-invalid" : ""
+                      // }
                       styles={{
                         control: (base) => ({
                           ...base,
@@ -792,11 +875,13 @@ const Treatment = () => {
                           color: "#000",
                         }),
                       }}
+                      required
                     />
                     <CFormFeedback invalid>
                       Please select a doctor.
                     </CFormFeedback>
                   </CCol>
+
                   <CCol md={4}>
                     <CFormLabel htmlFor="serviceId" style={{ color: "#000" }}>
                       Select Service
@@ -808,7 +893,7 @@ const Treatment = () => {
                         services && services.length > 0
                           ? services.map((service) => ({
                               value: service.id,
-                              label: service.serviceName, // Adjust to match your service object's property
+                              label: service.serviceName,
                             }))
                           : []
                       }
@@ -827,6 +912,11 @@ const Treatment = () => {
                       }
                       isClearable
                       isMulti
+                      // className={
+                      //   !selectedTreatment.treatmentItemDetailsList.length
+                      //     ? "is-invalid"
+                      //     : ""
+                      // }
                       value={selectedTreatment.treatmentItemDetailsList.map(
                         (item) => ({
                           value: item.serviceItem.id,
@@ -844,7 +934,24 @@ const Treatment = () => {
                           color: "#000",
                         }),
                       }}
+                      components={{
+                        MultiValueLabel: ({ data }) => (
+                          <div>
+                            <span>{data.label}</span>
+                            <button
+                              type="button"
+                              className="btn btn-link btn-sm text-danger"
+                              onClick={() => handleDeleteService(data.value)}
+                              style={{ paddingLeft: "5px" }}
+                            >
+                              <FontAwesomeIcon icon={faTimes} />
+                            </button>
+                          </div>
+                        ),
+                        MultiValueRemove: () => null, // This will remove the default cross icon
+                      }}
                     />
+
                     <CFormFeedback invalid>
                       Please select a service.
                     </CFormFeedback>
@@ -874,9 +981,9 @@ const Treatment = () => {
                     <CFormFeedback invalid>Please enter a date.</CFormFeedback>
                   </CCol>
 
-                  {treatment.medicineForms.map((medicineForms, index) => (
+                  {/* {treatment.medicineForms.map((medicineForms, index) => (
                     <React.Fragment key={index}>medicineName</React.Fragment>
-                  ))}
+                  ))} */}
 
                   <CCol md={8}>
                     <CFormLabel htmlFor="description">Description</CFormLabel>
@@ -979,6 +1086,7 @@ const Treatment = () => {
                               <CTableHeaderCell>Medicine</CTableHeaderCell>
                               <CTableHeaderCell>Dosage</CTableHeaderCell>
                               <CTableHeaderCell>Duration</CTableHeaderCell>
+                              <CTableHeaderCell>Delete</CTableHeaderCell>
                             </CTableRow>
                           </CTableHead>
                           <CTableBody>{renderMedicineTableRows()}</CTableBody>
@@ -989,7 +1097,6 @@ const Treatment = () => {
 
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <CCol md={18}>
-                      {" "}
                       <button
                         type="button"
                         className="btn btn-primary "

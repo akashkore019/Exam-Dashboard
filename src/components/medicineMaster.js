@@ -185,23 +185,25 @@ const Medicine = () => {
             <tbody>
               {filteredMedicines.map((medicine) => (
                 <tr key={medicine.medicineId}>
-                  <td style={{ display: "flex", gap: "10px" }}>
-                    <CButton
-                      color="info"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(medicine.medicineId)}
-                    >
-                      <AiFillEdit />
-                    </CButton>
-                    <CButton
-                      color="danger"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(medicine.medicineId)}
-                    >
-                      <FaTrash />
-                    </CButton>{" "}
+                  <td style={{ alignItems: "center" }}>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <CButton
+                        color="info"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(medicine.medicineId)}
+                      >
+                        <AiFillEdit />
+                      </CButton>
+                      <CButton
+                        color="danger"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(medicine.medicineId)}
+                      >
+                        <FaTrash />
+                      </CButton>
+                    </div>
                   </td>
                   <td>{medicine.medicineId}</td>
                   <td>{medicine.medicineName}</td>

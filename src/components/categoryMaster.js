@@ -174,23 +174,25 @@ const Category = () => {
             <tbody>
               {filteredCategory.map((category) => (
                 <tr key={category.id}>
-                 <CTableDataCell style={{ display: "flex", gap: "10px" }}>
-                    <CButton
-                      color="info"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(category.id)}
-                    >
-                      <AiFillEdit />
-                    </CButton>
-                    <CButton
-                      color="danger"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(category.id)}
-                    >
-                      <FaTrash />
-                    </CButton>{" "}
+                 <CTableDataCell style={{ alignItems: "center" }}>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <CButton
+                        color="info"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(category.id)}
+                      >
+                        <AiFillEdit />
+                      </CButton>
+                      <CButton
+                        color="danger"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(category.id)}
+                      >
+                        <FaTrash />
+                      </CButton>
+                    </div>
                   </CTableDataCell>
                   <CTableDataCell>{category.categoryName}</CTableDataCell>
                 </tr>

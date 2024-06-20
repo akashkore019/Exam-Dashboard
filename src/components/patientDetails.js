@@ -130,10 +130,22 @@ const Patient = () => {
         toast.success("Patient deleted successfully!", { autoClose: 3000 });
       } catch (error) {
         console.error("Error deleting patient:", error);
-        // Handle error - show toast message or any other UI indication
+        toast.error("Failed to delete patient. Please try again.");
       }
     }
   };
+
+  // const handleDelete = async (treatmentId) => {
+  //   try {
+  //     // Implement deletion logic here
+  //     await axios.delete(`${config.apiUrl}treatment/${treatmentId}`);
+  //     // Optionally update state or perform other actions upon successful deletion
+  //     fetchData(); // Assuming fetchData is a function to refetch treatments
+  //   } catch (error) {
+  //     console.error("Error deleting treatment:", error);
+  //     toast.error("Failed to delete treatment. Please try again.");
+  //   }
+  // };
 
   return (
     <div>
@@ -199,23 +211,25 @@ const Patient = () => {
             <tbody>
               {filteredPatients.map((patient) => (
                 <tr key={patient.id}>
-                  <td style={{ display: "flex", gap: "10px" }}>
-                    <CButton
-                      color="info"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(patient.id)}
-                    >
-                      <AiFillEdit />
-                    </CButton>
-                    <CButton
-                      color="danger"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(patient.id)}
-                    >
-                      <FaTrash />
-                    </CButton>{" "}
+                  <td style={{ alignItems: "center" }}>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <CButton
+                        color="info"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(patient.id)}
+                      >
+                        <AiFillEdit />
+                      </CButton>
+                      <CButton
+                        color="danger"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(patient.id)}
+                      >
+                        <FaTrash />
+                      </CButton>
+                    </div>
                   </td>
                   <td>{patient.id}</td>
                   <td style={{ textTransform: "capitalize" }}>
