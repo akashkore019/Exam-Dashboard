@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { FaArrowUpShortWide, FaArrowUpWideShort } from "react-icons/fa6";
+import { LuArrowDownUp } from "react-icons/lu";
+import { FaEdit, FaInfoCircle } from "react-icons/fa";
+
 import {
   Table,
   Button,
@@ -56,6 +60,19 @@ const QuestionList = () => {
     setQuestions(sortedQuestions);
   };
 
+  // Get the icon for the sorting direction
+  const getSortIcon = (key) => {
+    const iconStyle = { color: "gray" };
+    if (sortConfig.key === key) {
+      return sortConfig.direction === "ascending" ? (
+        <FaArrowUpShortWide style={iconStyle} />
+      ) : (
+        <FaArrowUpWideShort style={iconStyle} />
+      );
+    }
+    return <LuArrowDownUp style={iconStyle} />;
+  };
+
   // Pagination logic
   const indexOfLastQuestion = currentPage * questionsPerPage;
   const indexOfFirstQuestion = indexOfLastQuestion - questionsPerPage;
@@ -77,6 +94,15 @@ const QuestionList = () => {
   if (loading) {
     return <div>Loading...</div>;
   }
+
+  // Define the sticky column style
+  const stickyColumnStyle = {
+    position: "sticky",
+    right: 0,
+    backgroundColor: "white",
+    zIndex: 1,
+    whiteSpace: "nowrap",
+  };
 
   return (
     <div className="container">
@@ -107,62 +133,89 @@ const QuestionList = () => {
         </Col>
       </Row>
 
-      <div className="table-responsive">
-        <div style={{ overflowX: "auto" }}>
-          <Table striped bordered small>
-            <thead>
-              <tr>
-                <th onClick={() => sortQuestions("questionID")}>Ques Id</th>
-                <th onClick={() => sortQuestions("questionText")}>Ques Text</th>
-                <th onClick={() => sortQuestions("complexityLevel")}>
-                  Complexity
-                </th>
-                <th onClick={() => sortQuestions("gradeName")}>Program</th>
-                <th onClick={() => sortQuestions("subjectName")}>Course</th>
-                <th onClick={() => sortQuestions("addedOn")}>AddedOn</th>
-                <th onClick={() => sortQuestions("addedBy")}>AddedBy</th>
-                <th onClick={() => sortQuestions("status")}>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredQuestions.map((question) => (
-                <tr key={question.questionID}>
-                  <td style={{ whiteSpace: "nowrap" }}>
-                    {question.questionID}
-                  </td>
-                  <td style={{ whiteSpace: "nowrap" }}>
-                    {question.questionText}
-                  </td>
-                  <td style={{ whiteSpace: "nowrap" }}>
-                    {question.complexityLevel}
-                  </td>
-                  <td style={{ whiteSpace: "nowrap" }}>{question.gradeName}</td>
-                  <td style={{ whiteSpace: "nowrap" }}>
-                    {question.subjectName}
-                  </td>
-                  <td style={{ whiteSpace: "nowrap" }}>{question.addedOn}</td>
-                  <td style={{ whiteSpace: "nowrap" }}>{question.addedBy}</td>
-                  <td style={{ whiteSpace: "nowrap" }}>
-                    {question.status === "1" ? "Active" : "Inactive"}
-                  </td>
-                  <td style={{ whiteSpace: "nowrap" }}>
-                    <Button color="primary" size="sm" className="mr-2">
-                      Edit
+      <div style={{ overflowX: "auto" }}>
+        <Table striped bordered small>
+          <thead>
+            <tr>
+              <th onClick={() => sortQuestions("questionID")}>
+                <div className="header-container">
+                  <span>Id</span> {getSortIcon("questionID")}
+                </div>
+              </th>
+              <th onClick={() => sortQuestions("questionText")}>
+                <div className="header-container">
+                  <span>Ques Text</span> {getSortIcon("questionText")}
+                </div>
+              </th>
+              <th onClick={() => sortQuestions("complexityLevel")}>
+                <div className="header-container">
+                  <span>Complexity</span> {getSortIcon("complexityLevel")}
+                </div>
+              </th>
+              <th onClick={() => sortQuestions("gradeName")}>
+                <div className="header-container">
+                  <span>Program</span> {getSortIcon("gradeName")}
+                </div>
+              </th>
+              <th onClick={() => sortQuestions("subjectName")}>
+                <div className="header-container">
+                  <span>Course</span> {getSortIcon("subjectName")}
+                </div>
+              </th>
+              <th onClick={() => sortQuestions("addedOn")}>
+                <div className="header-container">
+                  <span>AddedOn</span> {getSortIcon("addedOn")}
+                </div>
+              </th>
+              <th onClick={() => sortQuestions("addedBy")}>
+                <div className="header-container">
+                  <span>AddedBy</span> {getSortIcon("addedBy")}
+                </div>
+              </th>
+              <th onClick={() => sortQuestions("status")}>
+                <div className="header-container">
+                  <span>Status</span> {getSortIcon("status")}
+                </div>
+              </th>
+              <th style={stickyColumnStyle}>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredQuestions.map((question) => (
+              <tr key={question.questionID}>
+                <td style={{ whiteSpace: "nowrap" }}>{question.questionID}</td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  {question.questionText}
+                </td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  {question.complexityLevel}
+                </td>
+                <td style={{ whiteSpace: "nowrap" }}>{question.gradeName}</td>
+                <td style={{ whiteSpace: "nowrap" }}>{question.subjectName}</td>
+                <td style={{ whiteSpace: "nowrap" }}>{question.addedOn}</td>
+                <td style={{ whiteSpace: "nowrap" }}>{question.addedBy}</td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  {question.status === "1" ? "Active" : "Inactive"}
+                </td>
+                <td style={stickyColumnStyle}>
+                  <div className="button-group">
+                    <Button color="primary" size="sm">
+                      <FaEdit />
                     </Button>
                     <Link
                       to={`/question/${question.questionID}`}
                       className="btn btn-info btn-sm"
                     >
-                      Info
+                      <FaInfoCircle />
                     </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
       </div>
+
       <div className="mt-3 d-flex justify-content-between">
         <Button
           color="primary"
@@ -195,6 +248,56 @@ const QuestionList = () => {
           Next
         </Button>
       </div>
+
+      <style>
+        {`
+          .table-wrapper {
+            position: relative;
+          }
+
+          .sticky-column {
+            position: -webkit-sticky;
+            position: sticky;
+            right: 0;
+            background-color: white;
+            z-index: 1;
+          }
+
+          th {
+            cursor: pointer;
+          }
+
+          .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+
+          .header-container span {
+            margin-right: 5px;
+          }
+
+          .button-group {
+            display: flex;
+            gap: 5px;
+          }
+
+          .button-group .btn {
+            padding: 5px 10px;
+            font-size: 14px;
+          }
+
+          .button-group .btn-primary {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+          }
+
+          .button-group .btn-info {
+            background-color: #007bff;
+            border-color: #007bff;
+          }
+        `}
+      </style>
     </div>
   );
 };
