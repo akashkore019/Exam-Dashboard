@@ -16,7 +16,7 @@ import {
   cilStar,
 } from "@coreui/icons";
 import { CNavGroup, CNavItem, CNavTitle } from "@coreui/react";
-import { FaUser, FaCalendarAlt, FaUserMd } from "react-icons/fa";
+import { FaUser, FaCalendarAlt, FaUserMd, FaFileAlt } from "react-icons/fa";
 
 const _nav = [
   {
@@ -32,14 +32,14 @@ const _nav = [
 
   {
     component: CNavItem,
-    name: "Appointment",
-    to: "/appointmentDetails",
-    icon: <FaCalendarAlt className="nav-icon" />,
+    name: "Question paper",
+    to: "/questionpaper",
+    icon: <FaFileAlt className="nav-icon" />,
   },
 
   {
     component: CNavItem,
-    name: "Patient",
+    name: "Questions list",
     to: "/patientDetails",
     icon: <FaUser className="nav-icon" />,
   },
@@ -76,7 +76,6 @@ const _nav = [
     to: "/categoryMaster",
     icon: <AiFillMedicineBox className="nav-icon" />,
   },
-
 ];
 
 export default _nav;

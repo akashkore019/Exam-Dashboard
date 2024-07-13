@@ -10,7 +10,7 @@ import {
 } from "@coreui/react";
 import { AppSidebarNav } from "./AppSidebarNav";
 import navigation from "../_nav";
-import clinicLogo from "../assets/clinic_logo.png";
+import jm_logo from "../assets/jm_logo.png";
 
 const AppSidebar = () => {
   const dispatch = useDispatch();
@@ -41,13 +41,13 @@ const AppSidebar = () => {
         >
           {/* Your logo JSX element */}
           <img
-            src={clinicLogo} // Use the imported logo
+            src={jm_logo} // Use the imported logo
             alt="Logo"
             style={{ height: "32px", marginRight: "8px" }}
           />
 
           {/* Xform Clinic */}
-          <h4 style={{ margin: 0 }}>Xform Clinic</h4>
+          <h4 style={{ margin: 0 }}>Admin</h4>
         </CSidebarBrand>
       </CSidebarHeader>
       <AppSidebarNav items={navigation} />

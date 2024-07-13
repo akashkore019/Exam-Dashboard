@@ -4,6 +4,11 @@ const UpdateTreatment = React.lazy(
   () => import("./components/updateTreatment"),
 );
 
+const QuestionDetails = React.lazy(
+  () => import("./components/QuestionDetails"),
+);
+
+
 const Dashboard = React.lazy(() => import("./views/dashboard/Dashboard"));
 const Colors = React.lazy(() => import("./views/theme/colors/Colors"));
 const Typography = React.lazy(
@@ -11,10 +16,8 @@ const Typography = React.lazy(
 );
 const AddPatient = React.lazy(() => import("./components/addpatient"));
 const PatientDetails = React.lazy(() => import("./components/patientDetails"));
-const AddAppointment = React.lazy(() => import("./components/addappointment"));
-const AppointmentDetails = React.lazy(
-  () => import("./components/appointmentDetails"),
-);
+const AddQuestion = React.lazy(() => import("./components/addquestion"));
+const Questionpaper = React.lazy(() => import("./components/questionpaper"));
 const Doctor = React.lazy(() => import("./components/doctor"));
 const AddDoctor = React.lazy(() => import("./components/addDoctor"));
 const AddTreatment = React.lazy(() => import("./components/addTreatment"));
@@ -108,12 +111,13 @@ const routes = [
   { path: "/theme", name: "Theme", element: Colors, exact: true },
   { path: "/addpatient", name: "Add Patient", element: AddPatient },
   { path: "/patientDetails", name: "PatientDetails", element: PatientDetails },
-  { path: "/addappointment", name: "Add Appointment", element: AddAppointment },
+  { path: "/addquestion", name: "Add Question", element: AddQuestion },
+  { path: "/question/:id", name: "Question Details", element: QuestionDetails },
 
   {
-    path: "/appointmentDetails",
-    name: "Appointment Details",
-    element: AppointmentDetails,
+    path: "/questionpaper",
+    name: "Question Paper",
+    element: Questionpaper,
   },
   { path: "/doctor", name: "Doctor", element: Doctor },
   { path: "/addDoctor", name: "Doctor", element: AddDoctor },
