@@ -1,5 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+
 import {
   CCloseButton,
   CSidebar,
@@ -39,15 +41,22 @@ const AppSidebar = () => {
             alignItems: "center",
           }}
         >
-          {/* Your logo JSX element */}
-          <img
-            src={jm_logo} // Use the imported logo
-            alt="Logo"
-            style={{ height: "32px", marginRight: "8px" }}
-          />
-
-          {/* Xform Clinic */}
-          <h4 style={{ margin: 0 }}>Admin</h4>
+          <Link to="./dashboard">
+            <img
+              src={jm_logo} // Use the imported logo
+              alt="Logo"
+              style={{ height: "32px", marginRight: "8px" }}
+            />
+          </Link>
+          <Link
+            to="./dashboard"
+            style={{
+              textDecoration: "none", // Remove underline
+              color: "inherit", // Inherit color from parent or set to specific color
+            }}
+          >
+            <h4 style={{ margin: 0 }}>Admin</h4>
+          </Link>
         </CSidebarBrand>
       </CSidebarHeader>
       <AppSidebarNav items={navigation} />
