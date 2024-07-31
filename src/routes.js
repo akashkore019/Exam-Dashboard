@@ -4,17 +4,20 @@ import React from "react";
 const UpdateTreatment = React.lazy(
   () => import("./components/updateTreatment"),
 );
-const QuestionDetails = React.lazy(
-  () => import("./components/QuestionDetails"),
+const UpdateQuestion = React.lazy(
+  () => import("./components/UpdateQuestions/update_question1"),
 );
+
+const QuestionDetails = React.lazy("./components/questionDetails");
+
 const Dashboard = React.lazy(() => import("./views/dashboard/Dashboard"));
 const Colors = React.lazy(() => import("./views/theme/colors/Colors"));
 const Typography = React.lazy(
   () => import("./views/theme/typography/Typography"),
 );
 const AddPatient = React.lazy(() => import("./components/addpatient"));
-const PatientDetails = React.lazy(() => import("./components/patientDetails"));
-const AddQuestion = React.lazy(() => import("./components/addquestion"));
+const QuestionList = React.lazy(() => import("./components/questionsList"));
+const AddQuestions = React.lazy(() => import("./components/addQuestions"));
 const Questionpaper = React.lazy(() => import("./components/questionpaper"));
 const Doctor = React.lazy(() => import("./components/doctor"));
 const AddDoctor = React.lazy(() => import("./components/addDoctor"));
@@ -108,9 +111,19 @@ const routes = [
   { path: "/dashboard", name: "Dashboard", element: Dashboard },
   { path: "/theme", name: "Theme", element: Colors, exact: true },
   { path: "/addpatient", name: "Add Patient", element: AddPatient },
-  { path: "/patientDetails", name: "Patient Details", element: PatientDetails },
-  { path: "/addquestion", name: "Add Question", element: AddQuestion },
-  { path: "/question/:id", name: "Question Details", element: QuestionDetails },
+  { path: "/questionsList", name: "Patient Details", element: QuestionList },
+  {
+    path: "/update_question1/:id",
+    name: "Update Question",
+    element: UpdateQuestion,
+  },
+  { path: "/addQuestions", name: "Add Question", element: AddQuestions },
+  {
+    path: "/questionDetails/:id",
+    name: "Question Details",
+    element: QuestionDetails,
+  },
+
   { path: "/questionpaper", name: "Question Paper", element: Questionpaper },
   { path: "/doctor", name: "Doctor", element: Doctor },
   { path: "/addDoctor", name: "Add Doctor", element: AddDoctor },
