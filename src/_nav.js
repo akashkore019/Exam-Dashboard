@@ -32,17 +32,23 @@ const _nav = [
 
   {
     component: CNavItem,
+    name: "Add Questions",
+    to: "/addQuestions",
+    icon: <FaFileAlt className="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: "Questions list",
+    to: "/questionsList",
+    icon: <FaUser className="nav-icon" />,
+  },
+  {
+    component: CNavItem,
     name: "Question paper",
     to: "/questionpaper",
     icon: <FaFileAlt className="nav-icon" />,
   },
 
-  {
-    component: CNavItem,
-    name: "Questions list",
-    to: "/patientDetails",
-    icon: <FaUser className="nav-icon" />,
-  },
   {
     component: CNavItem,
     name: "Treatment",

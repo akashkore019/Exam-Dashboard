@@ -1,70 +1,60 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, Link } from "react-router-dom";
-import { Button } from "reactstrap";
+import { useParams } from "react-router-dom";
+import { CSpinner } from "@coreui/react";
+import config from "../config";
 
 const QuestionDetails = () => {
-  const { id } = useParams(); // Get the question ID from the URL parameters
+  const { questionID } = useParams();
   const [question, setQuestion] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get(
-        `https://internship.jhamobi.com/projects/t001-m001-p001/controller/get_question_details.php?id=${id}`,
-      )
-      .then((response) => {
-        setQuestion(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
+    const fetchQuestionDetails = async () => {
+      try {
+        const response = await axios.get(`${config.apiUrl}get_question.php`, {
+          params: { questionID },
+        });
+        if (response.status === 200) {
+          setQuestion(response.data);
+        } else {
+          console.error(
+            "Failed to fetch question details. Status:",
+            response.status,
+          );
+        }
+      } catch (error) {
         console.error(
           "There was an error fetching the question details!",
           error,
         );
+      } finally {
         setLoading(false);
-      });
-  }, [id]);
+      }
+    };
+
+    fetchQuestionDetails();
+  }, [questionID]);
 
   if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!question) {
-    return <div>Question not found</div>;
+    return (
+      <div className="pt-3 text-center">
+        <CSpinner color="primary" variant="grow" />
+      </div>
+    );
   }
 
   return (
-    <div className="container">
-      <h2 className="mb-4">Question Details</h2>
-      <p>
-        <strong>ID:</strong> {question.questionID}
-      </p>
-      <p>
-        <strong>Question Text:</strong> {question.questionText}
-      </p>
-      <p>
-        <strong>Complexity Level:</strong> {question.complexityLevel}
-      </p>
-      <p>
-        <strong>Program:</strong> {question.gradeName}
-      </p>
-      <p>
-        <strong>Course:</strong> {question.subjectName}
-      </p>
-      <p>
-        <strong>Added On:</strong> {question.addedOn}
-      </p>
-      <p>
-        <strong>Added By:</strong> {question.addedBy}
-      </p>
-      <p>
-        <strong>Status:</strong>{" "}
-        {question.status === "1" ? "Active" : "Inactive"}
-      </p>
-      <Link to="/">
-        <Button color="primary">Back to List</Button>
-      </Link>
+    <div>
+      {question ? (
+        <div>
+          <h1>{question.title}</h1>
+          <p>{question.content}</p>
+          {/* Render other question details here */}
+        </div>
+      ) : (
+        <p>Question not found</p>
+      )}
     </div>
   );
 };

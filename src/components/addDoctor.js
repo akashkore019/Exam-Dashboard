@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import axios from 'axios'
-import config from '../config'
+import React, { useState } from "react";
+import axios from "axios";
+import config from "../config";
 
 import {
   CCard,
@@ -15,38 +15,38 @@ import {
   CRow,
   CButton,
   CFormSelect,
-} from '@coreui/react'
+} from "@coreui/react";
 
 const Doctor = () => {
-  const [validated, setValidated] = useState(false)
-  const [submitted, setSubmitted] = useState(false) // State variable to track form submission
+  const [validated, setValidated] = useState(false);
+  const [submitted, setSubmitted] = useState(false); // State variable to track form submission
   const [doctor, setDoctor] = useState({
-    fullName: '',
-    email: '',
-    contactNo: '',
-    gender: '',
-    specialization: '',
-    experience: '',
-    address: '',
-    country: '',
-    city: '',
-    postalCode: '',
-    qualification: '',
-  })
+    fullName: "",
+    email: "",
+    contactNo: "",
+    gender: "",
+    specialization: "",
+    experience: "",
+    address: "",
+    country: "",
+    city: "",
+    postalCode: "",
+    qualification: "",
+  });
 
   const handleInputChange = (event) => {
-    const { name, value } = event.target
-    setDoctor({ ...doctor, [name]: value })
-  }
+    const { name, value } = event.target;
+    setDoctor({ ...doctor, [name]: value });
+  };
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
-    const form = event.currentTarget
+    event.preventDefault();
+    const form = event.currentTarget;
 
     if (form.checkValidity() === false) {
-      event.stopPropagation()
-      setValidated(true)
-      return
+      event.stopPropagation();
+      setValidated(true);
+      return;
     }
 
     if (!submitted) {
@@ -64,23 +64,23 @@ const Doctor = () => {
           city: doctor.city,
           postalCode: doctor.postalCode,
           qualification: doctor.qualification,
-        })
+        });
 
         if (res.status === 200) {
-          window.alert('Data is submitted Successfully')
-          form.reset()
-          setSubmitted(true) // Update state to indicate form submission
+          window.alert("Data is submitted Successfully");
+          form.reset();
+          setSubmitted(true); // Update state to indicate form submission
         } else {
-          throw new Error('Failed to submit data')
+          throw new Error("Failed to submit data");
         }
       } catch (error) {
-        console.error('Error:', error)
-        window.alert('Failed to submit data. Please try again later.')
+        console.error("Error:", error);
+        window.alert("Failed to submit data. Please try again later.");
       }
     }
 
-    setValidated(true)
-  }
+    setValidated(true);
+  };
 
   return (
     <CCard className="mb-5">
@@ -115,7 +115,9 @@ const Doctor = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please enter a valid email address.</CFormFeedback>
+            <CFormFeedback invalid>
+              Please enter a valid email address.
+            </CFormFeedback>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
 
@@ -129,7 +131,9 @@ const Doctor = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please enter the contact number.</CFormFeedback>
+            <CFormFeedback invalid>
+              Please enter the contact number.
+            </CFormFeedback>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
 
@@ -161,7 +165,9 @@ const Doctor = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please enter the specialization.</CFormFeedback>
+            <CFormFeedback invalid>
+              Please enter the specialization.
+            </CFormFeedback>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
 
@@ -245,7 +251,9 @@ const Doctor = () => {
               onChange={handleInputChange}
               required
             />
-            <CFormFeedback invalid>Please enter the qualification.</CFormFeedback>
+            <CFormFeedback invalid>
+              Please enter the qualification.
+            </CFormFeedback>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
           <CCol xs={4} />
@@ -258,7 +266,7 @@ const Doctor = () => {
         </CForm>
       </CCardBody>
     </CCard>
-  )
-}
+  );
+};
 
-export default Doctor
+export default Doctor;

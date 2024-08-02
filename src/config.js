@@ -1,5 +1,5 @@
 const config = {
-  apiUrl: 'http://localhost:8080/api/v1/',
-}
+  apiUrl: "https://internship.jhamobi.com/projects/t001-m001-p001/controller/",
+};
 
-export default config
+export default config;

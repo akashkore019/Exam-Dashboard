@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaArrowUpShortWide, FaArrowUpWideShort } from "react-icons/fa6";
 import { LuArrowDownUp } from "react-icons/lu";
 import { FaEdit, FaInfoCircle } from "react-icons/fa";
-
 import {
   Table,
   Button,
@@ -15,6 +14,7 @@ import {
   PaginationItem,
   PaginationLink,
 } from "reactstrap";
+import config from "../config";
 
 const QuestionList = () => {
   const [questions, setQuestions] = useState([]);
@@ -27,19 +27,25 @@ const QuestionList = () => {
     direction: "ascending",
   });
 
+  const navigate = useNavigate();
+
   useEffect(() => {
-    axios
-      .get(
-        "https://internship.jhamobi.com/projects/t001-m001-p001/controller/get_questions.php",
-      )
-      .then((response) => {
-        setQuestions(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
+    const fetchQuestions = async () => {
+      try {
+        const response = await axios.get(`${config.apiUrl}get_questions.php`);
+        if (response.status === 200) {
+          setQuestions(response.data);
+        } else {
+          console.error("Failed to fetch questions. Status:", response.status);
+        }
+      } catch (error) {
         console.error("There was an error fetching the questions!", error);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchQuestions();
   }, []);
 
   const sortQuestions = (key) => {
@@ -150,64 +156,78 @@ const QuestionList = () => {
                 onClick={() => sortQuestions("questionID")}
                 style={{ borderColor: "white" }}
               >
-                <div className="header-container">
-                  <span>Id</span> {getSortIcon("questionID")}
+                <div className="header-container flex items-center justify-between">
+                  <span>Id</span>
+                  <span className="sort-icon">{getSortIcon("questionID")}</span>
                 </div>
               </th>
               <th
                 onClick={() => sortQuestions("questionText")}
                 style={{ borderColor: "white" }}
               >
-                <div className="header-container">
-                  <span>Ques Text</span> {getSortIcon("questionText")}
+                <div className="header-container flex items-center justify-between">
+                  <span>Ques Text</span>
+                  <span className="sort-icon">
+                    {getSortIcon("questionText")}
+                  </span>
                 </div>
               </th>
               <th
                 onClick={() => sortQuestions("complexityLevel")}
                 style={{ borderColor: "white" }}
               >
-                <div className="header-container">
-                  <span>Complexity</span> {getSortIcon("complexityLevel")}
+                <div className="header-container flex items-center justify-between">
+                  <span>Complexity</span>
+                  <span className="sort-icon">
+                    {getSortIcon("complexityLevel")}
+                  </span>
                 </div>
               </th>
               <th
                 onClick={() => sortQuestions("gradeName")}
                 style={{ borderColor: "white" }}
               >
-                <div className="header-container">
-                  <span>Program</span> {getSortIcon("gradeName")}
+                <div className="header-container flex items-center justify-between">
+                  <span>Program</span>
+                  <span className="sort-icon">{getSortIcon("gradeName")}</span>
                 </div>
               </th>
               <th
                 onClick={() => sortQuestions("subjectName")}
                 style={{ borderColor: "white" }}
               >
-                <div className="header-container">
-                  <span>Course</span> {getSortIcon("subjectName")}
+                <div className="header-container flex items-center justify-between">
+                  <span>Course</span>
+                  <span className="sort-icon">
+                    {getSortIcon("subjectName")}
+                  </span>
                 </div>
               </th>
               <th
                 onClick={() => sortQuestions("addedOn")}
                 style={{ borderColor: "white" }}
               >
-                <div className="header-container">
-                  <span>AddedOn</span> {getSortIcon("addedOn")}
+                <div className="header-container flex items-center justify-between">
+                  <span>AddedOn</span>
+                  <span className="sort-icon">{getSortIcon("addedOn")}</span>
                 </div>
               </th>
               <th
                 onClick={() => sortQuestions("addedBy")}
                 style={{ borderColor: "white" }}
               >
-                <div className="header-container">
-                  <span>AddedBy</span> {getSortIcon("addedBy")}
+                <div className="header-container flex items-center justify-between">
+                  <span>AddedBy</span>
+                  <span className="sort-icon">{getSortIcon("addedBy")}</span>
                 </div>
               </th>
               <th
                 onClick={() => sortQuestions("status")}
                 style={{ borderColor: "white" }}
               >
-                <div className="header-container">
-                  <span>Status</span> {getSortIcon("status")}
+                <div className="header-container flex items-center justify-between">
+                  <span>Status</span>
+                  <span className="sort-icon">{getSortIcon("status")}</span>
                 </div>
               </th>
               <th style={{ borderColor: "white", ...stickyColumnStyle }}>
@@ -215,6 +235,7 @@ const QuestionList = () => {
               </th>
             </tr>
           </thead>
+
           <tbody>
             {filteredQuestions.map((question) => (
               <tr key={question.questionID}>
@@ -227,9 +248,7 @@ const QuestionList = () => {
                 <td style={{ whiteSpace: "nowrap", borderColor: "white" }}>
                   {question.complexityLevel}
                 </td>
-                <td style={{ whiteSpace: "nowrap", borderColor: "white" }}>
-                  {question.gradeName}
-                </td>
+                <td style={{ borderColor: "white" }}>{question.gradeName}</td>
                 <td style={{ whiteSpace: "nowrap", borderColor: "white" }}>
                   {question.subjectName}
                 </td>
@@ -240,19 +259,31 @@ const QuestionList = () => {
                   {question.addedBy}
                 </td>
                 <td style={{ whiteSpace: "nowrap", borderColor: "white" }}>
-                  {question.status === "1" ? "Active" : "Inactive"}
+                  {question.status}
                 </td>
-                <td style={{ borderColor: "white", ...stickyColumnStyle }}>
-                  <div className="button-group">
-                    <Button color="primary" size="sm">
+                <td style={{ ...stickyColumnStyle }}>
+                  <div className="d-flex flex-column">
+                    <Button
+                      size="sm"
+                      color="link"
+                      className="m-0 p-0 mb-1 text-primary"
+                      title="Edit"
+                      tag={Link}
+                      to={{
+                        pathname: `/update_question1${question.questionID}`,
+                        state: { questionData: question },
+                      }}
+                    >
                       <FaEdit />
                     </Button>
-                    <Link
-                      to={`/question/${question.questionID}`}
-                      className="btn btn-info btn-sm"
+                    <Button
+                      size="sm"
+                      color="link"
+                      className="m-0 p-0 mb-1 text-info"
+                      title="Info"
                     >
                       <FaInfoCircle />
-                    </Link>
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -260,53 +291,51 @@ const QuestionList = () => {
           </tbody>
         </Table>
       </div>
-
-      <Row className="mt-4">
-        <Col md="6">
-          <div style={{ fontSize: "small" }}>
-            Showing {indexOfFirstQuestion + 1} to{" "}
-            {Math.min(indexOfLastQuestion, questions.length)} of{" "}
-            {questions.length} entries
-          </div>
-        </Col>
-        <Col md="6">
-          <Pagination className="pagination justify-content-end">
-            <PaginationItem disabled={currentPage === 1}>
-              <PaginationLink
-                onClick={() => paginate(currentPage - 1)}
-                previous
-                style={{ fontSize: "small" }}
-              />
-            </PaginationItem>
-            {Array.from(
-              {
-                length: Math.ceil(questions.length / questionsPerPage),
-              },
-              (_, index) => (
-                <PaginationItem active={index + 1 === currentPage} key={index}>
-                  <PaginationLink
-                    onClick={() => paginate(index + 1)}
-                    style={{ fontSize: "small" }}
-                  >
-                    {index + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ),
-            )}
-            <PaginationItem
-              disabled={
-                currentPage === Math.ceil(questions.length / questionsPerPage)
-              }
-            >
-              <PaginationLink
-                onClick={() => paginate(currentPage + 1)}
-                next
-                style={{ fontSize: "small" }}
-              />
-            </PaginationItem>
-          </Pagination>
-        </Col>
-      </Row>
+      <Pagination>
+        <PaginationItem>
+          <PaginationLink
+            first
+            onClick={() => paginate(1)}
+            disabled={currentPage === 1}
+          />
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink
+            previous
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+          />
+        </PaginationItem>
+        {Array.from({
+          length: Math.ceil(questions.length / questionsPerPage),
+        }).map((_, index) => (
+          <PaginationItem key={index} active={index + 1 === currentPage}>
+            <PaginationLink onClick={() => paginate(index + 1)}>
+              {index + 1}
+            </PaginationLink>
+          </PaginationItem>
+        ))}
+        <PaginationItem>
+          <PaginationLink
+            next
+            onClick={() => paginate(currentPage + 1)}
+            disabled={
+              currentPage === Math.ceil(questions.length / questionsPerPage)
+            }
+          />
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink
+            last
+            onClick={() =>
+              paginate(Math.ceil(questions.length / questionsPerPage))
+            }
+            disabled={
+              currentPage === Math.ceil(questions.length / questionsPerPage)
+            }
+          />
+        </PaginationItem>
+      </Pagination>
     </div>
   );
 };
