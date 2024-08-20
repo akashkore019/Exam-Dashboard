@@ -18,6 +18,7 @@ const Typography = React.lazy(
 const AddPatient = React.lazy(() => import("./components/addpatient"));
 const QuestionList = React.lazy(() => import("./components/questionsList"));
 const AddQuestions = React.lazy(() => import("./components/addQuestions"));
+const ViewQuestions = React.lazy(() => import("./components/viewQuestions"));
 const Questionpaper = React.lazy(() => import("./components/questionpaper"));
 const Doctor = React.lazy(() => import("./components/doctor"));
 const AddDoctor = React.lazy(() => import("./components/addDoctor"));
@@ -111,13 +112,15 @@ const routes = [
   { path: "/dashboard", name: "Dashboard", element: Dashboard },
   { path: "/theme", name: "Theme", element: Colors, exact: true },
   { path: "/addpatient", name: "Add Patient", element: AddPatient },
-  { path: "/questionsList", name: "Patient Details", element: QuestionList },
+  { path: "/questionsList", name: "questionsList", element: QuestionList },
   {
     path: "/update_question1/:id",
     name: "Update Question",
     element: UpdateQuestion,
   },
   { path: "/addQuestions", name: "Add Question", element: AddQuestions },
+  { path: "/viewQuestions", name: "View Question", element: ViewQuestions },
+
   {
     path: "/questionDetails/:id",
     name: "Question Details",

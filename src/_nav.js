@@ -3,20 +3,14 @@ import CIcon from "@coreui/icons-react";
 import { AiFillMedicineBox } from "react-icons/ai";
 
 import {
-  cilBell,
-  cilCalculator,
-  cilChartPie,
-  cilCursor,
-  cilDescription,
-  cilDrop,
-  cilNotes,
-  cilPencil,
-  cilPuzzle,
   cilSpeedometer,
-  cilStar,
+  cilList,
+  cilPlus,
+  cilNotes,
+  cilPaperclip,
 } from "@coreui/icons";
-import { CNavGroup, CNavItem, CNavTitle } from "@coreui/react";
-import { FaUser, FaCalendarAlt, FaUserMd, FaFileAlt } from "react-icons/fa";
+import { CNavGroup, CNavItem } from "@coreui/react";
+import { FaFileAlt } from "react-icons/fa";
 
 const _nav = [
   {
@@ -29,58 +23,43 @@ const _nav = [
       text: "NEW",
     },
   },
-
   {
-    component: CNavItem,
-    name: "Add Questions",
-    to: "/addQuestions",
+    component: CNavGroup,
+    name: "Questions",
+    icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: "Add Question",
+        to: "/addQuestions",
+        icon: <CIcon icon={cilPlus} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: "View Questions",
+        to: "/viewQuestions",
+        icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
+      },
+    ],
+  },
+  {
+    component: CNavGroup,
+    name: "Question Paper",
     icon: <FaFileAlt className="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: "Questions list",
-    to: "/questionsList",
-    icon: <FaUser className="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: "Question paper",
-    to: "/questionpaper",
-    icon: <FaFileAlt className="nav-icon" />,
-  },
-
-  {
-    component: CNavItem,
-    name: "Treatment",
-    to: "/treatment",
-    icon: <FaCalendarAlt className="nav-icon" />,
-  },
-
-  {
-    component: CNavItem,
-    name: "Doctor",
-    to: "/doctor",
-    icon: <FaUserMd className="nav-icon" />,
-  },
-
-  {
-    component: CNavItem,
-    name: "Services",
-    to: "/services",
-    icon: <FaUserMd className="nav-icon" />,
-  },
-
-  {
-    component: CNavItem,
-    name: "Medicine Master",
-    to: "/medicineMaster",
-    icon: <FaUserMd className="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: "Category Master",
-    to: "/categoryMaster",
-    icon: <AiFillMedicineBox className="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: "Add Question Paper",
+        to: "/addQuestionPaper",
+        icon: <CIcon icon={cilPlus} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: "View Questions Paper",
+        to: "/viewQuestionPaper",
+        icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
+      },
+    ],
   },
 ];
 

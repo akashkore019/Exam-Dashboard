@@ -292,11 +292,11 @@ const TreatmentList = () => {
       .join(
         ", ",
       )}\nDescription: ${treatment.description}\nMedicines:\n${treatmentsList
-      .map(
-        (med) =>
-          `${med.medicineName} - Dosage: ${med.dosageName} - Duration: ${med.durationName}`,
-      )
-      .join("\n")}`;
+        .map(
+          (med) =>
+            `${med.medicineName} - Dosage: ${med.dosageName} - Duration: ${med.durationName}`,
+        )
+        .join("\n")}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
 

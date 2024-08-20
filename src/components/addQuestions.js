@@ -1,6 +1,5 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./"; // Import your CSS file here
 import AddTab1 from "./AddTab1";
 import AddTab2 from "./AddTab2";
 import AddTab3 from "./AddTab3";
@@ -18,6 +17,7 @@ import {
   CardBody,
   CardTitle,
 } from "reactstrap";
+import axios from "axios";
 
 class AddQuestion extends React.Component {
   constructor(props) {
@@ -110,28 +110,40 @@ class AddQuestion extends React.Component {
       isCompleted: null,
     };
 
+    // Alert data for debugging
+    alert("Sending data:\n" + JSON.stringify(questionData, null, 2));
+
+    console.log("Submitting data:", questionData);
+
     try {
-      const response = await fetch(
+      const response = await axios.post(
         "https://internship.jhamobi.com/projects/t001-m001-p001/controller/get_questions.php",
+        [questionData],
         {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify([questionData]),
-        },
+          timeout: 10000, // Set a timeout for the request
+        }
       );
 
-      if (response.ok) {
+      console.log("Response:", response);
+
+      if (response.status === 200) {
         console.log("Question submitted successfully!");
+        alert("Question submitted successfully!");
       } else {
-        const errorData = await response.json();
-        console.error("Failed to submit question:", errorData);
+        console.error("Failed to submit question:", response.data);
+        alert("Failed to submit question: " + JSON.stringify(response.data));
       }
     } catch (error) {
-      console.error("Error submitting question:", error.message);
+      console.error("Error submitting question:", error);
+      alert("Error submitting question: " + (error.response ? error.response.data : error.message));
     }
   };
+
+
+
 
   render() {
     return (
@@ -214,7 +226,6 @@ class AddQuestion extends React.Component {
                 <AddTab4
                   solutionExplanation={this.state.solutionExplanation}
                   solutionPic={this.state.solutionPic}
-                  correctOption={this.state.correctOption}
                   handleInputChange={this.handleInputChange}
                   handleNext={() => this.handleNext("4")}
                 />

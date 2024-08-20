@@ -213,7 +213,7 @@ const Doctor = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => handleDelete(doctor.id)}
-                        
+
                       >
                         <FaTrash />
                       </CButton>

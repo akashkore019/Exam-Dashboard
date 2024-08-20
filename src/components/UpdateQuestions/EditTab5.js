@@ -1,46 +1,39 @@
 import React from "react";
-import { Button, FormGroup, Label, Input } from "reactstrap";
+import { Button } from "reactstrap";
 
-const EditTab1 = ({
-  programName,
-  courseName,
-  status,
-  handleInputChange,
-  handleNext,
-}) => (
-  <div>
-    <FormGroup>
-      <Label for="programName">Program Name</Label>
-      <Input
-        type="text"
-        name="programName"
-        id="programName"
-        value={programName}
-        onChange={handleInputChange}
-      />
-    </FormGroup>
-    <FormGroup>
-      <Label for="courseName">Course Name</Label>
-      <Input
-        type="text"
-        name="courseName"
-        id="courseName"
-        value={courseName}
-        onChange={handleInputChange}
-      />
-    </FormGroup>
-    <FormGroup>
-      <Label for="status">Status</Label>
-      <Input
-        type="text"
-        name="status"
-        id="status"
-        value={status}
-        onChange={handleInputChange}
-      />
-    </FormGroup>
-    <Button onClick={handleNext}>Next</Button>
-  </div>
-);
+const EditTab5 = ({
+    questionData,
+    handleSubmit,
+}) => {
+    const options = questionData.options || []; // Ensure options is at least an empty array
 
-export default EditTab1;
+    return (
+        <div>
+            <h5>Preview</h5>
+            <p>
+                <strong>Question:</strong> {questionData.specifyQuestion}
+            </p>
+            <p>
+                <strong>Options:</strong>
+            </p>
+            <ul>
+                {options.map((option, index) => (
+                    <li
+                        key={index}
+                        style={{ fontWeight: questionData.correctOption === index ? "bold" : "normal" }}
+                    >
+                        {option}
+                    </li>
+                ))}
+            </ul>
+            <p>
+                <strong>Solution Explanation:</strong> {questionData.solutionExplanation}
+            </p>
+            <Button color="primary" onClick={handleSubmit}>
+                Submit
+            </Button>
+        </div>
+    );
+};
+
+export default EditTab5;

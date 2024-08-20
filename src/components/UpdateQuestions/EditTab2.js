@@ -1,46 +1,85 @@
 import React from "react";
-import { Button, FormGroup, Label, Input } from "reactstrap";
+import { Form, FormGroup, Label, Input, Button } from "reactstrap";
 
-const EditTab1 = ({
-  programName,
-  courseName,
-  status,
-  handleInputChange,
-  handleNext,
-}) => (
-  <div>
-    <FormGroup>
-      <Label for="programName">Program Name</Label>
-      <Input
-        type="text"
-        name="programName"
-        id="programName"
-        value={programName}
-        onChange={handleInputChange}
-      />
-    </FormGroup>
-    <FormGroup>
-      <Label for="courseName">Course Name</Label>
-      <Input
-        type="text"
-        name="courseName"
-        id="courseName"
-        value={courseName}
-        onChange={handleInputChange}
-      />
-    </FormGroup>
-    <FormGroup>
-      <Label for="status">Status</Label>
-      <Input
-        type="text"
-        name="status"
-        id="status"
-        value={status}
-        onChange={handleInputChange}
-      />
-    </FormGroup>
-    <Button onClick={handleNext}>Next</Button>
-  </div>
-);
+const EditTab2 = ({
+    questionData,
+    setQuestionData,
+    handleNext,
+}) => {
 
-export default EditTab1;
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setQuestionData((prevState) => ({
+            ...prevState,
+            [name]: value,
+        }));
+    };
+
+    return (
+        <Form>
+            <FormGroup>
+                <Label for="complexity">Complexity *</Label>
+                <div>
+                    <FormGroup check inline>
+                        <Label check>
+                            <Input
+                                type="radio"
+                                name="complexity"
+                                value="Simple"
+                                checked={questionData.complexity === "Simple"}
+                                onChange={handleInputChange}
+                            />
+                            Simple
+                        </Label>
+                    </FormGroup>
+                    <FormGroup check inline>
+                        <Label check>
+                            <Input
+                                type="radio"
+                                name="complexity"
+                                value="Medium"
+                                checked={questionData.complexity === "Medium"}
+                                onChange={handleInputChange}
+                            />
+                            Medium
+                        </Label>
+                    </FormGroup>
+                    <FormGroup check inline>
+                        <Label check>
+                            <Input
+                                type="radio"
+                                name="complexity"
+                                value="Complex"
+                                checked={questionData.complexity === "Complex"}
+                                onChange={handleInputChange}
+                            />
+                            Complex
+                        </Label>
+                    </FormGroup>
+                </div>
+            </FormGroup>
+            <FormGroup>
+                <Label for="specifyQuestion">Specify Question *</Label>
+                <Input
+                    type="textarea"
+                    name="specifyQuestion"
+                    id="specifyQuestion"
+                    value={questionData.specifyQuestion}
+                    onChange={handleInputChange}
+                />
+            </FormGroup>
+            <FormGroup>
+                <Label for="questionPic">Question Pic</Label>
+                <Input
+                    type="file"
+                    name="questionPic"
+                    id="questionPic"
+                    onChange={handleInputChange}
+                />
+            </FormGroup>
+            <Button onClick={handleNext}>Next</Button>
+        </Form>
+    );
+};
+
+export default EditTab2;
