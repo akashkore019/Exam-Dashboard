@@ -1,9 +1,6 @@
 import React from "react";
 
 // Lazy-loaded components
-const UpdateTreatment = React.lazy(
-  () => import("./components/updateTreatment"),
-);
 const UpdateQuestion = React.lazy(
   () => import("./components/UpdateQuestions/update_question1"),
 );
@@ -15,24 +12,8 @@ const Colors = React.lazy(() => import("./views/theme/colors/Colors"));
 const Typography = React.lazy(
   () => import("./views/theme/typography/Typography"),
 );
-const AddPatient = React.lazy(() => import("./components/addpatient"));
 const AddQuestions = React.lazy(() => import("./components/addQuestions"));
 const ViewQuestions = React.lazy(() => import("./components/viewQuestions"));
-const Questionpaper = React.lazy(() => import("./components/questionpaper"));
-const Doctor = React.lazy(() => import("./components/doctor"));
-const AddDoctor = React.lazy(() => import("./components/addDoctor"));
-const AddTreatment = React.lazy(() => import("./components/addTreatment"));
-const Treatment = React.lazy(() => import("./components/treatment"));
-const AddServices = React.lazy(() => import("./components/addServices"));
-const Services = React.lazy(() => import("./components/services"));
-const Medicine = React.lazy(() => import("./components/medicineMaster"));
-const AddCategoryMaster = React.lazy(
-  () => import("./components/addCategoryMaster"),
-);
-const CategoryMaster = React.lazy(() => import("./components/categoryMaster"));
-const Addmedicinemaster = React.lazy(
-  () => import("./components/addmedicinemaster"),
-);
 
 // Base components
 const Accordion = React.lazy(() => import("./views/base/accordion/Accordion"));
@@ -110,7 +91,6 @@ const routes = [
   { path: "/", exact: true, name: "Home" },
   { path: "/dashboard", name: "Dashboard", element: Dashboard },
   { path: "/theme", name: "Theme", element: Colors, exact: true },
-  { path: "/addpatient", name: "Add Patient", element: AddPatient },
   {
     path: "/update_question1/:id",
     name: "Update Question",
@@ -125,30 +105,9 @@ const routes = [
     element: QuestionDetails,
   },
 
-  { path: "/questionpaper", name: "Question Paper", element: Questionpaper },
-  { path: "/doctor", name: "Doctor", element: Doctor },
-  { path: "/addDoctor", name: "Add Doctor", element: AddDoctor },
-  { path: "/addtreatment", name: "Add Treatment", element: AddTreatment },
-  {
-    path: "/updateTreatment",
-    name: "Update Treatment",
-    element: UpdateTreatment,
-  },
-  { path: "/treatment", name: "Treatment", element: Treatment },
-  { path: "/addServices", name: "Add Services", element: AddServices },
-  { path: "/services", name: "Services", element: Services },
-  { path: "/medicineMaster", name: "Medicine Master", element: Medicine },
-  {
-    path: "/addCategoryMaster",
-    name: "Add Category Master",
-    element: AddCategoryMaster,
-  },
-  { path: "/categoryMaster", name: "Category Master", element: CategoryMaster },
-  {
-    path: "/addmedicinemaster",
-    name: "Add Medicine Master",
-    element: Addmedicinemaster,
-  },
+
+
+
   { path: "/theme/colors", name: "Colors", element: Colors },
   { path: "/theme/typography", name: "Typography", element: Typography },
   { path: "/base", name: "Base", element: Cards, exact: true },

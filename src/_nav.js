@@ -18,6 +18,7 @@ const _nav = [
     name: "Dashboard",
     to: "/dashboard",
     icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
+    style: { fontSize: "12px" },  // Applying inline style
     badge: {
       color: "info",
       text: "NEW",
@@ -27,18 +28,21 @@ const _nav = [
     component: CNavGroup,
     name: "Questions",
     icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+    style: { fontSize: "12px" },  // Applying inline style
     items: [
       {
         component: CNavItem,
         name: "Add Question",
         to: "/addQuestions",
         icon: <CIcon icon={cilPlus} customClassName="nav-icon" />,
+        style: { fontSize: "12px" },  // Applying inline style
       },
       {
         component: CNavItem,
         name: "View Questions",
         to: "/viewQuestions",
         icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
+        style: { fontSize: "12px" },  // Applying inline style
       },
     ],
   },
@@ -46,18 +50,21 @@ const _nav = [
     component: CNavGroup,
     name: "Question Paper",
     icon: <FaFileAlt className="nav-icon" />,
+    style: { fontSize: "12px" },  // Applying inline style
     items: [
       {
         component: CNavItem,
         name: "Add Question Paper",
         to: "/addQuestionPaper",
         icon: <CIcon icon={cilPlus} customClassName="nav-icon" />,
+        style: { fontSize: "12px" },  // Applying inline style
       },
       {
         component: CNavItem,
         name: "View Questions Paper",
         to: "/viewQuestionPaper",
         icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
+        style: { fontSize: "12px" },  // Applying inline style
       },
     ],
   },
