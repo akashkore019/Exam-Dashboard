@@ -46,18 +46,20 @@ const AppSidebar = () => {
             <img
               src={jm_logo} // Use the imported logo
               alt="Logo"
-              style={{ height: "32px", marginRight: "8px" }}
+              style={{ height: "32px", marginRight: sidebarShow && !unfoldable ? "8px" : "0" }}
             />
           </Link>
-          <Link
-            to="./dashboard"
-            style={{
-              textDecoration: "none", // Remove underline
-              color: "inherit", // Inherit color from parent or set to specific color
-            }}
-          >
-            <h4 style={{ margin: 0 }}>Admin</h4>
-          </Link>
+          {sidebarShow && !unfoldable && (
+            <Link
+              to="./dashboard"
+              style={{
+                textDecoration: "none", // Remove underline
+                color: "inherit", // Inherit color from parent or set to specific color
+              }}
+            >
+              <h4 style={{ margin: 0 }}>Admin</h4>
+            </Link>
+          )}
         </CSidebarBrand>
       </CSidebarHeader>
       <AppSidebarNav items={navigation} />
