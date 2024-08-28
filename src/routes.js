@@ -5,6 +5,10 @@ const UpdateQuestion = React.lazy(
   () => import("./components/UpdateQuestions/update_question1"),
 );
 
+const EditTab1 = React.lazy(
+  () => import("./components/UpdateQuestions/EditTab1"),
+);
+
 const QuestionDetails = React.lazy("./components/questionDetails");
 
 const Dashboard = React.lazy(() => import("./views/dashboard/Dashboard"));
@@ -165,6 +169,8 @@ const routes = [
   { path: "/notifications/modals", name: "Modals", element: Modals },
   { path: "/notifications/toasts", name: "Toasts", element: Toasts },
   { path: "/widgets", name: "Widgets", element: Widgets },
+  { path: "/EditTab1", name: "EditTab1", element: EditTab1 },
+
 ];
 
 export default routes;
